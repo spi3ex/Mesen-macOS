@@ -315,7 +315,7 @@ ifeq ($(STATIC_LINKING),1)
   CXXFLAGS += $(PREFIX_DEFINES)
 endif
 
-include $(LIBRETRO_DIR)/Makefile.common
+include Makefile.common
 
 OBJECTS := $(SOURCES_C:.c=.o) $(SOURCES_CXX:.cpp=.o)
 
@@ -325,7 +325,7 @@ ifeq (,$(findstring windows_msvc2017,$(platform)))
 endif
 
 CFLAGS   += -D LIBRETRO $(fpic)
-CXXFLAGS += -D LIBRETRO $(fpic) -std=c++14
+CXXFLAGS += -D LIBRETRO $(fpic) -std=c++11
 
 all: $(TARGET)
 
