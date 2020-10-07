@@ -315,7 +315,7 @@ ifeq ($(STATIC_LINKING),1)
   CXXFLAGS += $(PREFIX_DEFINES)
 endif
 
-include Makefile.common
+include $(LIBRETRO_DIR)/Makefile.common
 
 OBJECTS := $(SOURCES_C:.c=.o) $(SOURCES_CXX:.cpp=.o)
 
