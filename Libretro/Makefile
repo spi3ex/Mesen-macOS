@@ -112,6 +112,19 @@ else ifeq ($(platform), classic_armv7_a7)
 	endif
 #######################################
 
+###########################
+# Raspberry Pi 4 in 64 mode
+else ifneq (,$(findstring rpi4_64,$(platform)))
+  EXT ?= so
+   TARGET := $(TARGET_NAME)_libretro.$(EXT)
+   fpic := -fPIC -pthread
+   SHARED := -shared -Wl,--version-script=$(LIBRETRO_DIR)/link.T -Wl,--no-undefined
+   CFLAGS += -march=armv8-a+crc+simd -mtune=cortex-a72 
+   CXXFLAGS += $(CFLAGS)
+   CPPFLAGS += $(CFLAGS)
+   ASFLAGS += $(CFLAGS)
+###########################
+
 else ifneq (,$(findstring osx,$(platform)))
    TARGET := $(TARGET_NAME)_libretro.dylib
    fpic := -fPIC
