@@ -32,6 +32,9 @@ else ifneq ($(findstring Darwin,$(shell uname -a)),)
 ifeq ($(shell uname -p),powerpc)
   arch = ppc
 endif
+ifeq ($(shell uname -p),arm)
+  arch = arm
+endif
 else ifneq ($(findstring MINGW,$(shell uname -a)),)
   system_platform = win
 endif
@@ -48,7 +51,7 @@ LIBM        = -lm
 ifeq ($(ARCHFLAGS),)
 ifeq ($(arch),ppc)
    ARCHFLAGS = -arch ppc -arch ppc64
-else ifneq ($(arch),arm)
+else ifeq ($(arch),arm)
    ARCHFLAGS = -arch arm64
 else
    ARCHFLAGS = -arch i386 -arch x86_64
@@ -57,6 +60,7 @@ endif
 
 ifeq ($(platform), osx)
 ifndef ($(NOUNIVERSAL))
+   CFLAGS += $(ARCHFLAGS)
    CXXFLAGS += $(ARCHFLAGS)
    LFLAGS += $(ARCHFLAGS)
 endif
