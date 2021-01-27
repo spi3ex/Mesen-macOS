@@ -46,8 +46,10 @@ TARGET_NAME := mesen
 LIBM        = -lm
 
 ifeq ($(ARCHFLAGS),)
-ifeq ($(archs),ppc)
+ifeq ($(arch),ppc)
    ARCHFLAGS = -arch ppc -arch ppc64
+else ifneq ($(arch),arm)
+   ARCHFLAGS = -arch arm64
 else
    ARCHFLAGS = -arch i386 -arch x86_64
 endif
