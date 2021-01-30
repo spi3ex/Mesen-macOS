@@ -1,6 +1,5 @@
 STATIC_LINKING := 0
 AR             ?= ar
-HAVE_TLS := 1
 
 SPACE :=
 SPACE := $(SPACE) $(SPACE)
@@ -149,7 +148,6 @@ else ifneq (,$(findstring ios,$(platform)))
   SHARED := -dynamiclib
   DEFINES := -DIOS
   MINVERSION=
-  HAVE_TLS=0
 
 ifeq ($(IOSSDK),)
    IOSSDK := $(shell xcodebuild -version -sdk iphoneos Path)
@@ -174,7 +172,6 @@ else ifeq ($(platform), tvos-arm64)
    fpic := -fPIC
    SHARED := -dynamiclib
    DEFINES := -DIOS -stdlib=libc++
-	HAVE_TLS=0
 
 ifeq ($(IOSSDK),)
    IOSSDK := $(shell xcodebuild -version -sdk appletvos Path)
@@ -318,8 +315,8 @@ else
     CFLAGS += -MT -O2 -DNDEBUG
     CXXFLAGS += -MT -O2 -DNDEBUG
   else
-    CFLAGS += -O3 -DNDEBUG
-    CXXFLAGS += -O3 -DNDEBUG
+    CFLAGS += -O3
+    CXXFLAGS += -O3
   endif
 endif
 
@@ -359,11 +356,6 @@ endif
 CFLAGS   += -D LIBRETRO $(fpic)
 CXXFLAGS += -D LIBRETRO $(fpic) -std=c++11
 
-ifeq ($(HAVE_TLS),1)
-CFLAGS += -DHAVE_TLS
-CXXFLAGS += -DHAVE_TLS
-endif
-
 all: $(TARGET)
 
 $(TARGET): $(OBJECTS)
@@ -385,3 +377,8 @@ endif
 
 clean:
 	rm -f $(OBJECTS) $(TARGET)
+
+.PHONY: clean
+
+print-%:
+	@echo '$*=$($*)'

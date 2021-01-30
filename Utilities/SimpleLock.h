@@ -1,8 +1,6 @@
 #pragma once 
 #include "stdafx.h"
-#ifdef HAVE_TLS
 #include <thread>
-#endif
 
 class SimpleLock;
 
@@ -18,11 +16,7 @@ public:
 class SimpleLock
 {
 private:
-#ifdef HAVE_TLS
 	thread_local static std::thread::id _threadID;
-#else
-   uint32_t _holderThreadID;
-#endif
 
 	std::thread::id _holderThreadID;
 	uint32_t _lockCount;
