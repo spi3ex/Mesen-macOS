@@ -6,7 +6,6 @@
 #include "PPU.h"
 #include "APU.h"
 #include "MemoryManager.h"
-#include "AutoSaveManager.h"
 #include "BaseMapper.h"
 #include "ControlManager.h"
 #include "VsControlManager.h"
@@ -122,7 +121,6 @@ void Console::Release(bool forShutdown)
 	}
 
 	_rewindManager.reset();
-	_autoSaveManager.reset();
 
 	_hdPackBuilder.reset();
 	_hdData.reset();
@@ -412,13 +410,6 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 			//Poll controller input after creating rewind manager, to make sure it catches the first frame's input
 			_controlManager->UpdateInputState();
 
-#ifndef LIBRETRO
-			//Don't use auto-save manager for libretro
-			//Only enable auto-save for the master console (VS Dualsystem)
-			if(IsMaster()) {
-				_autoSaveManager.reset(new AutoSaveManager(shared_from_this()));
-			}
-#endif
 			_videoDecoder->StartThread();
 
 			FolderUtilities::AddKnownGameFolder(romFile.GetFolderPath());

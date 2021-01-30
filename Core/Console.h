@@ -13,7 +13,6 @@ class CPU;
 class PPU;
 class MemoryManager;
 class ControlManager;
-class AutoSaveManager;
 class HdPackBuilder;
 class HdAudioDevice;
 class SystemActionManager;
@@ -70,7 +69,6 @@ private:
 
 	shared_ptr<VideoDecoder> _videoDecoder;
 	shared_ptr<VideoRenderer> _videoRenderer;
-	unique_ptr<AutoSaveManager> _autoSaveManager;
 	shared_ptr<SaveStateManager> _saveStateManager;
 	shared_ptr<CheatManager> _cheatManager;
 	shared_ptr<DebugHud> _debugHud;
