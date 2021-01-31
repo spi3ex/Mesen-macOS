@@ -26,7 +26,6 @@ SOURCES_CXX := $(LIBRETRO_DIR)/libretro.cpp \
                $(CORE_DIR)/BaseControlDevice.cpp \
                $(CORE_DIR)/BaseExpansionAudio.cpp \
                $(CORE_DIR)/BaseMapper.cpp \
-               $(CORE_DIR)/BaseRenderer.cpp \
                $(CORE_DIR)/BaseVideoFilter.cpp \
                $(CORE_DIR)/BatteryManager.cpp \
                $(CORE_DIR)/BisqwitNtscFilter.cpp \
