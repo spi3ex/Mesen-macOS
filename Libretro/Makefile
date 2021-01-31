@@ -160,7 +160,7 @@ else
   CXX = clang++ -arch armv7 -isysroot $(IOSSDK)
 endif
 ifeq ($(platform),$(filter $(platform),ios9 ios-arm64))
-  MINVERSION = -miphoneos-version-min=8.0
+  MINVERSION = -miphoneos-version-min=9.0
 else
   MINVERSION = -miphoneos-version-min=5.0
 endif
