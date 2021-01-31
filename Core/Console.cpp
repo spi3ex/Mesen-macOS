@@ -798,19 +798,6 @@ void Console::Run()
 
 			targetTime += delay;
 				
-			bool displayDebugInfo = _settings->CheckFlag(EmulationFlags::DisplayDebugInfo);
-			if(displayDebugInfo) {
-				double lastFrameTime = lastFrameTimer.GetElapsedMS();
-				lastFrameTimer.Reset();
-				frameDurations[frameDurationIndex] = lastFrameTime;
-				frameDurationIndex = (frameDurationIndex + 1) % 60;
-
-				DisplayDebugInformation(lastFrameTime, lastFrameMin, lastFrameMax, frameDurations);
-				if(_slave) {
-					_slave->DisplayDebugInformation(lastFrameTime, lastFrameMin, lastFrameMax, frameDurations);
-				}
-			}
-
 			//When sleeping for a long time (e.g <= 25% speed), sleep in small chunks and check to see if we need to stop sleeping between each sleep call
 			while(targetTime - clockTimer.GetElapsedMS() > 50) {
 				clockTimer.WaitUntil(clockTimer.GetElapsedMS() + 40);
@@ -1554,61 +1541,6 @@ void Console::DebugProcessVramWriteOperation(uint16_t addr, uint8_t & value)
 		_debugger->ProcessVramWriteOperation(addr, value);
 	}
 #endif
-}
-
-void Console::DisplayDebugInformation(double lastFrame, double &lastFrameMin, double &lastFrameMax, double frameDurations[60])
-{
-	AudioStatistics stats = _soundMixer->GetStatistics();
-	
-	int startFrame = _ppu->GetFrameCount();
-
-	_debugHud->DrawRectangle(8, 8, 115, 49, 0x40000000, true, 1, startFrame);
-	_debugHud->DrawRectangle(8, 8, 115, 49, 0xFFFFFF, false, 1, startFrame);
-
-	_debugHud->DrawString(10, 10, "Audio Stats", 0xFFFFFF, 0xFF000000, 1, startFrame);
-	_debugHud->DrawString(10, 21, "Latency: ", 0xFFFFFF, 0xFF000000, 1, startFrame);
-	
-	int color = (stats.AverageLatency > 0 && std::abs(stats.AverageLatency - _settings->GetAudioLatency()) > 3) ? 0xFF0000 : 0xFFFFFF;
-	std::stringstream ss;
-	ss << std::fixed << std::setprecision(2) << stats.AverageLatency << " ms";
-	_debugHud->DrawString(54, 21, ss.str(), color, 0xFF000000, 1, startFrame);
-
-	_debugHud->DrawString(10, 30, "Underruns: " + std::to_string(stats.BufferUnderrunEventCount), 0xFFFFFF, 0xFF000000, 1, startFrame);
-	_debugHud->DrawString(10, 39, "Buffer Size: " + std::to_string(stats.BufferSize / 1024) + "kb", 0xFFFFFF, 0xFF000000, 1, startFrame);
-	_debugHud->DrawString(10, 48, "Rate: " + std::to_string((uint32_t)(_settings->GetSampleRate() * _soundMixer->GetRateAdjustment())) + "Hz", 0xFFFFFF, 0xFF000000, 1, startFrame);
-
-	_debugHud->DrawRectangle(132, 8, 115, 49, 0x40000000, true, 1, startFrame);
-	_debugHud->DrawRectangle(132, 8, 115, 49, 0xFFFFFF, false, 1, startFrame);
-	_debugHud->DrawString(134, 10, "Video Stats", 0xFFFFFF, 0xFF000000, 1, startFrame);
-
-	double totalDuration = 0;
-	for(int i = 0; i < 60; i++) {
-		totalDuration += frameDurations[i];
-	}
-
-	ss = std::stringstream();
-	ss << "FPS: " << std::fixed << std::setprecision(4) << (1000 / (totalDuration/60));
-	_debugHud->DrawString(134, 21, ss.str(), 0xFFFFFF, 0xFF000000, 1, startFrame);
-
-	ss = std::stringstream();
-	ss << "Last Frame: " << std::fixed << std::setprecision(2) << lastFrame << " ms";
-	_debugHud->DrawString(134, 30, ss.str(), 0xFFFFFF, 0xFF000000, 1, startFrame);
-
-	if(_ppu->GetFrameCount() > 60) {
-		lastFrameMin = (std::min)(lastFrame, lastFrameMin);
-		lastFrameMax = (std::max)(lastFrame, lastFrameMax);
-	} else {
-		lastFrameMin = 9999;
-		lastFrameMax = 0;
-	}
-
-	ss = std::stringstream();
-	ss << "Min Delay: " << std::fixed << std::setprecision(2) << ((lastFrameMin < 9999) ? lastFrameMin : 0.0) << " ms";
-	_debugHud->DrawString(134, 39, ss.str(), 0xFFFFFF, 0xFF000000, 1, startFrame);
-
-	ss = std::stringstream();
-	ss << "Max Delay: " << std::fixed << std::setprecision(2) << lastFrameMax << " ms";
-	_debugHud->DrawString(134, 48, ss.str(), 0xFFFFFF, 0xFF000000, 1, startFrame);
 }
 
 void Console::ExportStub()

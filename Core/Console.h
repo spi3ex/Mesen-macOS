@@ -104,7 +104,6 @@ private:
 
 	void UpdateNesModel(bool sendNotification);
 	double GetFrameDelay();
-	void DisplayDebugInformation(double lastFrame, double &lastFrameMin, double &lastFrameMax, double frameDurations[60]);
 
 	void ExportStub();
 
