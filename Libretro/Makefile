@@ -65,7 +65,11 @@ endif
 ifneq (,$(findstring unix,$(platform)))
   EXT ?= so
    TARGET := $(TARGET_NAME)_libretro.$(EXT)
-   fpic := -fPIC -pthread
+   ifneq ($(findstring Haiku,$(shell uname -s)),)
+    fpic := -fPIC -lroot
+   else
+    fpic := -fPIC -pthread
+   endif
    SHARED := -shared -Wl,--version-script=$(LIBRETRO_DIR)/link.T -Wl,--no-undefined
 
 else ifeq ($(platform), linux-portable)
