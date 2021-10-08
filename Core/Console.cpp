@@ -731,11 +731,7 @@ void Console::Run()
 {
 	Timer clockTimer;
 	Timer lastFrameTimer;
-	double frameDurations[60] = {};
-	uint32_t frameDurationIndex = 0;
 	double targetTime;
-	double lastFrameMin = 9999;
-	double lastFrameMax = 0;
 	double lastDelay = GetFrameDelay();
 
 	_runLock.Acquire();
