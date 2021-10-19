@@ -47,7 +47,6 @@
 #include "HistoryViewer.h"
 #include "ConsolePauseHelper.h"
 #include "EventManager.h"
-#include "PgoUtilities.h"
 
 Console::Console(shared_ptr<Console> master, EmulationSettings* initialSettings)
 {
@@ -1537,11 +1536,4 @@ void Console::DebugProcessVramWriteOperation(uint16_t addr, uint8_t & value)
 		_debugger->ProcessVramWriteOperation(addr, value);
 	}
 #endif
-}
-
-void Console::ExportStub()
-{
-	//Force the compiler to export the PgoRunTest function - otherwise it seems to be ignored since it is unused
-	vector<string> testRoms;
-	PgoRunTest(testRoms, true);
 }
