@@ -743,31 +743,430 @@ extern "C" {
 
 		string code = codeStr;
 		std::transform(code.begin(), code.end(), code.begin(), ::toupper);
-		if(code.size() == 7 && code[4] == ':') {
-			string address = code.substr(0, 4);
-			string value = code.substr(5, 2);
-			_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address), HexUtilities::FromHex(value));
-		} else if(code.size() == 10 && code[4] == '?' && code[7] == ':') {
-			string address = code.substr(0, 4);
-			string comparison = code.substr(5, 2);
-			string value = code.substr(8, 2);
-			_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address), HexUtilities::FromHex(value), HexUtilities::FromHex(comparison));
-		} else if(code.size() == 6 || code.size() == 8) {
+		if(code.size() > 72) {
+			return;
+		}
+		if(code[4] == ':') {
+			if(code[55] == '+') {
+				string address1 = code.substr(0, 4);
+				string value1 = code.substr(5, 2);
+				string address2 = code.substr(8, 4);
+				string value2 = code.substr(13, 2);
+				string address3 = code.substr(16, 4);
+				string value3 = code.substr(21, 2);
+				string address4 = code.substr(24, 4);
+				string value4 = code.substr(29, 2);
+				string address5 = code.substr(32, 4);
+				string value5 = code.substr(37, 2);
+				string address6 = code.substr(40, 4);
+				string value6 = code.substr(45, 2);
+				string address7 = code.substr(48, 4);
+				string value7 = code.substr(53, 2);
+				string address8 = code.substr(56, 4);
+				string value8 = code.substr(61, 2);
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address1), HexUtilities::FromHex(value1));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address2), HexUtilities::FromHex(value2));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address3), HexUtilities::FromHex(value3));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address4), HexUtilities::FromHex(value4));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address5), HexUtilities::FromHex(value5));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address6), HexUtilities::FromHex(value6));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address6), HexUtilities::FromHex(value7));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address6), HexUtilities::FromHex(value8));
+			}
+			else if(code[47] == '+') {
+				string address1 = code.substr(0, 4);
+				string value1 = code.substr(5, 2);
+				string address2 = code.substr(8, 4);
+				string value2 = code.substr(13, 2);
+				string address3 = code.substr(16, 4);
+				string value3 = code.substr(21, 2);
+				string address4 = code.substr(24, 4);
+				string value4 = code.substr(29, 2);
+				string address5 = code.substr(32, 4);
+				string value5 = code.substr(37, 2);
+				string address6 = code.substr(40, 4);
+				string value6 = code.substr(45, 2);
+				string address7 = code.substr(48, 4);
+				string value7 = code.substr(53, 2);
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address1), HexUtilities::FromHex(value1));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address2), HexUtilities::FromHex(value2));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address3), HexUtilities::FromHex(value3));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address4), HexUtilities::FromHex(value4));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address5), HexUtilities::FromHex(value5));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address6), HexUtilities::FromHex(value6));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address6), HexUtilities::FromHex(value7));
+			}
+			else if(code[39] == '+') {
+				string address1 = code.substr(0, 4);
+				string value1 = code.substr(5, 2);
+				string address2 = code.substr(8, 4);
+				string value2 = code.substr(13, 2);
+				string address3 = code.substr(16, 4);
+				string value3 = code.substr(21, 2);
+				string address4 = code.substr(24, 4);
+				string value4 = code.substr(29, 2);
+				string address5 = code.substr(32, 4);
+				string value5 = code.substr(37, 2);
+				string address6 = code.substr(40, 4);
+				string value6 = code.substr(45, 2);
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address1), HexUtilities::FromHex(value1));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address2), HexUtilities::FromHex(value2));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address3), HexUtilities::FromHex(value3));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address4), HexUtilities::FromHex(value4));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address5), HexUtilities::FromHex(value5));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address6), HexUtilities::FromHex(value6));
+			}
+			else if(code[31] == '+') {
+				string address1 = code.substr(0, 4);
+				string value1 = code.substr(5, 2);
+				string address2 = code.substr(8, 4);
+				string value2 = code.substr(13, 2);
+				string address3 = code.substr(16, 4);
+				string value3 = code.substr(21, 2);
+				string address4 = code.substr(24, 4);
+				string value4 = code.substr(29, 2);
+				string address5 = code.substr(32, 4);
+				string value5 = code.substr(37, 2);
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address1), HexUtilities::FromHex(value1));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address2), HexUtilities::FromHex(value2));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address3), HexUtilities::FromHex(value3));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address4), HexUtilities::FromHex(value4));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address5), HexUtilities::FromHex(value5));
+			}
+			else if(code[23] == '+') {
+				string address1 = code.substr(0, 4);
+				string value1 = code.substr(5, 2);
+				string address2 = code.substr(8, 4);
+				string value2 = code.substr(13, 2);
+				string address3 = code.substr(16, 4);
+				string value3 = code.substr(21, 2);
+				string address4 = code.substr(24, 4);
+				string value4 = code.substr(29, 2);
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address1), HexUtilities::FromHex(value1));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address2), HexUtilities::FromHex(value2));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address3), HexUtilities::FromHex(value3));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address4), HexUtilities::FromHex(value4));
+			}
+			else if(code[15] == '+') {
+				string address1 = code.substr(0, 4);
+				string value1 = code.substr(5, 2);
+				string address2 = code.substr(8, 4);
+				string value2 = code.substr(13, 2);
+				string address3 = code.substr(16, 4);
+				string value3 = code.substr(21, 2);
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address1), HexUtilities::FromHex(value1));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address2), HexUtilities::FromHex(value2));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address3), HexUtilities::FromHex(value3));
+			}
+			else if(code[7] == '+') {
+				string address1 = code.substr(0, 4);
+				string value1 = code.substr(5, 2);
+				string address2 = code.substr(8, 4);
+				string value2 = code.substr(13, 2);
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address1), HexUtilities::FromHex(value1));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address2), HexUtilities::FromHex(value2));
+			}
+			else {
+				string address = code.substr(0, 4);
+				string value = code.substr(5, 2);
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address), HexUtilities::FromHex(value));
+			}
+
+		} else if(code[4] == '?' && code[7] == ':') {
+			if(code[10] == '+') {
+				string address1 = code.substr(0, 4);
+				string comparison1 = code.substr(5, 2);
+				string value1 = code.substr(8, 2);
+				string address2 = code.substr(11, 4);
+				string comparison2 = code.substr(16, 2);
+				string value2 = code.substr(19, 2);
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address1), HexUtilities::FromHex(value1), HexUtilities::FromHex(comparison1));
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address2), HexUtilities::FromHex(value2), HexUtilities::FromHex(comparison2));
+			}
+			else {
+				string address = code.substr(0, 4);
+				string comparison = code.substr(5, 2);
+				string value = code.substr(8, 2);
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address), HexUtilities::FromHex(value), HexUtilities::FromHex(comparison));
+			}
+
+		} else {
 			//This is either a GG or PAR code
 			bool isValidGgCode = true;
-			bool isValidParCode = code.size() == 8;
-			for(size_t i = 0; i < code.size(); i++) {
+			bool isValidParCode = true;
+			/* if(code.size > 72) {
+				isValidGgCode = false;
+				isValidParCode = false;
+			} */
+			for(size_t i = 0; i < 6; i++) {
 				if(validGgLetters.find(code[i]) == string::npos) {
 					isValidGgCode = false;
 				}
+			}
+			for(size_t i = 0; i < 8; i++) {
 				if(validParLetters.find(code[i]) == string::npos) {
 					isValidParCode = false;
 				}
 			}
 
-			if(isValidGgCode) {
+			if(isValidGgCode && code [48] == '+') {
+				string code1 = code.substr(0, 6);
+				string code2 = code.substr(7, 6);
+				string code3 = code.substr(14, 6);
+				string code4 = code.substr(21, 6);
+				string code5 = code.substr(28, 6);
+				string code6 = code.substr(35, 6);
+				string code7 = code.substr(42, 6);
+				string code8 = code.substr(49, 6);
+				_console->GetCheatManager()->AddGameGenieCode(code1);
+				_console->GetCheatManager()->AddGameGenieCode(code2);
+				_console->GetCheatManager()->AddGameGenieCode(code3);
+				_console->GetCheatManager()->AddGameGenieCode(code4);
+				_console->GetCheatManager()->AddGameGenieCode(code5);
+				_console->GetCheatManager()->AddGameGenieCode(code6);
+				_console->GetCheatManager()->AddGameGenieCode(code7);
+				_console->GetCheatManager()->AddGameGenieCode(code8);
+			}
+			else if(isValidGgCode && code [41] == '+') {
+				string code1 = code.substr(0, 6);
+				string code2 = code.substr(7, 6);
+				string code3 = code.substr(14, 6);
+				string code4 = code.substr(21, 6);
+				string code5 = code.substr(28, 6);
+				string code6 = code.substr(35, 6);
+				string code7 = code.substr(42, 6);
+				_console->GetCheatManager()->AddGameGenieCode(code1);
+				_console->GetCheatManager()->AddGameGenieCode(code2);
+				_console->GetCheatManager()->AddGameGenieCode(code3);
+				_console->GetCheatManager()->AddGameGenieCode(code4);
+				_console->GetCheatManager()->AddGameGenieCode(code5);
+				_console->GetCheatManager()->AddGameGenieCode(code6);
+				_console->GetCheatManager()->AddGameGenieCode(code7);
+			}
+			else if(isValidGgCode && code [34] == '+') {
+				string code1 = code.substr(0, 6);
+				string code2 = code.substr(7, 6);
+				string code3 = code.substr(14, 6);
+				string code4 = code.substr(21, 6);
+				string code5 = code.substr(28, 6);
+				string code6 = code.substr(35, 6);
+				_console->GetCheatManager()->AddGameGenieCode(code1);
+				_console->GetCheatManager()->AddGameGenieCode(code2);
+				_console->GetCheatManager()->AddGameGenieCode(code3);
+				_console->GetCheatManager()->AddGameGenieCode(code4);
+				_console->GetCheatManager()->AddGameGenieCode(code5);
+				_console->GetCheatManager()->AddGameGenieCode(code6);
+			}
+			else if(isValidGgCode && code [27] == '+') {
+				string code1 = code.substr(0, 6);
+				string code2 = code.substr(7, 6);
+				string code3 = code.substr(14, 6);
+				string code4 = code.substr(21, 6);
+				string code5 = code.substr(28, 6);
+				_console->GetCheatManager()->AddGameGenieCode(code1);
+				_console->GetCheatManager()->AddGameGenieCode(code2);
+				_console->GetCheatManager()->AddGameGenieCode(code3);
+				_console->GetCheatManager()->AddGameGenieCode(code4);
+				_console->GetCheatManager()->AddGameGenieCode(code5);
+			}
+			else if(isValidGgCode && code [20] == '+') {
+				string code1 = code.substr(0, 6);
+				string code2 = code.substr(7, 6);
+				string code3 = code.substr(14, 6);
+				string code4 = code.substr(21, 6);
+				_console->GetCheatManager()->AddGameGenieCode(code1);
+				_console->GetCheatManager()->AddGameGenieCode(code2);
+				_console->GetCheatManager()->AddGameGenieCode(code3);
+				_console->GetCheatManager()->AddGameGenieCode(code4);
+			}
+			else if(isValidGgCode && code [13] == '+') {
+				string code1 = code.substr(0, 6);
+				string code2 = code.substr(7, 6);
+				string code3 = code.substr(14, 6);
+				_console->GetCheatManager()->AddGameGenieCode(code1);
+				_console->GetCheatManager()->AddGameGenieCode(code2);
+				_console->GetCheatManager()->AddGameGenieCode(code3);
+			}
+			else if(isValidGgCode && code[6] == '+') {
+				string code1 = code.substr(0, 6);
+				string code2 = code.substr(7, 6);
+				_console->GetCheatManager()->AddGameGenieCode(code1);
+				_console->GetCheatManager()->AddGameGenieCode(code2);
+			}
+
+			else if(isValidGgCode && code [62] == '+') {
+				string code1 = code.substr(0, 8);
+				string code2 = code.substr(9, 8);
+				string code3 = code.substr(18, 8);
+				string code4 = code.substr(27, 8);
+				string code5 = code.substr(36, 8);
+				string code6 = code.substr(45, 8);
+				string code7 = code.substr(54, 8);
+				string code8 = code.substr(63, 8);
+				_console->GetCheatManager()->AddGameGenieCode(code1);
+				_console->GetCheatManager()->AddGameGenieCode(code2);
+				_console->GetCheatManager()->AddGameGenieCode(code3);
+				_console->GetCheatManager()->AddGameGenieCode(code4);
+				_console->GetCheatManager()->AddGameGenieCode(code5);
+				_console->GetCheatManager()->AddGameGenieCode(code6);
+				_console->GetCheatManager()->AddGameGenieCode(code7);
+				_console->GetCheatManager()->AddGameGenieCode(code8);
+			}
+			else if(isValidGgCode && code [53] == '+') {
+				string code1 = code.substr(0, 8);
+				string code2 = code.substr(9, 8);
+				string code3 = code.substr(18, 8);
+				string code4 = code.substr(27, 8);
+				string code5 = code.substr(36, 8);
+				string code6 = code.substr(45, 8);
+				string code7 = code.substr(54, 8);
+				_console->GetCheatManager()->AddGameGenieCode(code1);
+				_console->GetCheatManager()->AddGameGenieCode(code2);
+				_console->GetCheatManager()->AddGameGenieCode(code3);
+				_console->GetCheatManager()->AddGameGenieCode(code4);
+				_console->GetCheatManager()->AddGameGenieCode(code5);
+				_console->GetCheatManager()->AddGameGenieCode(code6);
+				_console->GetCheatManager()->AddGameGenieCode(code7);
+			}
+			else if(isValidGgCode && code [44] == '+') {
+				string code1 = code.substr(0, 8);
+				string code2 = code.substr(9, 8);
+				string code3 = code.substr(18, 8);
+				string code4 = code.substr(27, 8);
+				string code5 = code.substr(36, 8);
+				string code6 = code.substr(45, 8);
+				_console->GetCheatManager()->AddGameGenieCode(code1);
+				_console->GetCheatManager()->AddGameGenieCode(code2);
+				_console->GetCheatManager()->AddGameGenieCode(code3);
+				_console->GetCheatManager()->AddGameGenieCode(code4);
+				_console->GetCheatManager()->AddGameGenieCode(code5);
+				_console->GetCheatManager()->AddGameGenieCode(code6);
+			}
+			else if(isValidGgCode && code [35] == '+') {
+				string code1 = code.substr(0, 8);
+				string code2 = code.substr(9, 8);
+				string code3 = code.substr(18, 8);
+				string code4 = code.substr(27, 8);
+				string code5 = code.substr(36, 8);
+				_console->GetCheatManager()->AddGameGenieCode(code1);
+				_console->GetCheatManager()->AddGameGenieCode(code2);
+				_console->GetCheatManager()->AddGameGenieCode(code3);
+				_console->GetCheatManager()->AddGameGenieCode(code4);
+				_console->GetCheatManager()->AddGameGenieCode(code5);
+			}
+			else if(isValidGgCode && code [26] == '+') {
+				string code1 = code.substr(0, 8);
+				string code2 = code.substr(9, 8);
+				string code3 = code.substr(18, 8);
+				string code4 = code.substr(27, 8);
+				_console->GetCheatManager()->AddGameGenieCode(code1);
+				_console->GetCheatManager()->AddGameGenieCode(code2);
+				_console->GetCheatManager()->AddGameGenieCode(code3);
+				_console->GetCheatManager()->AddGameGenieCode(code4);
+			}
+			else if(isValidGgCode && code [17] == '+') {
+				string code1 = code.substr(0, 8);
+				string code2 = code.substr(9, 8);
+				string code3 = code.substr(18, 8);
+				_console->GetCheatManager()->AddGameGenieCode(code1);
+				_console->GetCheatManager()->AddGameGenieCode(code2);
+				_console->GetCheatManager()->AddGameGenieCode(code3);
+			}
+			else if(isValidGgCode && code[8] == '+') {
+				string code1 = code.substr(0, 8);
+				string code2 = code.substr(9, 8);
+				_console->GetCheatManager()->AddGameGenieCode(code1);
+				_console->GetCheatManager()->AddGameGenieCode(code2);
+			}
+			else if(isValidGgCode) {
 				_console->GetCheatManager()->AddGameGenieCode(code);
-			} else if(isValidParCode) {
+			}
+
+			else if(isValidParCode && code [62] == '+') {
+				string code1 = code.substr(0, 8);
+				string code2 = code.substr(9, 8);
+				string code3 = code.substr(18, 8);
+				string code4 = code.substr(27, 8);
+				string code5 = code.substr(36, 8);
+				string code6 = code.substr(45, 8);
+				string code7 = code.substr(54, 8);
+				string code8 = code.substr(63, 8);
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code1));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code2));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code3));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code4));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code5));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code6));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code7));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code8));
+			}
+			else if(isValidParCode && code [53] == '+') {
+				string code1 = code.substr(0, 8);
+				string code2 = code.substr(9, 8);
+				string code3 = code.substr(18, 8);
+				string code4 = code.substr(27, 8);
+				string code5 = code.substr(36, 8);
+				string code6 = code.substr(45, 8);
+				string code7 = code.substr(54, 8);
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code1));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code2));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code3));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code4));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code5));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code6));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code7));
+			}
+			else if(isValidParCode && code [44] == '+') {
+				string code1 = code.substr(0, 8);
+				string code2 = code.substr(9, 8);
+				string code3 = code.substr(18, 8);
+				string code4 = code.substr(27, 8);
+				string code5 = code.substr(36, 8);
+				string code6 = code.substr(45, 8);
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code1));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code2));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code3));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code4));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code5));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code6));
+			}
+			else if(isValidParCode && code [26] == '+') {
+				string code1 = code.substr(0, 8);
+				string code2 = code.substr(9, 8);
+				string code3 = code.substr(18, 8);
+				string code4 = code.substr(27, 8);
+				string code5 = code.substr(36, 8);
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code1));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code2));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code3));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code4));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code5));
+			}
+			else if(isValidParCode && code [26] == '+') {
+				string code1 = code.substr(0, 8);
+				string code2 = code.substr(9, 8);
+				string code3 = code.substr(18, 8);
+				string code4 = code.substr(27, 8);
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code1));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code2));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code3));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code4));
+			}
+			else if(isValidParCode && code [17] == '+') {
+				string code1 = code.substr(0, 8);
+				string code2 = code.substr(9, 8);
+				string code3 = code.substr(18, 8);
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code1));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code2));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code3));
+			}
+			else if(isValidParCode && code[8] == '+') {
+				string code1 = code.substr(0, 8);
+				string code2 = code.substr(9, 8);
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code1));
+				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code2));
+			}
+			else if(isValidParCode) {
 				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code));
 			}
 		}
