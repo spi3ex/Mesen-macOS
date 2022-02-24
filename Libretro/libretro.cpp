@@ -740,36 +740,90 @@ extern "C" {
 	{
 		static const string validGgLetters = "APZLGITYEOXUKSVN";
 		static const string validParLetters = "0123456789ABCDEF";
+		int chl = 0;
 
 		string code = codeStr;
 		std::transform(code.begin(), code.end(), code.begin(), ::toupper);
-		if(code.size() == 7 && code[4] == ':') {
-			string address = code.substr(0, 4);
-			string value = code.substr(5, 2);
-			_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address), HexUtilities::FromHex(value));
-		} else if(code.size() == 10 && code[4] == '?' && code[7] == ':') {
-			string address = code.substr(0, 4);
-			string comparison = code.substr(5, 2);
-			string value = code.substr(8, 2);
-			_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address), HexUtilities::FromHex(value), HexUtilities::FromHex(comparison));
-		} else if(code.size() == 6 || code.size() == 8) {
+
+		if(code[4] == ':') {
+			for(;;) {
+				string address = code.substr((0 + chl), 4);
+				string value = code.substr((5 + chl), 2);
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address), HexUtilities::FromHex(value));
+				if(code[(7 + chl)] != '+') {
+					return;
+				}
+				chl = (chl + 8);
+			}
+		}
+
+		else if(code[4] == '?' && code[7] == ':') {
+			for(;;) {
+				string address = code.substr((0 + chl), 4);
+				string comparison = code.substr((5 + chl), 2);
+				string value = code.substr((8 + chl), 2);
+				_console->GetCheatManager()->AddCustomCode(HexUtilities::FromHex(address), HexUtilities::FromHex(value), HexUtilities::FromHex(comparison));
+				if(code[(10 + chl)] != '+') {
+					return;
+				}
+				chl = (chl + 11);
+			}
+		}
+
+		else {
 			//This is either a GG or PAR code
 			bool isValidGgCode = true;
-			bool isValidParCode = code.size() == 8;
-			for(size_t i = 0; i < code.size(); i++) {
+			bool isValidParCode = true;
+
+			for(size_t i = 0; i < 6; i++) {
 				if(validGgLetters.find(code[i]) == string::npos) {
 					isValidGgCode = false;
 				}
+			}
+			for(size_t i = 0; i < 8; i++) {
 				if(validParLetters.find(code[i]) == string::npos) {
 					isValidParCode = false;
 				}
 			}
 
-			if(isValidGgCode) {
-				_console->GetCheatManager()->AddGameGenieCode(code);
-			} else if(isValidParCode) {
+			if(isValidGgCode && code[6] == '+') {
+				for(;;) {
+					string code1 = code.substr((0 + chl), 6);
+					_console->GetCheatManager()->AddGameGenieCode(code1);;
+					if(code[(6 + chl)] != '+') {
+						return;
+					}
+					chl = (chl + 7);
+				}
+			}
+			else if(isValidGgCode && code[8] == '+') {
+				for(;;) {
+					string code1 = code.substr((0 + chl), 8);
+					_console->GetCheatManager()->AddGameGenieCode(code1);;
+					if(code[(8 + chl)] != '+') {
+						return;
+					}
+					chl = (chl + 9);
+				}
+			}
+			else if(isValidGgCode) {
+				_console->GetCheatManager()->AddGameGenieCode(code);;
+			}
+
+			else if(isValidParCode && code[8] == '+') {
+				for(;;) {
+					string code1 = code.substr((0 + chl), 8);
+					_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code1));
+					if(code[(8 + chl)] != '+') {
+						return;
+					}
+					chl = (chl + 9);
+				}
+			}
+			else if(isValidParCode) {
 				_console->GetCheatManager()->AddProActionRockyCode(HexUtilities::FromHex(code));
 			}
+
 		}
 
 	}
