@@ -162,7 +162,7 @@ extern "C" {
 			{ MesenOverscanRight, "Right Overscan; None|4px|8px|12px|16px" },
 			{ MesenOverscanTop, "Top Overscan; None|4px|8px|12px|16px" },
 			{ MesenOverscanBottom, "Bottom Overscan; None|4px|8px|12px|16px" },
-			{ MesenAspectRatio, "Aspect Ratio; Auto|No Stretching|NTSC|PAL|4:3|16:9" },
+			{ MesenAspectRatio, "Aspect Ratio; Auto|No Stretching|NTSC|PAL|4:3|4:3 (Preserved)|16:9|16:9 (Preserved)" },
 			{ MesenControllerTurboSpeed, "Controller Turbo Speed; Fast|Very Fast|Disabled|Slow|Normal" },
 			{ MesenShiftButtonsClockwise, u8"Shift A/B/X/Y clockwise; disabled|enabled" },
 			{ MesenHdPacks, "Enable HD Packs; enabled|disabled" },
@@ -486,8 +486,12 @@ extern "C" {
 			} else if(value == "PAL") {
 				_console->GetSettings()->SetVideoAspectRatio(VideoAspectRatio::PAL, 1.0);
 			} else if(value == "4:3") {
+				_console->GetSettings()->SetVideoAspectRatio(VideoAspectRatio::StandardS, 1.0);
+			} else if(value == "4:3 (Preserved)") {
 				_console->GetSettings()->SetVideoAspectRatio(VideoAspectRatio::Standard, 1.0);
 			} else if(value == "16:9") {
+				_console->GetSettings()->SetVideoAspectRatio(VideoAspectRatio::WidescreenS, 1.0);
+			} else if(value == "16:9 (Preserved)") {
 				_console->GetSettings()->SetVideoAspectRatio(VideoAspectRatio::Widescreen, 1.0);
 			}
 		}

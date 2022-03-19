@@ -49,6 +49,8 @@ double EmulationSettings::GetAspectRatio(shared_ptr<Console> console)
 		case VideoAspectRatio::PAL: return 9440000.0 / 6384411.0;
 		case VideoAspectRatio::Standard: return 4.0 / 3.0;
 		case VideoAspectRatio::Widescreen: return 16.0 / 9.0;
+		case VideoAspectRatio::StandardS: return 4.0 / 3.0;
+		case VideoAspectRatio::WidescreenS: return 16.0 / 9.0;
 		case VideoAspectRatio::Custom: return _customAspectRatio;
 	}
 	return 0.0;

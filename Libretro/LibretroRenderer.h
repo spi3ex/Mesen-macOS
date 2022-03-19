@@ -60,7 +60,11 @@ public:
 		if(ratio == 0.0f) {
 			ratio = (float)256 / 240;
 		}
-		ratio *= (float)_console->GetSettings()->GetOverscanDimensions().GetScreenWidth() / _console->GetSettings()->GetOverscanDimensions().GetScreenHeight() / 256 * 240;
+
+		bool staticar = (bool)_console->GetSettings()->GetStaticAspectRatio();
+		if(!staticar) {
+			ratio *= (float)_console->GetSettings()->GetOverscanDimensions().GetScreenWidth() / _console->GetSettings()->GetOverscanDimensions().GetScreenHeight() / 256 * 240;
+		}
 
 		if(_console->GetSettings()->GetScreenRotation() % 180) {
 			info.geometry.aspect_ratio = ratio == 0.0f ? 0.0f : 1.0f / ratio;
