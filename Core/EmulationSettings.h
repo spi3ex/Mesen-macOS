@@ -183,7 +183,9 @@ enum class VideoAspectRatio
 	PAL = 3,
 	Standard = 4,
 	Widescreen = 5,
-	Custom = 6
+	Custom = 6,
+	StandardS = 7,
+	WidescreenS = 8
 };
 
 struct OverscanDimensions
@@ -1232,6 +1234,14 @@ public:
 	}
 
 	double GetAspectRatio(shared_ptr<Console> console);
+	bool GetStaticAspectRatio()
+	{
+		if(_aspectRatio == VideoAspectRatio::StandardS || _aspectRatio == VideoAspectRatio::WidescreenS) {
+			return true; 
+		} else {
+			return false;
+		}
+	}
 	void InitializeInputDevices(GameInputType inputType, GameSystem system, bool silent);
 
 	void SetVideoScale(double scale)
