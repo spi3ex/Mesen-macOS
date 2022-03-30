@@ -5,7 +5,6 @@
 #include "CPU.h"
 #include "VideoRenderer.h"
 #include "RewindManager.h"
-#include "WaveRecorder.h"
 #include "OggMixer.h"
 #include "Console.h"
 #include "BaseMapper.h"
@@ -133,7 +132,7 @@ void SoundMixer::PlayAudioBuffer(uint32_t time)
 
 	shared_ptr<RewindManager> rewindManager = _console->GetRewindManager();
 
-	if(!_console->GetVideoRenderer()->IsRecording() && !_waveRecorder && !_settings->CheckFlag(EmulationFlags::NsfPlayerEnabled)) {
+	if(!_console->GetVideoRenderer()->IsRecording() && !_settings->CheckFlag(EmulationFlags::NsfPlayerEnabled)) {
 		if((_settings->CheckFlag(EmulationFlags::Turbo) || (rewindManager && rewindManager->IsRewinding())) && _settings->CheckFlag(EmulationFlags::ReduceSoundInFastForward)) {
 			//Reduce volume when fast forwarding or rewinding
 			_lowPassFilter.ApplyFilter(_outputBuffer, sampleCount, 0, 1.0 - _settings->GetVolumeReduction());
@@ -168,17 +167,6 @@ void SoundMixer::PlayAudioBuffer(uint32_t time)
 	}
 
 	if(!_settings->IsRunAheadFrame() && rewindManager && rewindManager->SendAudio(_outputBuffer, (uint32_t)sampleCount, _sampleRate)) {
-		bool isRecording = _waveRecorder || _console->GetVideoRenderer()->IsRecording();
-		if(isRecording) {
-			shared_ptr<WaveRecorder> recorder = _waveRecorder;
-			if(recorder) {
-				if(!recorder->WriteSamples(_outputBuffer, (uint32_t)sampleCount, _sampleRate, true)) {
-					_waveRecorder.reset();
-				}
-			}
-			_console->GetVideoRenderer()->AddRecordingSound(_outputBuffer, (uint32_t)sampleCount, _sampleRate);
-		}
-
 		if(_audioDevice && !_console->IsPaused()) {
 			_audioDevice->PlayBuffer(_outputBuffer, (uint32_t)sampleCount, _sampleRate, true);
 		}
@@ -373,17 +361,15 @@ void SoundMixer::UpdateEqualizers(bool forceUpdate)
 
 void SoundMixer::StartRecording(string filepath)
 {
-	_waveRecorder.reset(new WaveRecorder(filepath, _settings->GetSampleRate(), true));
 }
 
 void SoundMixer::StopRecording()
 {
-	_waveRecorder.reset();
 }
 
 bool SoundMixer::IsRecording()
 {
-	return _waveRecorder.get() != nullptr;
+	return false;
 }
 
 void SoundMixer::SetFadeRatio(double fadeRatio)
@@ -410,15 +396,6 @@ OggMixer* SoundMixer::GetOggMixer()
 	return _oggMixer.get();
 }
 
-AudioStatistics SoundMixer::GetStatistics()
-{
-	if(_audioDevice) {
-		return _audioDevice->GetStatistics();
-	} else {
-		return AudioStatistics();
-	}
-}
-
 void SoundMixer::ProcessEndOfFrame()
 {
 	if(_audioDevice) {
@@ -428,55 +405,12 @@ void SoundMixer::ProcessEndOfFrame()
 
 double SoundMixer::GetRateAdjustment()
 {
-	return _rateAdjustment;
+	return 1.0;
 }
 
 double SoundMixer::GetTargetRateAdjustment()
 {
-	bool isRecording = _waveRecorder || _console->GetVideoRenderer()->IsRecording();
-	if(!isRecording && !_settings->CheckFlag(EmulationFlags::DisableDynamicSampleRate)) {
-		//Don't deviate from selected sample rate while recording
-		//TODO: Have 2 output streams (one for recording, one for the speakers)
-		AudioStatistics stats = GetStatistics();
-
-		if(stats.AverageLatency > 0 && _settings->GetEmulationSpeed() == 100) {
-			//Try to stay within +/- 3ms of requested latency
-			constexpr int32_t maxGap = 3;
-			constexpr int32_t maxSubAdjustment = 3600;
-
-			int32_t requestedLatency = (int32_t)_settings->GetAudioLatency();
-			double latencyGap = stats.AverageLatency - requestedLatency;
-			double adjustment = std::min(0.0025, (std::ceil((std::abs(latencyGap) - maxGap) * 8)) * 0.00003125);
-
-			if(latencyGap < 0 && _underTarget < maxSubAdjustment) {
-				_underTarget++;
-			} else if(latencyGap > 0 && _underTarget > -maxSubAdjustment) {
-				_underTarget--;
-			}
-
-			//For every ~1 second spent under/over target latency, further adjust rate (GetTargetRate is called approx. 3x per frame) 
-			//This should slowly get us closer to the actual output rate of the sound card
-			double subAdjustment = 0.00003125 * _underTarget / 180;
-
-			if(adjustment > 0) {
-				if(latencyGap > maxGap) {
-					_rateAdjustment = 1 - adjustment + subAdjustment;
-				} else if(latencyGap < -maxGap) {
-					_rateAdjustment = 1 + adjustment + subAdjustment;
-				}
-			} else if(std::abs(latencyGap) < 1) {
-				//Restore normal rate once we get within +/- 1ms
-				_rateAdjustment = 1.0 + subAdjustment;
-			}
-		} else {
-			_underTarget = 0;
-			_rateAdjustment = 1.0;
-		}
-	} else {
-		_underTarget = 0;
-		_rateAdjustment = 1.0;
-	}
-	return _rateAdjustment;
+	return 1.0;
 }
 
 void SoundMixer::UpdateTargetSampleRate()

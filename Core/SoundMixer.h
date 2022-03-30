@@ -13,7 +13,6 @@
 #include "CrossFeedFilter.h"
 
 class Console;
-class WaveRecorder;
 class OggMixer;
 
 namespace orfanidis_eq {
@@ -34,7 +33,6 @@ private:
 
 	IAudioDevice* _audioDevice;
 	EmulationSettings* _settings;
-	shared_ptr<WaveRecorder> _waveRecorder;
 	double _fadeRatio;
 	uint32_t _muteFrameCount;
 	unique_ptr<OggMixer> _oggMixer;
@@ -53,9 +51,6 @@ private:
 
 	int16_t _previousOutputLeft = 0;
 	int16_t _previousOutputRight = 0;
-
-	double _rateAdjustment = 1.0;
-	int32_t _underTarget = 0;
 
 	vector<uint32_t> _timestamps;
 	int16_t _channelOutput[MaxChannelCount][CycleLength];
@@ -114,7 +109,6 @@ public:
 
 	OggMixer* GetOggMixer();
 
-	AudioStatistics GetStatistics();
 	void ProcessEndOfFrame();
 	double GetRateAdjustment();
 };
