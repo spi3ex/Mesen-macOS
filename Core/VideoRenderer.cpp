@@ -4,7 +4,6 @@
 #include "VideoDecoder.h"
 #include "Console.h"
 #include "../Utilities/IVideoRecorder.h"
-#include "../Utilities/GifRecorder.h"
 
 VideoRenderer::VideoRenderer(shared_ptr<Console> console)
 {
