@@ -18,4 +18,9 @@ class IAudioDevice
 		virtual void Pause() = 0;
 		virtual void ProcessEndOfFrame() = 0;
 		virtual void UpdateSoundSettings() = 0;
+
+		virtual string GetAvailableDevices() = 0;
+		virtual void SetAudioDevice(string deviceName) = 0;
+		
+		virtual AudioStatistics GetStatistics() = 0;
 };
