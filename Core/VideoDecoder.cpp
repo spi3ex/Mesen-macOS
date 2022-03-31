@@ -15,7 +15,6 @@
 #include "HdData.h"
 #include "HdNesPack.h"
 #include "RotateFilter.h"
-#include "DebugHud.h"
 #include "NotificationManager.h"
 
 VideoDecoder::VideoDecoder(shared_ptr<Console> console)
@@ -104,7 +103,6 @@ void VideoDecoder::DecodeFrame(bool synchronous)
 
 	uint32_t* outputBuffer = _videoFilter->GetOutputBuffer();
 	FrameInfo frameInfo = _videoFilter->GetFrameInfo();
-	_console->GetDebugHud()->Draw(outputBuffer, _videoFilter->GetOverscan(), frameInfo.Width, _frameNumber);
 
 	if(_rotateFilter) {
 		outputBuffer = _rotateFilter->ApplyFilter(outputBuffer, frameInfo.Width, frameInfo.Height);

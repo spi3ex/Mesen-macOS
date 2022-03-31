@@ -71,7 +71,6 @@ private:
 	shared_ptr<VideoRenderer> _videoRenderer;
 	shared_ptr<SaveStateManager> _saveStateManager;
 	shared_ptr<CheatManager> _cheatManager;
-	shared_ptr<DebugHud> _debugHud;
 	shared_ptr<SoundMixer> _soundMixer;
 	shared_ptr<NotificationManager> _notificationManager;
 	shared_ptr<EmulationSettings> _settings;

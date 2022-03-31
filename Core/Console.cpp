@@ -37,12 +37,10 @@
 #include "IBattery.h"
 #include "KeyManager.h"
 #include "BatteryManager.h"
-#include "DebugHud.h"
 #include "RomLoader.h"
 #include "CheatManager.h"
 #include "VideoDecoder.h"
 #include "VideoRenderer.h"
-#include "DebugHud.h"
 #include "NotificationManager.h"
 #include "HistoryViewer.h"
 #include "ConsolePauseHelper.h"
@@ -83,7 +81,6 @@ void Console::Init()
 
 	_saveStateManager.reset(new SaveStateManager(shared_from_this()));
 	_cheatManager.reset(new CheatManager(shared_from_this()));
-	_debugHud.reset(new DebugHud());
 
 	_soundMixer.reset(new SoundMixer(shared_from_this()));
 	_soundMixer->SetNesModel(_model);
@@ -107,7 +104,6 @@ void Console::Release(bool forShutdown)
 		_videoDecoder.reset();
 		_videoRenderer.reset();
 
-		_debugHud.reset();
 		_saveStateManager.reset();
 		_cheatManager.reset();
 
@@ -155,11 +151,6 @@ shared_ptr<VideoDecoder> Console::GetVideoDecoder()
 shared_ptr<VideoRenderer> Console::GetVideoRenderer()
 {
 	return _videoRenderer;
-}
-
-shared_ptr<DebugHud> Console::GetDebugHud()
-{
-	return _debugHud;
 }
 
 void Console::SaveBatteries()
@@ -606,7 +597,6 @@ void Console::ResetComponents(bool softReset)
 	}
 
 	_soundMixer->StopAudio(true);
-	_debugHud->ClearScreen();
 
 	_memoryManager->Reset(softReset);
 	if(!_settings->CheckFlag(EmulationFlags::DisablePpuReset) || !softReset || IsNsf()) {
@@ -1099,7 +1089,6 @@ void Console::LoadState(istream &loadStream, uint32_t stateVersion)
 			debugger->ResetCounters();
 		}
 
-		_debugHud->ClearScreen();
 		_notificationManager->SendNotification(ConsoleNotificationType::StateLoaded);
 		UpdateNesModel(false);
 	}

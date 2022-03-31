@@ -26,7 +26,6 @@
 #include "Breakpoint.h"
 #include "CodeDataLogger.h"
 #include "NotificationManager.h"
-#include "DebugHud.h"
 #include "DummyCpu.h"
 #include "EventManager.h"
 
@@ -1500,7 +1499,6 @@ void Debugger::RemoveScript(int32_t scriptId)
 		if(script->GetScriptId() == scriptId) {
 			//Send a ScriptEnded event before unloading the script
 			script->ProcessEvent(EventType::ScriptEnded);
-			_console->GetDebugHud()->ClearScreen();
 			return true;
 		}
 		return false;
