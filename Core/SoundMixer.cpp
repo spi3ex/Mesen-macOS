@@ -130,8 +130,6 @@ void SoundMixer::PlayAudioBuffer(uint32_t time)
 		}
 	}
 
-	shared_ptr<RewindManager> rewindManager = _console->GetRewindManager();
-
 	AudioFilterSettings filterSettings = _settings->GetAudioFilterSettings();
 
 	if(filterSettings.ReverbStrength > 0) {
@@ -151,11 +149,8 @@ void SoundMixer::PlayAudioBuffer(uint32_t time)
 		_crossFeedFilter.ApplyFilter(_outputBuffer, sampleCount, filterSettings.CrossFadeRatio);
 	}
 
-	if(!_settings->IsRunAheadFrame() && rewindManager && rewindManager->SendAudio(_outputBuffer, (uint32_t)sampleCount, _sampleRate)) {
-		if(_audioDevice && !_console->IsPaused()) {
-			_audioDevice->PlayBuffer(_outputBuffer, (uint32_t)sampleCount, _sampleRate, true);
-		}
-	}
+	if(_audioDevice && !_console->IsPaused())
+		_audioDevice->PlayBuffer(_outputBuffer, (uint32_t)sampleCount, _sampleRate, true);
 
 	if(_settings->NeedAudioSettingsUpdate()) {
 		if(_settings->GetSampleRate() != _sampleRate) {
