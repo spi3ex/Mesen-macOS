@@ -29,7 +29,6 @@
 #include "NotificationManager.h"
 #include "DebugHud.h"
 #include "DummyCpu.h"
-#include "PerformanceTracker.h"
 #include "EventManager.h"
 
 string Debugger::_disassemblerOutput = "";
@@ -55,7 +54,6 @@ Debugger::Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<
 
 	_memoryAccessCounter.reset(new MemoryAccessCounter(this));
 	_profiler.reset(new Profiler(this));
-	_performanceTracker.reset(new PerformanceTracker(console));
 	_eventManager.reset(new EventManager(this, cpu.get(), ppu.get(), _console->GetSettings()));
 
 	_bpExpEval.reset(new ExpressionEvaluator(this));
@@ -805,8 +803,6 @@ bool Debugger::ProcessRamOperation(MemoryOperationType type, uint16_t &addr, uin
 					}
 				}
 			}
-
-			_performanceTracker->ProcessCpuExec(addressInfo);
 		}
 
 		ProcessStepConditions(addr);
@@ -1316,11 +1312,6 @@ shared_ptr<MemoryAccessCounter> Debugger::GetMemoryAccessCounter()
 	return _memoryAccessCounter;
 }
 
-shared_ptr<PerformanceTracker> Debugger::GetPerformanceTracker()
-{
-	return _performanceTracker;
-}
-
 shared_ptr<EventManager> Debugger::GetEventManager()
 {
 	return _eventManager;
@@ -1618,7 +1609,6 @@ void Debugger::ProcessEvent(EventType type)
 			break;
 
 		case EventType::EndFrame:
-			_performanceTracker->ProcessEndOfFrame();
 			_memoryDumper->GatherChrPaletteInfo();
 			break;
 
