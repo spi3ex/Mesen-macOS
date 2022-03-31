@@ -501,7 +501,6 @@ private:
 	static uint8_t _versionRevision;
 	static Language _displayLanguage;
 
-	static SimpleLock _shortcutLock;
 	static SimpleLock _equalizerLock;
 	static SimpleLock _lock;
 
