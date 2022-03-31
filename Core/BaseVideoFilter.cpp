@@ -101,9 +101,6 @@ void BaseVideoFilter::TakeScreenshot(VideoFilterType filterType, string filename
 			pngBuffer = scaleFilter->ApplyFilter(pngBuffer, frameInfo.Width, frameInfo.Height, _console->GetSettings()->GetPictureSettings().ScanlineIntensity);
 			frameInfo = scaleFilter->GetFrameInfo(frameInfo);
 		}
-
-		VideoHud hud;
-		hud.DrawHud(_console, pngBuffer, frameInfo, _console->GetSettings()->GetOverscanDimensions());
 	}
 
 	if(!filename.empty()) {

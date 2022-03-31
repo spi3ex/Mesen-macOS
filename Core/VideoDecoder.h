@@ -12,7 +12,6 @@ class BaseVideoFilter;
 class ScaleFilter;
 class RotateFilter;
 class IRenderingDevice;
-class VideoHud;
 class Console;
 struct HdScreenInfo;
 
@@ -34,7 +33,6 @@ private:
 	uint32_t _frameNumber = 0;
 
 	unique_ptr<thread> _decodeThread;
-	unique_ptr<VideoHud> _hud;
 
 	AutoResetEvent _waitForFrame;
 	

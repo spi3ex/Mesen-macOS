@@ -3,7 +3,6 @@
 #include "../Utilities/SimpleLock.h"
 #include "EmulationSettings.h"
 #include "FrameInfo.h"
-#include "VideoHud.h"
 
 class Console;
 

@@ -114,10 +114,6 @@ void VideoDecoder::DecodeFrame(bool synchronous)
 		frameInfo = _scaleFilter->GetFrameInfo(frameInfo);
 	}
 
-	if(_hud) {
-		_hud->DrawHud(_console, outputBuffer, frameInfo, _videoFilter->GetOverscan());
-	}
-
 	ScreenSize screenSize;
 	GetScreenSize(screenSize, true);
 	if(_previousScale != _console->GetSettings()->GetVideoScale() || screenSize.Height != _previousScreenSize.Height || screenSize.Width != _previousScreenSize.Width) {
@@ -207,7 +203,6 @@ void VideoDecoder::StartThread()
 		_frameChanged = false;
 		_frameCount = 0;
 		_waitForFrame.Reset();
-		_hud.reset(new VideoHud());
 		_decodeThread.reset(new thread(&VideoDecoder::DecodeThread, this));
 	}
 #endif
@@ -223,7 +218,6 @@ void VideoDecoder::StopThread()
 
 		_decodeThread.reset();
 
-		_hud.reset();
 		_hdScreenInfo = nullptr;
 		_console->GetSettings()->SetPpuModel(PpuModel::Ppu2C02);
 		UpdateVideoFilter();
