@@ -51,7 +51,6 @@ private:
 	shared_ptr<CodeDataLogger> _codeDataLogger;
 	shared_ptr<MemoryAccessCounter> _memoryAccessCounter;
 	shared_ptr<LabelManager> _labelManager;
-	shared_ptr<TraceLogger> _traceLogger;
 	shared_ptr<Profiler> _profiler;
 	shared_ptr<PerformanceTracker> _performanceTracker;
 	shared_ptr<EventManager> _eventManager;

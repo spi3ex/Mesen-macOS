@@ -24,7 +24,6 @@
 #include "DebugBreakHelper.h"
 #include "ScriptHost.h"
 #include "StandardController.h"
-#include "TraceLogger.h"
 #include "Breakpoint.h"
 #include "CodeDataLogger.h"
 #include "NotificationManager.h"
@@ -58,7 +57,6 @@ Debugger::Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<
 	_profiler.reset(new Profiler(this));
 	_performanceTracker.reset(new PerformanceTracker(console));
 	_eventManager.reset(new EventManager(this, cpu.get(), ppu.get(), _console->GetSettings()));
-	_traceLogger.reset(new TraceLogger(this, memoryManager, _labelManager));
 
 	_bpExpEval.reset(new ExpressionEvaluator(this));
 	_watchExpEval.reset(new ExpressionEvaluator(this));
@@ -854,10 +852,8 @@ bool Debugger::ProcessRamOperation(MemoryOperationType type, uint16_t &addr, uin
 				disassemblyInfo.Initialize(addr, _memoryManager.get(), false);
 			}
 		}
-		_traceLogger->Log(_debugState, disassemblyInfo, operationInfo);
 	} else {
 		_opCodeCycle++;
-		_traceLogger->LogNonExec(operationInfo);
 	}
 
 	if(!breakDone && _stepCycleCount > 0) {
@@ -1310,11 +1306,6 @@ shared_ptr<Assembler> Debugger::GetAssembler()
 	return _assembler;
 }
 
-shared_ptr<TraceLogger> Debugger::GetTraceLogger()
-{
-	return _traceLogger;
-}
-
 shared_ptr<MemoryDumper> Debugger::GetMemoryDumper()
 {
 	return _memoryDumper;
@@ -1661,9 +1652,4 @@ void Debugger::ProcessEvent(EventType type)
 uint32_t Debugger::GetScreenPixel(uint8_t x, uint8_t y)
 {
 	return _ppu->GetPixel(x, y);
-}
-
-void Debugger::AddTrace(const char* log)
-{
-	_traceLogger->LogExtraInfo(log, _cpu->GetCycleCount());
 }

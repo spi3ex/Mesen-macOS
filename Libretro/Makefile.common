@@ -101,7 +101,6 @@ SOURCES_CXX := $(LIBRETRO_DIR)/libretro.cpp \
                $(CORE_DIR)/StereoDelayFilter.cpp \
                $(CORE_DIR)/StereoPanningFilter.cpp \
                $(CORE_DIR)/StudyBoxLoader.cpp \
-               $(CORE_DIR)/TraceLogger.cpp \
                $(CORE_DIR)/UnifLoader.cpp \
                $(CORE_DIR)/VideoDecoder.cpp \
                $(CORE_DIR)/VideoHud.cpp \
