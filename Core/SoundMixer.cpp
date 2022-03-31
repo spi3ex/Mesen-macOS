@@ -132,21 +132,6 @@ void SoundMixer::PlayAudioBuffer(uint32_t time)
 
 	shared_ptr<RewindManager> rewindManager = _console->GetRewindManager();
 
-	if(!_settings->CheckFlag(EmulationFlags::NsfPlayerEnabled)) {
-		if((_settings->CheckFlag(EmulationFlags::Turbo) || (rewindManager && rewindManager->IsRewinding())) && _settings->CheckFlag(EmulationFlags::ReduceSoundInFastForward)) {
-			//Reduce volume when fast forwarding or rewinding
-			_lowPassFilter.ApplyFilter(_outputBuffer, sampleCount, 0, 1.0 - _settings->GetVolumeReduction());
-		} else if(_settings->CheckFlag(EmulationFlags::InBackground)) {
-			if(_settings->CheckFlag(EmulationFlags::MuteSoundInBackground)) {
-				//Mute sound when in background
-				_lowPassFilter.ApplyFilter(_outputBuffer, sampleCount, 0, 0);
-			} else if(_settings->CheckFlag(EmulationFlags::ReduceSoundInBackground)) {
-				//Apply low pass filter/volume reduction when in background (based on options)
-				_lowPassFilter.ApplyFilter(_outputBuffer, sampleCount, 0, 1.0 - _settings->GetVolumeReduction());
-			}
-		}
-	}
-
 	AudioFilterSettings filterSettings = _settings->GetAudioFilterSettings();
 
 	if(filterSettings.ReverbStrength > 0) {
