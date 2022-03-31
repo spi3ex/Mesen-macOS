@@ -16,7 +16,6 @@
 #include "../Utilities/sha1.h"
 #include "../Utilities/Timer.h"
 #include "../Utilities/FolderUtilities.h"
-#include "../Utilities/PlatformUtilities.h"
 #include "VirtualFile.h"
 #include "HdBuilderPpu.h"
 #include "HdPpu.h"
@@ -735,8 +734,6 @@ void Console::Run()
 
 	_videoDecoder->StartThread();
 
-	PlatformUtilities::DisableScreensaver();
-
 	UpdateNesModel(true);
 
 	_running = true;
@@ -829,8 +826,6 @@ void Console::Run()
 
 				_runLock.Release();
 
-				PlatformUtilities::EnableScreensaver();
-				PlatformUtilities::RestoreTimerResolution();
 				while(pausedRequired && !_stop && !_settings->CheckFlag(EmulationFlags::DebuggerWindowEnabled)) {
 					//Sleep until emulation is resumed
 					std::this_thread::sleep_for(std::chrono::duration<int, std::milli>(30));
@@ -839,19 +834,12 @@ void Console::Run()
 				}
 				_paused = false;
 					
-				PlatformUtilities::DisableScreensaver();
 				_runLock.Acquire();
 				_notificationManager->SendNotification(ConsoleNotificationType::GameResumed);
 				lastFrameTimer.Reset();
 
 				//Reset the timer to avoid speed up after a pause
 				_resetRunTimers = true;
-			}
-
-			if(_settings->CheckFlag(EmulationFlags::UseHighResolutionTimer)) {
-				PlatformUtilities::EnableHighResolutionTimer();
-			} else {
-				PlatformUtilities::RestoreTimerResolution();
 			}
 
 			_systemActionManager->ProcessSystemActions();
@@ -882,9 +870,6 @@ void Console::Run()
 	_soundMixer->StopAudio();
 	MovieManager::Stop();
 	_soundMixer->StopRecording();
-
-	PlatformUtilities::EnableScreensaver();
-	PlatformUtilities::RestoreTimerResolution();
 
 	_settings->ClearFlags(EmulationFlags::ForceMaxSpeed);
 

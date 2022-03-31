@@ -114,7 +114,6 @@ SOURCES_CXX := $(LIBRETRO_DIR)/libretro.cpp \
                $(UTIL_DIR)/md5.cpp \
                $(UTIL_DIR)/miniz.cpp \
                $(UTIL_DIR)/nes_ntsc.cpp \
-               $(UTIL_DIR)/PlatformUtilities.cpp \
                $(UTIL_DIR)/PNGHelper.cpp \
                $(UTIL_DIR)/sha1.cpp \
                $(UTIL_DIR)/SimpleLock.cpp \
