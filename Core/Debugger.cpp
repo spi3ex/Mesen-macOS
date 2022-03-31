@@ -14,7 +14,6 @@
 #include "LabelManager.h"
 #include "MemoryDumper.h"
 #include "MemoryAccessCounter.h"
-#include "Profiler.h"
 #include "Assembler.h"
 #include "CodeRunner.h"
 #include "DisassemblyInfo.h"
@@ -53,7 +52,6 @@ Debugger::Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<
 	SetPpu(ppu);
 
 	_memoryAccessCounter.reset(new MemoryAccessCounter(this));
-	_profiler.reset(new Profiler(this));
 	_eventManager.reset(new EventManager(this, cpu.get(), ppu.get(), _console->GetSettings()));
 
 	_bpExpEval.reset(new ExpressionEvaluator(this));
@@ -280,11 +278,6 @@ shared_ptr<CodeDataLogger> Debugger::GetCodeDataLogger()
 shared_ptr<LabelManager> Debugger::GetLabelManager()
 {
 	return _labelManager;
-}
-
-shared_ptr<Profiler> Debugger::GetProfiler()
-{
-	return _profiler;
 }
 
 void Debugger::SetBreakpoints(Breakpoint breakpoints[], uint32_t length)
@@ -581,7 +574,6 @@ void Debugger::UpdateCallstack(uint8_t instruction, uint32_t addr)
 						for(int j = (int)_callstack.size() - i - 1; j >= 0; j--) {
 							_callstack.pop_back();
 							_subReturnAddresses.pop_back();
-							_profiler->UnstackFunction();
 						}
 						break;
 					}
@@ -593,8 +585,6 @@ void Debugger::UpdateCallstack(uint8_t instruction, uint32_t addr)
 				}
 			}
 		}
-
-		_profiler->UnstackFunction();
 	} else if(instruction == 0x20) {
 		//JSR
 		uint16_t targetAddr = _memoryManager->DebugRead(addr + 1) | (_memoryManager->DebugRead(addr + 2) << 8);
@@ -603,7 +593,6 @@ void Debugger::UpdateCallstack(uint8_t instruction, uint32_t addr)
 		
 		AddressTypeInfo dest;
 		_mapper->GetAbsoluteAddressAndType(targetAddr, &dest);
-		_profiler->StackFunction(dest, StackFrameFlags::None);
 	}
 }
 
@@ -634,7 +623,6 @@ void Debugger::ProcessInterrupt(uint16_t cpuAddr, uint16_t destCpuAddr, bool for
 
 	AddressTypeInfo addressInfo;
 	_mapper->GetAbsoluteAddressAndType(destCpuAddr, &addressInfo);
-	_profiler->StackFunction(addressInfo, forNmi ? StackFrameFlags::Nmi : StackFrameFlags::Irq);
 
 	ProcessEvent(forNmi ? EventType::Nmi : EventType::Irq);
 }
@@ -1538,7 +1526,6 @@ void Debugger::ResetCounters()
 	if(_runToCycle == -1) {
 		_memoryAccessCounter->ResetCounts();
 	}
-	_profiler->Reset();
 }
 
 void Debugger::UpdateProgramCounter(uint16_t &addr, uint8_t &value)
