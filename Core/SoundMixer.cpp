@@ -58,9 +58,6 @@ void SoundMixer::RegisterAudioDevice(IAudioDevice *audioDevice)
 	_audioDevice = audioDevice;
 }
 
-void SoundMixer::StopAudio(bool clearBuffer)
-{
-}
 void SoundMixer::Reset()
 {
 	if(_oggMixer) {
@@ -203,11 +200,9 @@ void SoundMixer::UpdateRates(bool forceUpdate)
 
 double SoundMixer::GetChannelOutput(AudioChannel channel, bool forRightChannel)
 {
-	if(forRightChannel) {
+	if(forRightChannel)
 		return _currentOutput[(int)channel] * _volumes[(int)channel] * _panning[(int)channel];
-	} else {
-		return _currentOutput[(int)channel] * _volumes[(int)channel] * (2.0 - _panning[(int)channel]);
-	}
+	return _currentOutput[(int)channel] * _volumes[(int)channel] * (2.0 - _panning[(int)channel]);
 }
 
 int16_t SoundMixer::GetOutputVolume(bool forRightChannel)

@@ -952,7 +952,6 @@ bool Debugger::SleepUntilResume(BreakSource source, uint32_t breakpointId, Break
 		auto lock = _breakLock.AcquireSafe();
 				
 		if(preventResume == 0) {
-			_console->GetSoundMixer()->StopAudio();
 			if(source == BreakSource::Unspecified) {
 				source = _breakSource;
 			}

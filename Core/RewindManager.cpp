@@ -153,7 +153,6 @@ void RewindManager::Start(bool forDebugger)
 			PopHistory();
 		}
 
-		_console->GetSoundMixer()->StopAudio(true);
 		_settings->SetFlags(EmulationFlags::ForceMaxSpeed);
 		_settings->SetFlags(EmulationFlags::Rewind);
 

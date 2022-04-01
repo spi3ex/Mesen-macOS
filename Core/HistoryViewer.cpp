@@ -70,7 +70,6 @@ void HistoryViewer::SeekTo(uint32_t seekPosition)
 		RewindData rewindData = _history[_position];
 		rewindData.LoadState(_console);
 
-		_console->GetSoundMixer()->StopAudio(true);
 		_pollCounter = 0;
 
 		if(wasPaused) {

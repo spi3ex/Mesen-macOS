@@ -243,7 +243,6 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 {
 	if(romFile.IsValid()) {
 		Pause();
-		_soundMixer->StopAudio(true);
 
 		if(!_romFilepath.empty() && _mapper) {
 			//Ensure we save any battery file before loading a new game
@@ -588,8 +587,6 @@ void Console::ResetComponents(bool softReset)
 		_slave->ResetComponents(softReset);
 	}
 
-	_soundMixer->StopAudio(true);
-
 	_memoryManager->Reset(softReset);
 	if(!_settings->CheckFlag(EmulationFlags::DisablePpuReset) || !softReset || IsNsf()) {
 		_ppu->Reset();
@@ -804,12 +801,6 @@ void Console::Run()
 			if(pausedRequired && !_stop && !_settings->CheckFlag(EmulationFlags::DebuggerWindowEnabled)) {
 				_notificationManager->SendNotification(ConsoleNotificationType::GamePaused);
 
-				//Prevent audio from looping endlessly while game is paused
-				_soundMixer->StopAudio();
-				if(_slave) {
-					_slave->_soundMixer->StopAudio();
-				}
-
 				_runLock.Release();
 
 				while(pausedRequired && !_stop && !_settings->CheckFlag(EmulationFlags::DebuggerWindowEnabled)) {
@@ -852,7 +843,6 @@ void Console::Run()
 
 	StopRecordingHdPack();
 
-	_soundMixer->StopAudio();
 	MovieManager::Stop();
 	_soundMixer->StopRecording();
 
@@ -1188,8 +1178,6 @@ void Console::StartRecordingHdPack(string saveFolder, ScaleFilterType filterType
 	}
 
 	LoadState(saveState);
-
-	_soundMixer->StopAudio();
 }
 
 void Console::StopRecordingHdPack()
@@ -1216,8 +1204,6 @@ void Console::StopRecordingHdPack()
 		}
 
 		LoadState(saveState);
-
-		_soundMixer->StopAudio();
 	}
 }
 

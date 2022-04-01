@@ -106,7 +106,6 @@ public:
 	void ResetMuteFrameCount();
 	void SetFadeRatio(double fadeRatio);
 
-	void StopAudio(bool clearBuffer = false);
 	void RegisterAudioDevice(IAudioDevice *audioDevice);
 
 	OggMixer* GetOggMixer();
