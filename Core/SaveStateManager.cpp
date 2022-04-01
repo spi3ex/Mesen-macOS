@@ -1,8 +1,4 @@
 #include "stdafx.h"
-#include "../Utilities/FolderUtilities.h"
-#include "../Utilities/ZipWriter.h"
-#include "../Utilities/ZipReader.h"
-#include "../Utilities/miniz.h"
 #include "SaveStateManager.h"
 #include "MessageManager.h"
 #include "Console.h"
@@ -17,42 +13,6 @@
 SaveStateManager::SaveStateManager(shared_ptr<Console> console)
 {
 	_console = console;
-	_lastIndex = 1;
-}
-
-string SaveStateManager::GetStateFilepath(int stateIndex)
-{
-	string folder = FolderUtilities::GetSaveStateFolder();
-	string filename = FolderUtilities::GetFilename(_console->GetRomInfo().RomName, false) + "_" + std::to_string(stateIndex) + ".mst";
-	return FolderUtilities::CombinePath(folder, filename);
-}
-
-void SaveStateManager::SelectSaveSlot(int slotIndex)
-{
-	_lastIndex = slotIndex;
-	MessageManager::DisplayMessage("SaveStates", "SaveStateSlotSelected", std::to_string(_lastIndex));
-}
-
-void SaveStateManager::MoveToNextSlot()
-{
-	_lastIndex = (_lastIndex % MaxIndex) + 1;
-	MessageManager::DisplayMessage("SaveStates", "SaveStateSlotSelected", std::to_string(_lastIndex));
-}
-
-void SaveStateManager::MoveToPreviousSlot()
-{
-	_lastIndex = (_lastIndex == 1 ? SaveStateManager::MaxIndex : (_lastIndex - 1));
-	MessageManager::DisplayMessage("SaveStates", "SaveStateSlotSelected", std::to_string(_lastIndex));
-}
-
-void SaveStateManager::SaveState()
-{
-	SaveState(_lastIndex);
-}
-
-bool SaveStateManager::LoadState()
-{
-	return LoadState(_lastIndex);
 }
 
 void SaveStateManager::GetSaveStateHeader(ostream &stream)
@@ -80,63 +40,6 @@ void SaveStateManager::SaveState(ostream &stream)
 {
 	GetSaveStateHeader(stream);
 	_console->SaveState(stream);
-}
-
-bool SaveStateManager::SaveState(string filepath)
-{
-	ofstream file(filepath, ios::out | ios::binary);
-
-	if(file) {
-		_console->Pause();
-		SaveState(file);
-		file.close();
-
-		shared_ptr<Debugger> debugger = _console->GetDebugger(false);
-		if(debugger) {
-			debugger->ProcessEvent(EventType::StateSaved);
-		}
-
-		_console->Resume();
-		return true;
-	}
-	return false;
-}
-
-void SaveStateManager::SaveState(int stateIndex, bool displayMessage)
-{
-	string filepath = SaveStateManager::GetStateFilepath(stateIndex);
-	if(SaveState(filepath)) {
-		if(displayMessage) {
-			MessageManager::DisplayMessage("SaveStates", "SaveStateSaved", std::to_string(stateIndex));
-		}
-	}
-}
-
-void SaveStateManager::SaveScreenshotData(ostream &stream)
-{
-	unsigned long compressedSize = compressBound(PPU::PixelCount * 2);
-	vector<uint8_t> compressedData(compressedSize, 0);
-	compress2(compressedData.data(), &compressedSize, (const unsigned char*)_console->GetPpu()->GetScreenBuffer(true), PPU::PixelCount * 2, MZ_DEFAULT_LEVEL);
-
-	uint32_t screenshotLength = (uint32_t)compressedSize;
-	stream.write((char*)&screenshotLength, sizeof(uint32_t));
-	stream.write((char*)compressedData.data(), screenshotLength);
-}
-
-bool SaveStateManager::GetScreenshotData(vector<uint8_t>& out, istream& stream)
-{
-	uint32_t screenshotLength = 0;
-	stream.read((char*)&screenshotLength, sizeof(uint32_t));
-
-	vector<uint8_t> compressedData(screenshotLength, 0);
-	stream.read((char*)compressedData.data(), screenshotLength);
-
-	out = vector<uint8_t>(PPU::PixelCount * 2, 0);
-	unsigned long decompSize = PPU::PixelCount * 2;
-	if(uncompress(out.data(), &decompSize, compressedData.data(), (unsigned long)compressedData.size()) == MZ_OK) {
-		return true;
-	}
-	return false;
 }
 
 bool SaveStateManager::LoadState(istream &stream, bool hashCheckRequired)
@@ -204,57 +107,4 @@ bool SaveStateManager::LoadState(istream &stream, bool hashCheckRequired)
 	}
 	MessageManager::DisplayMessage("SaveStates", "SaveStateInvalidFile");
 	return false;
-}
-
-bool SaveStateManager::LoadState(string filepath, bool hashCheckRequired)
-{
-	ifstream file(filepath, ios::in | ios::binary);
-	bool result = false;
-
-	if(file.good()) {
-		_console->Pause();
-		if(LoadState(file, hashCheckRequired)) {
-			result = true;
-		}
-		file.close();
-		shared_ptr<Debugger> debugger = _console->GetDebugger(false);
-		if(debugger) {
-			debugger->ProcessEvent(EventType::StateLoaded);
-		}
-		_console->Resume();
-	} else {
-		MessageManager::DisplayMessage("SaveStates", "SaveStateEmpty");
-	}
-
-	return result;
-}
-
-bool SaveStateManager::LoadState(int stateIndex)
-{
-	string filepath = SaveStateManager::GetStateFilepath(stateIndex);
-	if(LoadState(filepath, false)) {
-		MessageManager::DisplayMessage("SaveStates", "SaveStateLoaded", std::to_string(stateIndex));
-		return true;
-	}
-	return false;
-}
-
-void SaveStateManager::SaveRecentGame(string romName, string romPath, string patchPath)
-{
-	if(!_console->GetSettings()->CheckFlag(EmulationFlags::ConsoleMode) && !_console->GetSettings()->CheckFlag(EmulationFlags::DisableGameSelectionScreen) && _console->GetRomInfo().Format != RomFormat::Nsf) {
-		string filename = FolderUtilities::GetFilename(_console->GetRomInfo().RomName, false) + ".rgd";
-		ZipWriter writer;
-		writer.Initialize(FolderUtilities::CombinePath(FolderUtilities::GetRecentGamesFolder(), filename));
-
-		std::stringstream stateStream;
-		SaveStateManager::SaveState(stateStream);
-		writer.AddFile(stateStream, "Savestate.mst");
-
-		std::stringstream romInfoStream;
-		romInfoStream << romName << std::endl;
-		romInfoStream << romPath << std::endl;
-		romInfoStream << patchPath << std::endl;
-		writer.AddFile(romInfoStream, "RomInfo.txt");
-		writer.Save();
-	}
 }

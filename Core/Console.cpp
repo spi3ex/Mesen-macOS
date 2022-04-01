@@ -266,11 +266,6 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 		if(mapper) {
 			bool isDifferentGame = _romFilepath != (string)romFile || _patchFilename != (string)patchFile;
 			if(_mapper) {
-				if(isDifferentGame && _ppu->GetFrameCount() > 1) {
-					//Save current game state before loading another one
-					_saveStateManager->SaveRecentGame(GetRomInfo().RomName, _romFilepath, _patchFilename);
-				}
-
 				//Send notification only if a game was already running and we successfully loaded the new one
 				_notificationManager->SendNotification(ConsoleNotificationType::GameStopped, (void*)1);
 			}
@@ -726,7 +721,6 @@ void Console::Run()
 
 	_running = true;
 
-	bool crashed = false;
 	try {
 		while(true) {
 			stringstream runAheadState;
@@ -827,7 +821,6 @@ void Console::Run()
 			}
 		}
 	} catch(const std::runtime_error &ex) {
-		crashed = true;
 		_stopCode = -1;
 		MessageManager::DisplayMessage("Error", "GameCrash", ex.what());
 	}
@@ -836,10 +829,6 @@ void Console::Run()
 	_running = false;
 
 	_notificationManager->SendNotification(ConsoleNotificationType::BeforeEmulationStop);
-
-	if(!crashed) {
-		_saveStateManager->SaveRecentGame(GetRomInfo().RomName, _romFilepath, _patchFilename);
-	}
 
 	StopRecordingHdPack();
 
