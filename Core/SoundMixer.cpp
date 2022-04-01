@@ -11,7 +11,6 @@
 
 SoundMixer::SoundMixer(shared_ptr<Console> console)
 {
-	_audioDevice = nullptr;
 	_clockRate = 0;
 	_console = console;
 	_settings = _console->GetSettings();
@@ -55,7 +54,6 @@ void SoundMixer::StreamState(bool saving)
 
 void SoundMixer::RegisterAudioDevice(IAudioDevice *audioDevice)
 {
-	_audioDevice = audioDevice;
 }
 
 void SoundMixer::Reset()
@@ -136,8 +134,14 @@ void SoundMixer::PlayAudioBuffer(uint32_t time)
 		_crossFeedFilter.ApplyFilter(_outputBuffer, sampleCount, filterSettings.CrossFadeRatio);
 	}
 
-	if(_audioDevice && !_console->IsPaused())
-		_audioDevice->PlayBuffer(_outputBuffer, (uint32_t)sampleCount, _sampleRate, true);
+	if(!_console->IsPaused())
+	{
+		if(!_skipMode && _sendAudioSample) {
+			for(uint32_t total = 0; total < sampleCount; ) {
+				total += (uint32_t)_sendAudioSample(_outputBuffer + total*2, sampleCount - total);
+			}
+		}
+	}
 
 	if(_settings->NeedAudioSettingsUpdate()) {
 		if(_settings->GetSampleRate() != _sampleRate) {

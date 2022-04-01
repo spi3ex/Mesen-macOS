@@ -3,7 +3,6 @@
 #include <sstream>
 #include <algorithm>
 #include "LibretroRenderer.h"
-#include "LibretroSoundManager.h"
 #include "LibretroKeyManager.h"
 #include "LibretroMessageManager.h"
 #include "libretro.h"
@@ -18,6 +17,7 @@
 #include "../Core/SaveStateManager.h"
 #include "../Core/DebuggerTypes.h"
 #include "../Core/GameDatabase.h"
+#include "../Core/SoundMixer.h"
 #include "../Utilities/FolderUtilities.h"
 #include "../Utilities/HexUtilities.h"
 
@@ -55,7 +55,6 @@ static int32_t _audioSampleRate = 44100;
 
 static std::shared_ptr<Console> _console;
 static std::unique_ptr<LibretroRenderer> _renderer;
-static std::unique_ptr<LibretroSoundManager> _soundManager;
 static std::unique_ptr<LibretroKeyManager> _keyManager;
 static std::unique_ptr<LibretroMessageManager> _messageManager;
 
@@ -121,7 +120,6 @@ extern "C" {
 		_console->Init();
 
 		_renderer.reset(new LibretroRenderer(_console, retroEnv));
-		_soundManager.reset(new LibretroSoundManager(_console));
 		_keyManager.reset(new LibretroKeyManager(_console));
 		_messageManager.reset(new LibretroMessageManager(logCallback, retroEnv));
 
@@ -139,7 +137,6 @@ extern "C" {
 	RETRO_API void retro_deinit()
 	{
 		_renderer.reset();
-		_soundManager.reset();
 		_keyManager.reset();
 		_messageManager.reset();
 
@@ -267,7 +264,7 @@ extern "C" {
 
 	RETRO_API void retro_set_audio_sample_batch(retro_audio_sample_batch_t audioSampleBatch)
 	{
-		_soundManager->SetSendAudioSample(audioSampleBatch);
+		_console->GetSoundMixer()->SetSendAudioSample(audioSampleBatch);
 	}
 
 	RETRO_API void retro_set_input_poll(retro_input_poll_t pollInput)
@@ -676,13 +673,13 @@ extern "C" {
 		if(_console->GetSettings()->CheckFlag(EmulationFlags::ForceMaxSpeed)) {
 			//Skip frames to speed up emulation while still outputting at 50/60 fps (needed for FDS fast forward while loading)
 			_renderer->SetSkipMode(true);
-			_soundManager->SetSkipMode(true);
+			_console->GetSoundMixer()->SetSkipMode(true);
 			for(int i = 0; i < 9; i++) {
 				//Attempt to speed up to 1000% speed
 				_console->RunSingleFrame();
 			}
 			_renderer->SetSkipMode(false);
-			_soundManager->SetSkipMode(false);
+			_console->GetSoundMixer()->SetSkipMode(false);
 		}
 
 		bool updated = false;
