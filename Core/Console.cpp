@@ -740,11 +740,6 @@ void Console::Run()
 				RunFrame();
 			}
 
-			_soundMixer->ProcessEndOfFrame();
-			if(_slave) {
-				_slave->_soundMixer->ProcessEndOfFrame();
-			}
-
 			if(_historyViewer) {
 				_historyViewer->ProcessEndOfFrame();
 			}

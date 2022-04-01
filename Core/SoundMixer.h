@@ -111,7 +111,5 @@ public:
 
 	OggMixer* GetOggMixer();
 
-	AudioStatistics GetStatistics();
-	void ProcessEndOfFrame();
 	double GetRateAdjustment();
 };

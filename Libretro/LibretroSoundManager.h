@@ -42,34 +42,4 @@ public:
 	{
 		_skipMode = skip;
 	}
-
-	virtual void Stop() override
-	{
-	}
-
-	virtual void Pause() override
-	{
-	}
-
-	virtual string GetAvailableDevices() override
-	{
-		return string();
-	}
-
-	virtual void SetAudioDevice(string deviceName) override
-	{
-	}
-
-	virtual void UpdateSoundSettings() override
-	{
-	}
-
-	virtual void ProcessEndOfFrame() override
-	{
-	}
-
-	virtual AudioStatistics GetStatistics() override
-	{
-		return AudioStatistics();
-	}
 };

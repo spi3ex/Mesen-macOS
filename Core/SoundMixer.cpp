@@ -60,13 +60,6 @@ void SoundMixer::RegisterAudioDevice(IAudioDevice *audioDevice)
 
 void SoundMixer::StopAudio(bool clearBuffer)
 {
-	if(_audioDevice) {
-		if(clearBuffer) {
-			_audioDevice->Stop();
-		} else {
-			_audioDevice->Pause();
-		}
-	}
 }
 void SoundMixer::Reset()
 {
@@ -92,9 +85,6 @@ void SoundMixer::Reset()
 
 	UpdateRates(true);
 	UpdateEqualizers(true);
-	if(_audioDevice) {
-		_audioDevice->UpdateSoundSettings();
-	}
 	_previousTargetRate = _sampleRate;
 }
 
@@ -374,22 +364,6 @@ OggMixer* SoundMixer::GetOggMixer()
 		_oggMixer->Reset(_settings->GetSampleRate());
 	}
 	return _oggMixer.get();
-}
-
-AudioStatistics SoundMixer::GetStatistics()
-{
-	if(_audioDevice) {
-		return _audioDevice->GetStatistics();
-	} else {
-		return AudioStatistics();
-	}
-}
-
-void SoundMixer::ProcessEndOfFrame()
-{
-	if(_audioDevice) {
-		_audioDevice->ProcessEndOfFrame();
-	}
 }
 
 double SoundMixer::GetRateAdjustment()
