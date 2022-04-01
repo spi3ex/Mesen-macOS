@@ -4,7 +4,7 @@
 #include "../Utilities/LowPassFilter.h"
 #include "../Utilities/blip_buf.h"
 #include "../Utilities/SimpleLock.h"
-#include "../libretro/libretro.h"
+#include "../Libretro/libretro.h"
 #include "Snapshotable.h"
 #include "StereoPanningFilter.h"
 #include "StereoDelayFilter.h"
