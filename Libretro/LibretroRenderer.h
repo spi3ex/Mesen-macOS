@@ -93,16 +93,4 @@ public:
 	{
 		_skipMode = skip;
 	}
-	
-	virtual void Render() override
-	{
-	}
-
-	virtual void Reset() override
-	{
-	}
-
-	virtual void SetFullscreenMode(bool fullscreen, void *windowHandle, uint32_t monitorWidth, uint32_t monitorHeight) override
-	{
-	}
 };

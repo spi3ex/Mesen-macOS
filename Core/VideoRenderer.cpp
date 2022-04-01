@@ -7,7 +7,6 @@
 
 VideoRenderer::VideoRenderer(shared_ptr<Console> console)
 {
-	_console = console;
 }
 
 VideoRenderer::~VideoRenderer()
@@ -16,10 +15,8 @@ VideoRenderer::~VideoRenderer()
 
 void VideoRenderer::UpdateFrame(void *frameBuffer, uint32_t width, uint32_t height)
 {
-	if(_renderer) {		
+	if(_renderer)
 		_renderer->UpdateFrame(frameBuffer, width, height);
-		_waitForRender.Signal();
-	}
 }
 
 void VideoRenderer::RegisterRenderingDevice(IRenderingDevice *renderer)
@@ -31,21 +28,4 @@ void VideoRenderer::UnregisterRenderingDevice(IRenderingDevice *renderer)
 {
 	if(_renderer == renderer)
 		_renderer = nullptr;
-}
-
-void VideoRenderer::StartRecording(string filename, VideoCodec codec, uint32_t compressionLevel)
-{
-}
-
-void VideoRenderer::AddRecordingSound(int16_t* soundBuffer, uint32_t sampleCount, uint32_t sampleRate)
-{
-}
-
-void VideoRenderer::StopRecording()
-{
-}
-
-bool VideoRenderer::IsRecording()
-{
-	return false;
 }
