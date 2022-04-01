@@ -35,9 +35,6 @@ bool RomLoader::LoadFile(VirtualFile &romFile)
 
 	Log("");
 	Log("Loading rom: " + romName);
-	stringstream crcHex;
-	crcHex << std::hex << std::uppercase << std::setfill('0') << std::setw(8) << crc;
-	Log("File CRC32: 0x" + crcHex.str());
 
 	if(memcmp(fileData.data(), "NES\x1a", 4) == 0) {
 		iNesLoader loader(_checkOnly);
