@@ -2,10 +2,8 @@
 #include "IRenderingDevice.h"
 #include "VideoRenderer.h"
 #include "VideoDecoder.h"
-#include "Console.h"
-#include "../Utilities/IVideoRecorder.h"
 
-VideoRenderer::VideoRenderer(shared_ptr<Console> console)
+VideoRenderer::VideoRenderer()
 {
 }
 

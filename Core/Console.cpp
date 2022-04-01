@@ -75,7 +75,7 @@ void Console::Init()
 	_notificationManager.reset(new NotificationManager());
 	_batteryManager.reset(new BatteryManager());
 	
-	_videoRenderer.reset(new VideoRenderer(shared_from_this()));
+	_videoRenderer.reset(new VideoRenderer());
 	_videoDecoder.reset(new VideoDecoder(shared_from_this()));
 
 	_saveStateManager.reset(new SaveStateManager(shared_from_this()));
