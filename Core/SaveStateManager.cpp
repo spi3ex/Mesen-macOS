@@ -258,30 +258,3 @@ void SaveStateManager::SaveRecentGame(string romName, string romPath, string pat
 		writer.Save();
 	}
 }
-
-void SaveStateManager::LoadRecentGame(string filename, bool resetGame)
-{
-	ZipReader reader;
-	reader.LoadArchive(filename);
-
-	stringstream romInfoStream, stateStream;
-	reader.GetStream("RomInfo.txt", romInfoStream);
-	reader.GetStream("Savestate.mst", stateStream);
-
-	string romName, romPath, patchPath;
-	std::getline(romInfoStream, romName);
-	std::getline(romInfoStream, romPath);
-	std::getline(romInfoStream, patchPath);
-
-	_console->Pause();
-	try {
-		if(_console->Initialize(romPath, patchPath)) {
-			if(!resetGame) {
-				SaveStateManager::LoadState(stateStream, false);
-			}
-		}
-	} catch(std::exception&) { 
-		_console->Stop();
-	}
-	_console->Resume();
-}
