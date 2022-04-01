@@ -31,19 +31,16 @@ void BatteryManager::SetBatteryRecorder(shared_ptr<IBatteryRecorder> recorder)
 
 void BatteryManager::SaveBattery(string extension, uint8_t* data, uint32_t length)
 {
-	if(_saveEnabled) {
-#ifdef LIBRETRO
-		if(extension == ".sav") {
-			//Disable .sav files for libretro
-			return;
-		}
-#endif
+	if(!_saveEnabled)
+		return;
 
-		ofstream out(GetBasePath() + extension, ios::binary);
-		if(out) {
-			out.write((char*)data, length);
-		}
-	}
+	//Disable .sav files for libretro
+	if(extension == ".sav")
+		return;
+
+	ofstream out(GetBasePath() + extension, ios::binary);
+	if(out)
+		out.write((char*)data, length);
 }
 
 vector<uint8_t> BatteryManager::LoadBattery(string extension)

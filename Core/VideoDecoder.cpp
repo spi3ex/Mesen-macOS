@@ -197,40 +197,10 @@ void VideoDecoder::UpdateFrame(void *ppuOutputBuffer, HdScreenInfo *hdScreenInfo
 
 void VideoDecoder::StartThread()
 {
-#ifndef LIBRETRO
-	if(!_decodeThread) {	
-		_stopFlag = false;
-		_frameChanged = false;
-		_frameCount = 0;
-		_waitForFrame.Reset();
-		_decodeThread.reset(new thread(&VideoDecoder::DecodeThread, this));
-	}
-#endif
 }
 
 void VideoDecoder::StopThread()
 {
-#ifndef LIBRETRO
-	_stopFlag = true;
-	if(_decodeThread) {
-		_waitForFrame.Signal();
-		_decodeThread->join();
-
-		_decodeThread.reset();
-
-		_hdScreenInfo = nullptr;
-		_console->GetSettings()->SetPpuModel(PpuModel::Ppu2C02);
-		UpdateVideoFilter();
-		if(_ppuOutputBuffer != nullptr) {
-			//Clear whole screen
-			for(uint32_t i = 0; i < PPU::PixelCount; i++) {
-				_ppuOutputBuffer[i] = 14; //Black
-			}
-			DecodeFrame();
-		}
-		_ppuOutputBuffer = nullptr;
-	}
-#endif
 }
 
 bool VideoDecoder::IsRunning()

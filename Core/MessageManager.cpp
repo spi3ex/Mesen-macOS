@@ -839,20 +839,9 @@ void MessageManager::DisplayMessage(string title, string message, string param1,
 
 void MessageManager::Log(string message)
 {
-#ifndef LIBRETRO
-	auto lock = _logLock.AcquireSafe();
-	if(message.empty()) {
-		message = "------------------------------------------------------";
-	}
-	if(_log.size() >= 1000) {
-		_log.pop_front();
-	}
-	_log.push_back(message);
-#else
 	if(MessageManager::_messageManager) {
 		MessageManager::_messageManager->DisplayMessage("", message + "\n");
 	}
-#endif
 }
 
 string MessageManager::GetLog()

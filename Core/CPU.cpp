@@ -293,27 +293,7 @@ uint16_t CPU::FetchOperand()
 		default: break;
 	}
 	
-#if !defined(LIBRETRO) && !defined(DUMMYCPU)
-	if(_lastCrashWarning == 0 || _cycleCount - _lastCrashWarning > 5000000) {
-		MessageManager::DisplayMessage("Error", "GameCrash", "Invalid OP code - CPU crashed.");
-		_lastCrashWarning = _cycleCount;
-	}
-
-	if(_console->GetSettings()->CheckFlag(EmulationFlags::BreakOnCrash)) {
-		//When "Break on Crash" is enabled, open the debugger and break immediately if a crash occurs
-		_console->GetDebugger(true)->BreakImmediately(BreakSource::BreakOnCpuCrash);
-	}
-	
-	if(_console->IsNsf()) {
-		//Don't stop emulation on CPU crash when playing NSFs, reset cpu instead
-		_console->Reset(true);
-		return 0;
-	} else {
-		return 0;
-	}
-#else 
 	return 0;
-#endif
 }
 
 void CPU::EndCpuCycle(bool forRead)

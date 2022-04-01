@@ -1,15 +1,5 @@
 #include "stdafx.h"
 
-#ifndef LIBRETRO
-#if __has_include(<filesystem>)
-	#include <filesystem>
-	namespace fs = std::filesystem;
-#elif __has_include(<experimental/filesystem>)
-	#include <experimental/filesystem>
-	namespace fs = std::experimental::filesystem;
-#endif
-#endif
-
 #include <unordered_set>
 #include <algorithm>
 #include "FolderUtilities.h"
@@ -123,98 +113,6 @@ string FolderUtilities::GetRecentGamesFolder()
 	return folder;
 }
 
-#ifndef LIBRETRO
-void FolderUtilities::CreateFolder(string folder)
-{
-	std::error_code errorCode;
-	fs::create_directory(fs::u8path(folder), errorCode);
-}
-
-vector<string> FolderUtilities::GetFolders(string rootFolder)
-{
-	vector<string> folders;
-
-	std::error_code errorCode;
-	if(!fs::is_directory(fs::u8path(rootFolder), errorCode)) {
-		return folders;
-	} 
-
-	fs::recursive_directory_iterator itt(fs::u8path(rootFolder));
-	for(auto path : itt) {
-		if(itt.depth() > 1) {
-			//Prevent excessive recursion
-			itt.disable_recursion_pending();
-		} else {
-			if(fs::is_directory(itt->path(), errorCode)) {
-				folders.push_back(itt->path().u8string());
-			}
-		}
-	}
-
-	return folders;
-}
-
-vector<string> FolderUtilities::GetFilesInFolder(string rootFolder, std::unordered_set<string> extensions, bool recursive)
-{
-	vector<string> files;
-	vector<string> folders = { { rootFolder } };
-
-	std::error_code errorCode;
-	if(!fs::is_directory(fs::u8path(rootFolder), errorCode)) {
-		return files;
-	}
-
-	if(recursive) {
-		for(fs::recursive_directory_iterator i(fs::u8path(rootFolder)), end; i != end; i++) {
-			if(i.depth() > 1) {
-				//Prevent excessive recursion
-				i.disable_recursion_pending();
-			} else {
-				string extension = i->path().extension().u8string();
-				std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
-				if(extensions.empty() || extensions.find(extension) != extensions.end()) {
-					files.push_back(i->path().u8string());
-				}
-			}
-		}
-	} else {
-		for(fs::directory_iterator i(fs::u8path(rootFolder)), end; i != end; i++) {
-			string extension = i->path().extension().u8string();
-			std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
-			if(extensions.empty() || extensions.find(extension) != extensions.end()) {
-				files.push_back(i->path().u8string());
-			}
-		}
-	}
-
-	return files;
-}
-
-string FolderUtilities::GetFilename(string filepath, bool includeExtension)
-{
-	fs::path filename = fs::u8path(filepath).filename();
-	if(!includeExtension) {
-		filename.replace_extension("");
-	}
-	return filename.u8string();
-}
-
-string FolderUtilities::GetFolderName(string filepath)
-{
-	return fs::u8path(filepath).remove_filename().u8string();
-}
-
-string FolderUtilities::CombinePath(string folder, string filename)
-{
-	//Windows supports forward slashes for paths, too.  And fs::u8path is abnormally slow.
-	if(folder[folder.length() - 1] != '/') {
-		return folder + "/" + filename;
-	} else {
-		return folder + filename;
-	}
-}
-#else
-
 //Libretro: Avoid using filesystem API.
 
 #ifdef _WIN32
@@ -260,5 +158,3 @@ string FolderUtilities::CombinePath(string folder, string filename)
 	}
 	return folder + filename;
 }
-
-#endif

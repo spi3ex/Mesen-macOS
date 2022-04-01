@@ -1173,18 +1173,8 @@ void PPU::SendFrame()
 
 	_console->GetNotificationManager()->SendNotification(ConsoleNotificationType::PpuFrameDone, _currentOutputBuffer);
 
-#ifdef LIBRETRO
 	_console->GetVideoDecoder()->UpdateFrameSync(_currentOutputBuffer);
-#else 
-	if(_console->GetRewindManager()->IsRewinding()) {
-		if(!_console->GetRewindManager()->IsStepBack()) {
-			_console->GetVideoDecoder()->UpdateFrameSync(_currentOutputBuffer);
-		}
-	} else {
-		//If VideoDecoder isn't done with the previous frame, UpdateFrame will block until it is ready to accept a new frame.
-		_console->GetVideoDecoder()->UpdateFrame(_currentOutputBuffer);
-	}
-
+#if 0
 	_enableOamDecay = _settings->CheckFlag(EmulationFlags::EnableOamDecay);
 #endif
 }

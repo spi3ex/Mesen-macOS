@@ -71,10 +71,6 @@ void SaveStateManager::GetSaveStateHeader(ostream &stream)
 	string sha1Hash = romInfo.Hash.Sha1;
 	stream.write(sha1Hash.c_str(), sha1Hash.size());
 
-	#ifndef LIBRETRO
-	SaveScreenshotData(stream);
-	#endif
-
 	string romName = romInfo.RomName;
 	uint32_t nameLength = (uint32_t)romName.size();
 	stream.write((char*)&nameLength, sizeof(uint32_t));
@@ -173,17 +169,6 @@ bool SaveStateManager::LoadState(istream &stream, bool hashCheckRequired)
 
 			char hash[41] = {};
 			stream.read(hash, 40);
-
-			if(fileFormatVersion >= 13) {
-				#ifndef LIBRETRO
-				vector<uint8_t> frameData;
-				if(GetScreenshotData(frameData, stream)) {
-					if(_console->IsPaused()) {
-						_console->GetVideoDecoder()->UpdateFrameSync(frameData.data());
-					}
-				}
-				#endif
-			}
 
 			uint32_t nameLength = 0;
 			stream.read((char*)&nameLength, sizeof(uint32_t));

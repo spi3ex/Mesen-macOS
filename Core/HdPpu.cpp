@@ -160,15 +160,5 @@ void HdPpu::SendFrame()
 		}
 	}
 
-#ifdef  LIBRETRO
 	_console->GetVideoDecoder()->UpdateFrameSync(_currentOutputBuffer, _info);
-#else
-	if(_console->GetRewindManager()->IsRewinding()) {
-		_console->GetVideoDecoder()->UpdateFrameSync(_currentOutputBuffer, _info);
-	} else {
-		_console->GetVideoDecoder()->UpdateFrame(_currentOutputBuffer, _info);
-	}
-	_currentOutputBuffer = (_currentOutputBuffer == _outputBuffers[0]) ? _outputBuffers[1] : _outputBuffers[0];
-	_info = (_info == _screenInfo[0]) ? _screenInfo[1] : _screenInfo[0];
-#endif
 }
