@@ -172,43 +172,6 @@ void EventManager::DrawDot(uint32_t x, uint32_t y, uint32_t color, bool drawBack
 	}
 }
 
-uint32_t EventManager::TakeEventSnapshot(EventViewerDisplayOptions options)
-{
-	DebugBreakHelper breakHelper(_debugger);
-	auto lock = _lock.AcquireSafe();
-	_snapshot.clear();
-
-	uint16_t cycle = _ppu->GetCurrentCycle();
-	uint16_t scanline = _ppu->GetCurrentScanline() + 1;
-	uint32_t key = (scanline << 9) + cycle;
-	constexpr uint32_t size = 256 * 240;
-
-	if(scanline >= 240 || (scanline == 0 && cycle == 0)) {
-		memcpy(_ppuBuffer, _ppu->GetScreenBuffer(false), size * sizeof(uint16_t));
-	} else {
-		uint32_t offset = (256 * scanline);
-		memcpy(_ppuBuffer, _ppu->GetScreenBuffer(false), offset * sizeof(uint16_t));
-		memcpy(_ppuBuffer + offset, _ppu->GetScreenBuffer(true) + offset, (size - offset) * sizeof(uint16_t));
-	}
-
-	_snapshot = _debugEvents;
-	_snapshotScanline = scanline;
-	_snapshotCycle = cycle;
-	if(options.ShowPreviousFrameEvents && scanline != 0) {
-		for(DebugEventInfo &evt : _prevDebugEvents) {
-			uint32_t evtKey = ((evt.Scanline + 1) << 9) + evt.Cycle;
-			if(evtKey > key) {
-				_snapshot.push_back(evt);
-			}
-		}
-	}
-	
-	PPUDebugState state;
-	_ppu->GetState(state);
-	_scanlineCount = state.ScanlineCount;
-	return _scanlineCount;
-}
-
 void EventManager::GetDisplayBuffer(uint32_t *buffer, EventViewerDisplayOptions options)
 {
 	auto lock = _lock.AcquireSafe();

@@ -46,7 +46,6 @@ public:
 	uint32_t GetEventCount(bool getPreviousFrameData);
 	void ClearFrameEvents();
 
-	uint32_t TakeEventSnapshot(EventViewerDisplayOptions options);
 	void GetDisplayBuffer(uint32_t *buffer, EventViewerDisplayOptions options);
 
 	DebugEventInfo GetEvent(int16_t scanline, uint16_t cycle, EventViewerDisplayOptions &options);
