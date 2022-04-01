@@ -46,7 +46,6 @@ class Console : public std::enable_shared_from_this<Console>
 private:
 	SimpleLock _runLock;
 	SimpleLock _stopLock;
-	SimpleLock _debuggerLock;
 	atomic<uint32_t> _pauseCounter;
 
 	shared_ptr<RewindManager> _rewindManager;
@@ -55,7 +54,6 @@ private:
 	shared_ptr<CPU> _cpu;
 	shared_ptr<PPU> _ppu;
 	shared_ptr<APU> _apu;
-	shared_ptr<Debugger> _debugger;
 	shared_ptr<BaseMapper> _mapper;
 	shared_ptr<ControlManager> _controlManager;
 	shared_ptr<MemoryManager> _memoryManager;
@@ -95,7 +93,6 @@ private:
 	bool _disableOcNextFrame = false;
 
 	bool _initialized = false;
-	std::thread::id _emulationThreadId;
 
 	void RunFrameWithRunAhead(std::stringstream& runAheadState);
 
@@ -175,8 +172,6 @@ public:
 	bool IsRecordingTapeFile();
 	bool IsNsf();
 		
-	std::thread::id GetEmulationThreadId();
-
 	void Reset(bool softReset = true);
 	void PowerCycle();
 	void ReloadRom(bool forPowerCycle = false);
@@ -187,9 +182,6 @@ public:
 
 	//Used to resume the emu loop after calling Pause()
 	void Resume();
-
-	shared_ptr<Debugger> GetDebugger(bool autoStart = true);
-	void StopDebugger();
 
 	void SaveState(ostream &saveStream);
 	void LoadState(istream &loadStream);

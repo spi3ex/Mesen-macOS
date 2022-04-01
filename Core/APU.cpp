@@ -108,10 +108,7 @@ uint8_t APU::ReadRAM(uint16_t addr)
 
 uint8_t APU::PeekRAM(uint16_t addr)
 {
-	if(_console->GetEmulationThreadId() == std::this_thread::get_id()) {
-		//Only run the APU (to catch up) if we're running this in the emulation thread (not 100% accurate, but we can't run the APU from any other thread without locking)
-		Run();
-	}
+	Run();
 	return GetStatus();
 }
 

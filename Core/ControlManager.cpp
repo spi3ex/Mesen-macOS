@@ -290,11 +290,6 @@ void ControlManager::UpdateInputState()
 		//log += "|" + device->GetTextState();
 	}
 
-	shared_ptr<Debugger> debugger = _console->GetDebugger(false);
-	if(debugger) {
-		debugger->ProcessEvent(EventType::InputPolled);
-	}
-
 	if(!_console->GetSettings()->IsRunAheadFrame()) {
 		for(IInputRecorder* recorder : _inputRecorders) {
 			recorder->RecordInput(_controlDevices);

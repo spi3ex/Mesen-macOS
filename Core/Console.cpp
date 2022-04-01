@@ -83,10 +83,6 @@ void Console::Init()
 
 	_soundMixer.reset(new SoundMixer(shared_from_this()));
 	_soundMixer->SetNesModel(_model);
-
-	if(_master) {
-		_emulationThreadId = _master->_emulationThreadId;
-	}
 }
 
 void Console::Release(bool forShutdown)
@@ -123,7 +119,6 @@ void Console::Release(bool forShutdown)
 	_cpu.reset();
 	_ppu.reset();
 	_apu.reset();
-	_debugger.reset();
 	_mapper.reset();
 	_memoryManager.reset();
 	_controlManager.reset();
@@ -367,13 +362,6 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 
 			_initialized = true;
 
-			if(_debugger) {
-				//Reset debugger if it was running before
-				auto lock = _debuggerLock.AcquireSafe();
-				StopDebugger();
-				GetDebugger();
-			}
-
 			ResetComponents(false);
 
 			//Reset components before creating rewindmanager, otherwise the first save state it takes will be invalid
@@ -419,11 +407,6 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 
 			Resume();
 		}
-	}
-
-	shared_ptr<Debugger> debugger = _debugger;
-	if(debugger) {
-		debugger->Resume();
 	}
 
 	MessageManager::DisplayMessage("Error", "CouldNotLoadFile", romFile.GetFileName());
@@ -562,16 +545,6 @@ void Console::Reset(bool softReset)
 {
 	if(_initialized) {
 		bool needSuspend = softReset ? _systemActionManager->Reset() : _systemActionManager->PowerCycle();
-
-		if(needSuspend) {
-			//Only do this if a reset/power cycle is not already pending - otherwise we'll end up calling Suspend() too many times
-			//Resume from code break if needed (otherwise reset doesn't happen right away)
-			shared_ptr<Debugger> debugger = _debugger;
-			if(debugger) {
-				debugger->Suspend();
-				debugger->Run();
-			}
-		}
 	}
 }
 
@@ -596,15 +569,6 @@ void Console::ResetComponents(bool softReset)
 	if(!_master) {
 		_notificationManager->SendNotification(softReset ? ConsoleNotificationType::GameReset : ConsoleNotificationType::GameLoaded);
 	}
-
-	if(softReset) {
-		shared_ptr<Debugger> debugger = _debugger;
-		if(debugger) {
-			debugger->ResetCounters();
-			debugger->ProcessEvent(EventType::Reset);
-			debugger->Resume();
-		}
-	}
 }
 
 void Console::Stop(int stopCode)
@@ -612,22 +576,12 @@ void Console::Stop(int stopCode)
 	_stop = true;
 	_stopCode = stopCode;
 
-	shared_ptr<Debugger> debugger = _debugger;
-	if(debugger) {
-		debugger->Suspend();
-	}
 	_stopLock.Acquire();
 	_stopLock.Release();
 }
 
 void Console::Pause()
 {
-	shared_ptr<Debugger> debugger = _debugger;
-	if(debugger) {
-		//Make sure debugger resumes if we try to pause the emu, otherwise we will get deadlocked.
-		debugger->Suspend();
-	}
-
 	if(_master) {
 		//When trying to pause/resume the slave, we need to pause/resume the master instead
 		_master->Pause();
@@ -646,19 +600,12 @@ void Console::Resume()
 		_runLock.Release();
 		_pauseCounter--;
 	}
-	
-	shared_ptr<Debugger> debugger = _debugger;
-	if(debugger) {
-		//Make sure debugger resumes if we try to pause the emu, otherwise we will get deadlocked.
-		debugger->Resume();
-	}
 }
 
 void Console::RunSingleFrame()
 {
 	//Used by Libretro
 	uint32_t lastFrameNumber = _ppu->GetFrameCount();
-	_emulationThreadId = std::this_thread::get_id();
 	UpdateNesModel(true);
 
 	while(_ppu->GetFrameCount() == lastFrameNumber) {
@@ -710,11 +657,6 @@ void Console::Run()
 	_runLock.Acquire();
 	_stopLock.Acquire();
 
-	_emulationThreadId = std::this_thread::get_id();
-	if(_slave) {
-		_slave->_emulationThreadId = std::this_thread::get_id();
-	}
-
 	targetTime = lastDelay;
 
 	UpdateNesModel(true);
@@ -724,7 +666,7 @@ void Console::Run()
 	try {
 		while(true) {
 			stringstream runAheadState;
-			bool useRunAhead = _settings->GetRunAheadFrames() > 0 && !_debugger && !IsNsf() && !_rewindManager->IsRewinding() && _settings->GetEmulationSpeed() > 0 && _settings->GetEmulationSpeed() <= 100;
+			bool useRunAhead = _settings->GetRunAheadFrames() > 0 && !IsNsf() && !_rewindManager->IsRewinding() && _settings->GetEmulationSpeed() > 0 && _settings->GetEmulationSpeed() <= 100;
 			if(useRunAhead) {
 				RunFrameWithRunAhead(runAheadState);
 			} else {
@@ -850,8 +792,6 @@ void Console::Run()
 	
 	_stopLock.Release();
 	_runLock.Release();
-
-	_emulationThreadId = std::thread::id();
 
 	_notificationManager->SendNotification(ConsoleNotificationType::GameStopped);
 	_notificationManager->SendNotification(ConsoleNotificationType::EmulationStopped);
@@ -1025,11 +965,6 @@ void Console::LoadState(istream &loadStream, uint32_t stateVersion)
 			_slave->LoadState(loadStream, stateVersion);
 		}
 		
-		shared_ptr<Debugger> debugger = _debugger;
-		if(debugger) {
-			debugger->ResetCounters();
-		}
-
 		_notificationManager->SendNotification(ConsoleNotificationType::StateLoaded);
 		UpdateNesModel(false);
 	}
@@ -1041,34 +976,6 @@ void Console::LoadState(uint8_t *buffer, uint32_t bufferSize)
 	stream.write((char*)buffer, bufferSize);
 	stream.seekg(0, ios::beg);
 	LoadState(stream);
-}
-
-std::shared_ptr<Debugger> Console::GetDebugger(bool autoStart)
-{
-	shared_ptr<Debugger> debugger = _debugger;
-	if(!debugger && autoStart) {
-		//Lock to make sure we don't try to start debuggers in 2 separate threads at once
-		auto lock = _debuggerLock.AcquireSafe();
-		debugger = _debugger;
-		if(!debugger) {
-			debugger.reset(new Debugger(shared_from_this(), _cpu, _ppu, _apu, _memoryManager, _mapper));
-			_debugger = debugger;
-		}
-	}
-	return debugger;
-}
-
-void Console::StopDebugger()
-{
-	if(_debugger) {
-		_debugger->ReleaseDebugger(_running);
-	}
-	_debugger.reset();
-}
-
-std::thread::id Console::GetEmulationThreadId()
-{
-	return _emulationThreadId;
 }
 
 uint32_t Console::GetLagCounter()
@@ -1085,7 +992,7 @@ void Console::ResetLagCounter()
 
 bool Console::IsDebuggerAttached()
 {
-	return (bool)_debugger;
+	return false;
 }
 
 void Console::SetNextFrameOverclockStatus(bool disabled)
@@ -1161,11 +1068,6 @@ void Console::StartRecordingHdPack(string saveFolder, ScaleFilterType filterType
 	_ppu.reset(new HdBuilderPpu(shared_from_this(), _hdPackBuilder.get(), chrRamBankSize, _hdData));
 	_memoryManager->RegisterIODevice(_ppu.get());
 
-	shared_ptr<Debugger> debugger = _debugger;
-	if(debugger) {
-		debugger->SetPpu(_ppu);
-	}
-
 	LoadState(saveState);
 }
 
@@ -1186,11 +1088,6 @@ void Console::StopRecordingHdPack()
 		}
 		_memoryManager->RegisterIODevice(_ppu.get());
 		_hdPackBuilder.reset();
-
-		shared_ptr<Debugger> debugger = _debugger;
-		if(debugger) {
-			debugger->SetPpu(_ppu);
-		}
 
 		LoadState(saveState);
 	}

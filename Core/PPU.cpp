@@ -1131,13 +1131,6 @@ uint8_t PPU::ReadSpriteRam(uint8_t addr)
 			_oamDecayCycles[addr >> 3] = _console->GetCpu()->GetCycleCount();
 			return _spriteRAM[addr];
 		} else {
-			if(_flags.SpritesEnabled) {
-				shared_ptr<Debugger> debugger = _console->GetDebugger(false);
-				if(debugger && debugger->CheckFlag(DebuggerFlags::BreakOnDecayedOamRead)) {
-					//When debugging with the break on decayed oam read flag turned on, break (only if sprite rendering is enabled to avoid false positives)
-					debugger->BreakImmediately(BreakSource::BreakOnDecayedOamRead);
-				}
-			}
 			//If this 8-byte row hasn't been read/written to in over 3000 cpu cycles (~1.7ms), return 0x10 to simulate decay
 			return 0x10;
 		}
@@ -1382,16 +1375,8 @@ void PPU::UpdateState()
 				//When a $2006 address update lands on the Y or X increment, the written value is bugged and is ANDed with the incremented value
 				if(_cycle == 257) {
 					_state.VideoRamAddr &= _updateVramAddr;
-					shared_ptr<Debugger> debugger = _console->GetDebugger(false);
-					if(debugger && debugger->CheckFlag(DebuggerFlags::BreakOnPpu2006ScrollGlitch)) {
-						debugger->BreakImmediately(BreakSource::BreakOnPpu2006ScrollGlitch);
-					}
 				} else if(_cycle > 0 && (_cycle & 0x07) == 0 && (_cycle <= 256 || _cycle > 320)) {
 					_state.VideoRamAddr = (_updateVramAddr & ~0x41F) | (_state.VideoRamAddr & _updateVramAddr & 0x41F);
-					shared_ptr<Debugger> debugger = _console->GetDebugger(false);
-					if(debugger && debugger->CheckFlag(DebuggerFlags::BreakOnPpu2006ScrollGlitch)) {
-						debugger->BreakImmediately(BreakSource::BreakOnPpu2006ScrollGlitch);
-					}
 				} else {
 					_state.VideoRamAddr = _updateVramAddr;
 				}

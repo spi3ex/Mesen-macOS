@@ -207,14 +207,7 @@ bool Debugger::LoadCdlFile(string cdlFilepath)
 {
 	if(_codeDataLogger->LoadCdlFile(cdlFilepath)) {
 		//Can't use DebugBreakHelper due to the fact this is called in the constructor
-		bool isEmulationThread = _console->GetEmulationThreadId() == std::this_thread::get_id();
-		if(!isEmulationThread) {
-			_console->Pause();
-		}
 		UpdateCdlCache();
-		if(!isEmulationThread) {
-			_console->Resume();
-		}
 		return true;
 	}
 	return false;
