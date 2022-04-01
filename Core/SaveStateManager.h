@@ -35,8 +35,6 @@ public:
 	void SaveRecentGame(string romName, string romPath, string patchPath);
 	void LoadRecentGame(string filename, bool resetGame);
 
-	int32_t GetSaveStatePreview(string saveStatePath, uint8_t* pngData);
-
 	void SelectSaveSlot(int slotIndex);
 	void MoveToNextSlot();
 	void MoveToPreviousSlot();

@@ -176,26 +176,3 @@ void VideoDecoder::UpdateFrame(void *ppuOutputBuffer, HdScreenInfo *hdScreenInfo
 
 	_frameCount++;
 }
-
-void VideoDecoder::TakeScreenshot()
-{
-	if(_videoFilter) {
-		_videoFilter->TakeScreenshot(_console->GetRomPath().GetFileName(), _videoFilterType);
-	}
-}
-
-void VideoDecoder::TakeScreenshot(std::stringstream &stream, bool rawScreenshot)
-{
-	if(!_ppuOutputBuffer) {
-		return;
-	}
-
-	if(rawScreenshot) {
-		//Take screenshot without NTSC filter on
-		DefaultVideoFilter filter(_console);
-		filter.SendFrame(_ppuOutputBuffer, 0);
-		filter.TakeScreenshot(_videoFilterType, "", &stream, rawScreenshot);
-	} else if(_videoFilter) {
-		_videoFilter->TakeScreenshot(_videoFilterType, "", &stream, rawScreenshot);
-	}
-}

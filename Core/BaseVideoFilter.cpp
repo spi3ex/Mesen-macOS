@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "BaseVideoFilter.h"
 #include "MessageManager.h"
-#include "../Utilities/PNGHelper.h"
 #include "../Utilities/FolderUtilities.h"
 #include "StandardController.h"
 #include "ScaleFilter.h"
@@ -68,74 +67,3 @@ uint32_t* BaseVideoFilter::GetOutputBuffer()
 {
 	return _outputBuffer;
 }
-
-void BaseVideoFilter::TakeScreenshot(VideoFilterType filterType, string filename, std::stringstream *stream, bool rawScreenshot)
-{
-	uint32_t* pngBuffer;
-	FrameInfo frameInfo;
-	uint32_t* frameBuffer = nullptr;
-	{
-		auto lock = _frameLock.AcquireSafe();
-		if(_bufferSize == 0 || !GetOutputBuffer()) {
-			return;
-		}
-
-		frameBuffer = new uint32_t[_bufferSize];
-		memcpy(frameBuffer, GetOutputBuffer(), _bufferSize * sizeof(frameBuffer[0]));
-		frameInfo = GetFrameInfo();
-	}
-
-	pngBuffer = frameBuffer;
-
-	shared_ptr<RotateFilter> rotateFilter;
-	shared_ptr<ScaleFilter> scaleFilter = ScaleFilter::GetScaleFilter(filterType);
-	if(!rawScreenshot) {
-		uint32_t rotationAngle = _console->GetSettings()->GetScreenRotation();
-		if(rotationAngle > 0) {
-			rotateFilter.reset(new RotateFilter(rotationAngle));
-			pngBuffer = rotateFilter->ApplyFilter(pngBuffer, frameInfo.Width, frameInfo.Height);
-			frameInfo = rotateFilter->GetFrameInfo(frameInfo);
-		}
-
-		if(scaleFilter) {
-			pngBuffer = scaleFilter->ApplyFilter(pngBuffer, frameInfo.Width, frameInfo.Height, _console->GetSettings()->GetPictureSettings().ScanlineIntensity);
-			frameInfo = scaleFilter->GetFrameInfo(frameInfo);
-		}
-	}
-
-	if(!filename.empty()) {
-		PNGHelper::WritePNG(filename, pngBuffer, frameInfo.Width, frameInfo.Height);
-	} else {
-		PNGHelper::WritePNG(*stream, pngBuffer, frameInfo.Width, frameInfo.Height);
-	}
-
-	delete[] frameBuffer;
-}
-
-void BaseVideoFilter::TakeScreenshot(string romName, VideoFilterType filterType)
-{
-	string romFilename = FolderUtilities::GetFilename(romName, false);
-
-	int counter = 0;
-	string baseFilename = FolderUtilities::CombinePath(FolderUtilities::GetScreenshotFolder(), romFilename);
-	string ssFilename;
-	while(true) {
-		string counterStr = std::to_string(counter);
-		while(counterStr.length() < 3) {
-			counterStr = "0" + counterStr;
-		}
-		ssFilename = baseFilename + "_" + counterStr + ".png";
-		ifstream file(ssFilename, ios::in);
-		if(file) {
-			file.close();
-		} else {
-			break;
-		}
-		counter++;
-	}
-
-	TakeScreenshot(filterType, ssFilename);
-
-	MessageManager::DisplayMessage("ScreenshotSaved", FolderUtilities::GetFilename(ssFilename, true));
-}
-

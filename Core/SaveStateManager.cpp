@@ -2,7 +2,6 @@
 #include "../Utilities/FolderUtilities.h"
 #include "../Utilities/ZipWriter.h"
 #include "../Utilities/ZipReader.h"
-#include "../Utilities/PNGHelper.h"
 #include "../Utilities/miniz.h"
 #include "SaveStateManager.h"
 #include "MessageManager.h"
@@ -247,10 +246,6 @@ void SaveStateManager::SaveRecentGame(string romName, string romPath, string pat
 		ZipWriter writer;
 		writer.Initialize(FolderUtilities::CombinePath(FolderUtilities::GetRecentGamesFolder(), filename));
 
-		std::stringstream pngStream;
-		_console->GetVideoDecoder()->TakeScreenshot(pngStream, true);
-		writer.AddFile(pngStream, "Screenshot.png");
-
 		std::stringstream stateStream;
 		SaveStateManager::SaveState(stateStream);
 		writer.AddFile(stateStream, "Savestate.mst");
@@ -289,49 +284,4 @@ void SaveStateManager::LoadRecentGame(string filename, bool resetGame)
 		_console->Stop();
 	}
 	_console->Resume();
-}
-
-int32_t SaveStateManager::GetSaveStatePreview(string saveStatePath, uint8_t* pngData)
-{
-	ifstream stream(saveStatePath, ios::binary);
-
-	if(!stream) {
-		return -1;
-	}
-
-	char header[3];
-	stream.read(header, 3);
-	if(memcmp(header, "MST", 3) == 0) {
-		uint32_t emuVersion = 0;
-
-		stream.read((char*)&emuVersion, sizeof(emuVersion));
-		if(emuVersion > EmulationSettings::GetMesenVersion()) {
-			return -1;
-		}
-
-		uint32_t fileFormatVersion = 0;
-		stream.read((char*)&fileFormatVersion, sizeof(fileFormatVersion));
-		if(fileFormatVersion <= 12) {
-			return -1;
-		}
-
-		//Skip some header fields
-		stream.seekg(43, ios::cur);
-
-		vector<uint8_t> frameData;
-		if(GetScreenshotData(frameData, stream)) {
-			DefaultVideoFilter filter(_console);
-			FrameInfo frameInfo = filter.GetFrameInfo();
-			filter.SendFrame((uint16_t*)frameData.data(), 0);
-
-			std::stringstream pngStream;
-			PNGHelper::WritePNG(pngStream, filter.GetOutputBuffer(), frameInfo.Width, frameInfo.Height);
-
-			string data = pngStream.str();
-			memcpy(pngData, data.c_str(), data.size());
-
-			return (int32_t)frameData.size();
-		}
-	}
-	return -1;
 }

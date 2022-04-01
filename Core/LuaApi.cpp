@@ -597,12 +597,7 @@ int LuaApi::Rewind(lua_State *lua)
 
 int LuaApi::TakeScreenshot(lua_State *lua)
 {
-	LuaCallHelper l(lua);
-	checkparams();
-	stringstream ss;
-	_console->GetVideoDecoder()->TakeScreenshot(ss);
-	l.Return(ss.str());
-	return l.ReturnCount();
+	return 0;
 }
 
 int LuaApi::SaveSavestate(lua_State *lua)
