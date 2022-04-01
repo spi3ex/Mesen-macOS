@@ -100,11 +100,9 @@ public:
 
 	virtual bool IsKeyPressed(uint32_t keyCode) override
 	{
-		if(keyCode > 0 && _getInputState) {
+		if(keyCode > 0 && _getInputState)
 			return _getInputState(keyCode >> 8, RETRO_DEVICE_JOYPAD, 0, (keyCode - 1) & 0xFF) != 0;
-		} else {
-			return false;
-		}
+		return false;
 	}
 
 	virtual void UpdateDevices() override
@@ -129,17 +127,5 @@ public:
 	virtual uint32_t GetKeyCode(string keyName) override
 	{
 		return 0;
-	}
-
-	virtual void SetKeyState(uint16_t scanCode, bool state) override
-	{
-	}
-
-	virtual void ResetKeyState() override
-	{
-	}
-
-	virtual void SetDisabled(bool disabled) override
-	{
 	}
 };
