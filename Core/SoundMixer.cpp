@@ -173,14 +173,13 @@ void SoundMixer::UpdateRates(bool forceUpdate)
 		}
 	}
 
-	double targetRate = _sampleRate * GetTargetRateAdjustment();
+	double targetRate = _sampleRate;
 	if(_clockRate != newRate || forceUpdate) {
 		_clockRate = newRate;
 		blip_set_rates(_blipBufLeft, _clockRate, targetRate);
 		blip_set_rates(_blipBufRight, _clockRate, targetRate);
-		if(_oggMixer) {
+		if(_oggMixer)
 			_oggMixer->SetSampleRate(_sampleRate);
-		}
 	}
 
 	bool hasPanning = false;
@@ -361,19 +360,9 @@ OggMixer* SoundMixer::GetOggMixer()
 	return _oggMixer.get();
 }
 
-double SoundMixer::GetRateAdjustment()
-{
-	return 1.0;
-}
-
-double SoundMixer::GetTargetRateAdjustment()
-{
-	return 1.0;
-}
-
 void SoundMixer::UpdateTargetSampleRate()
 {
-	double targetRate = _sampleRate * GetTargetRateAdjustment();
+	double targetRate = _sampleRate;
 	if(targetRate != _previousTargetRate) {
 		blip_set_rates(_blipBufLeft, _clockRate, targetRate);
 		blip_set_rates(_blipBufRight, _clockRate, targetRate);

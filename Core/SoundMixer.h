@@ -81,7 +81,6 @@ private:
 	void UpdateEqualizers(bool forceUpdate);
 	void ApplyEqualizer(orfanidis_eq::eq1* equalizer, size_t sampleCount);
 	
-	double GetTargetRateAdjustment();
 	void UpdateTargetSampleRate();
 
 protected:
@@ -109,6 +108,4 @@ public:
 	void RegisterAudioDevice(IAudioDevice *audioDevice);
 
 	OggMixer* GetOggMixer();
-
-	double GetRateAdjustment();
 };
