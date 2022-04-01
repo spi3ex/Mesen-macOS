@@ -22,13 +22,11 @@ VideoDecoder::VideoDecoder(shared_ptr<Console> console)
 	_console = console;
 	_settings = _console->GetSettings();
 	_frameChanged = false;
-	_stopFlag = false;
 	UpdateVideoFilter();
 }
 
 VideoDecoder::~VideoDecoder()
 {
-	StopThread();
 }
 
 FrameInfo VideoDecoder::GetFrameInfo()
@@ -130,22 +128,6 @@ void VideoDecoder::DecodeFrame(bool synchronous)
 	_console->GetRewindManager()->SendFrame(outputBuffer, frameInfo.Width, frameInfo.Height, synchronous);
 }
 
-void VideoDecoder::DecodeThread()
-{
-	//This thread will decode the PPU's output (color ID to RGB, intensify r/g/b and produce a HD version of the frame if needed)
-	while(!_stopFlag.load()) {
-		//DecodeFrame returns the final ARGB frame we want to display in the emulator window
-		while(!_frameChanged) {
-			_waitForFrame.Wait();
-			if(_stopFlag.load()) {
-				return;
-			}
-		}
-
-		DecodeFrame();
-	}
-}
-
 uint32_t VideoDecoder::GetFrameCount()
 {
 	return _frameCount;
@@ -193,19 +175,6 @@ void VideoDecoder::UpdateFrame(void *ppuOutputBuffer, HdScreenInfo *hdScreenInfo
 	_waitForFrame.Signal();
 
 	_frameCount++;
-}
-
-void VideoDecoder::StartThread()
-{
-}
-
-void VideoDecoder::StopThread()
-{
-}
-
-bool VideoDecoder::IsRunning()
-{
-	return _decodeThread != nullptr;
 }
 
 void VideoDecoder::TakeScreenshot()

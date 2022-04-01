@@ -1,7 +1,5 @@
 #pragma once
 #include "stdafx.h"
-#include <thread>
-using std::thread;
 
 #include "../Utilities/SimpleLock.h"
 #include "../Utilities/AutoResetEvent.h"
@@ -32,12 +30,9 @@ private:
 	bool _hdFilterEnabled = false;
 	uint32_t _frameNumber = 0;
 
-	unique_ptr<thread> _decodeThread;
-
 	AutoResetEvent _waitForFrame;
 	
 	atomic<bool> _frameChanged;
-	atomic<bool> _stopFlag;
 	uint32_t _frameCount = 0;
 
 	ScreenSize _previousScreenSize = {};
@@ -50,9 +45,6 @@ private:
 	shared_ptr<RotateFilter> _rotateFilter;
 
 	void UpdateVideoFilter();
-
-	void DecodeThread();
-
 public:
 	VideoDecoder(shared_ptr<Console> console);
 	~VideoDecoder();
@@ -68,8 +60,4 @@ public:
 
 	void UpdateFrameSync(void* frameBuffer, HdScreenInfo *hdScreenInfo = nullptr);
 	void UpdateFrame(void* frameBuffer, HdScreenInfo *hdScreenInfo = nullptr);
-
-	bool IsRunning();
-	void StartThread();
-	void StopThread();
 };

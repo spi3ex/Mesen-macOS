@@ -97,9 +97,6 @@ void Console::Release(bool forShutdown)
 	}
 
 	if(forShutdown) {
-		_videoDecoder->StopThread();
-		_videoRenderer->StopThread();
-
 		_videoDecoder.reset();
 		_videoRenderer.reset();
 
@@ -279,8 +276,6 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 				_notificationManager->SendNotification(ConsoleNotificationType::GameStopped, (void*)1);
 			}
 
-			_videoDecoder->StopThread();
-
 			if(isDifferentGame) {
 				_romFilepath = romFile;
 				_patchFilename = patchFile;
@@ -398,8 +393,6 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 
 			//Poll controller input after creating rewind manager, to make sure it catches the first frame's input
 			_controlManager->UpdateInputState();
-
-			_videoDecoder->StartThread();
 
 			FolderUtilities::AddKnownGameFolder(romFile.GetFolderPath());
 
@@ -732,8 +725,6 @@ void Console::Run()
 
 	targetTime = lastDelay;
 
-	_videoDecoder->StartThread();
-
 	UpdateNesModel(true);
 
 	_running = true;
@@ -864,7 +855,6 @@ void Console::Run()
 		_saveStateManager->SaveRecentGame(GetRomInfo().RomName, _romFilepath, _patchFilename);
 	}
 
-	_videoDecoder->StopThread();
 	StopRecordingHdPack();
 
 	_soundMixer->StopAudio();
@@ -920,31 +910,25 @@ void Console::ResetRunTimers()
 
 bool Console::IsRunning()
 {
-	if(_master) {
-		//For slave CPU, return the master's state
+	//For slave CPU, return the master's state
+	if(_master)
 		return _master->IsRunning();
-	} else {
-		return !_stopLock.IsFree() && _running;
-	}
+	return !_stopLock.IsFree() && _running;
 }
 
 bool Console::IsExecutionStopped()
 {
-	if(_master) {
-		//For slave CPU, return the master's state
+	//For slave CPU, return the master's state
+	if(_master)
 		return _master->IsPaused();
-	} else {
-		return _runLock.IsFree() || (!_runLock.IsFree() && _pauseCounter > 0) || !_running;
-	}
+	return _runLock.IsFree() || (!_runLock.IsFree() && _pauseCounter > 0) || !_running;
 }
 
 bool Console::IsPaused()
 {
-	if(_master) {
+	if(_master)
 		return _master->_paused;
-	} else {
-		return _paused;
-	}
+	return _paused;
 }
 
 void Console::PauseOnNextFrame()
@@ -1009,11 +993,9 @@ double Console::GetFrameDelay()
 
 double Console::GetFps()
 {
-	if(_model == NesModel::NTSC) {
+	if(_model == NesModel::NTSC)
 		return _settings->CheckFlag(EmulationFlags::IntegerFpsMode) ? 60.0 : 60.098812;
-	} else {
-		return _settings->CheckFlag(EmulationFlags::IntegerFpsMode) ? 50.0 : 50.006978;
-	}
+	return _settings->CheckFlag(EmulationFlags::IntegerFpsMode) ? 50.0 : 50.006978;
 }
 
 void Console::SaveState(ostream &saveStream)
