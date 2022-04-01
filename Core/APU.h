@@ -2,7 +2,6 @@
 
 #include "stdafx.h"
 #include "IMemoryHandler.h"
-#include "IAudioDevice.h"
 #include "Snapshotable.h"
 #include "EmulationSettings.h"
 

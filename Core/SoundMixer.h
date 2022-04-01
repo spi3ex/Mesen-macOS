@@ -5,7 +5,6 @@
 #include "../Utilities/blip_buf.h"
 #include "../Utilities/SimpleLock.h"
 #include "../libretro/libretro.h"
-#include "IAudioDevice.h"
 #include "Snapshotable.h"
 #include "StereoPanningFilter.h"
 #include "StereoDelayFilter.h"
@@ -106,8 +105,6 @@ public:
 	uint32_t GetMuteFrameCount();
 	void ResetMuteFrameCount();
 	void SetFadeRatio(double fadeRatio);
-
-	void RegisterAudioDevice(IAudioDevice *audioDevice);
 
 	OggMixer* GetOggMixer();
 

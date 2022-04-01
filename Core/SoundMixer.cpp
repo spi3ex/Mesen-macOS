@@ -52,10 +52,6 @@ void SoundMixer::StreamState(bool saving)
 	Stream(_previousOutputLeft, currentOutput, _previousOutputRight);
 }
 
-void SoundMixer::RegisterAudioDevice(IAudioDevice *audioDevice)
-{
-}
-
 void SoundMixer::Reset()
 {
 	if(_oggMixer) {
