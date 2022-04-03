@@ -501,9 +501,6 @@ private:
 
 	uint32_t _emulationSpeed = 100;
 	uint32_t _turboSpeed = 300;
-	uint32_t _rewindSpeed = 100;
-
-	uint32_t _rewindBufferSize = 300;
 
 	bool _disableOverclocking = false;
 	uint32_t _extraScanlinesBeforeNmi = 0;
@@ -603,7 +600,7 @@ public:
 
 	bool NeedsPause()
 	{
-		return CheckFlag(EmulationFlags::Paused) && !CheckFlag(EmulationFlags::DebuggerWindowEnabled);
+		return CheckFlag(EmulationFlags::Paused);
 	}
 
 	bool InputEnabled()
@@ -852,27 +849,6 @@ public:
 				}
 			}
 		}
-	}
-
-	void SetTurboRewindSpeed(uint32_t turboSpeed, uint32_t rewindSpeed)
-	{
-		_turboSpeed = turboSpeed;
-		_rewindSpeed = rewindSpeed;
-	}
-
-	uint32_t GetRewindSpeed()
-	{
-		return _rewindSpeed;
-	}
-
-	void SetRewindBufferSize(uint32_t seconds)
-	{
-		_rewindBufferSize = seconds;
-	}
-
-	uint32_t GetRewindBufferSize()
-	{
-		return _rewindBufferSize;
 	}
 
 	uint32_t GetEmulationSpeed(bool ignoreTurbo = false);

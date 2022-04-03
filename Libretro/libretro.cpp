@@ -130,7 +130,6 @@ extern "C" {
 		_console->GetSettings()->SetFlags(EmulationFlags::FdsAutoLoadDisk);
 		_console->GetSettings()->SetFlags(EmulationFlags::AutoConfigureInput);
 		_console->GetSettings()->SetSampleRate(_audioSampleRate);
-		_console->GetSettings()->SetRewindBufferSize(0);
 	}
 
 	RETRO_API void retro_deinit()

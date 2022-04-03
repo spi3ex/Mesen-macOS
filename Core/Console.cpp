@@ -682,12 +682,12 @@ void Console::Run()
 			}
 
 			bool pausedRequired = _settings->NeedsPause();
-			if(pausedRequired && !_stop && !_settings->CheckFlag(EmulationFlags::DebuggerWindowEnabled)) {
+			if(pausedRequired && !_stop) {
 				_notificationManager->SendNotification(ConsoleNotificationType::GamePaused);
 
 				_runLock.Release();
 
-				while(pausedRequired && !_stop && !_settings->CheckFlag(EmulationFlags::DebuggerWindowEnabled)) {
+				while(pausedRequired && !_stop) {
 					//Sleep until emulation is resumed
 					std::this_thread::sleep_for(std::chrono::duration<int, std::milli>(30));
 					pausedRequired = _settings->NeedsPause();

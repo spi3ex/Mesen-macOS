@@ -20,8 +20,6 @@ uint32_t EmulationSettings::GetEmulationSpeed(bool ignoreTurbo)
 		return 0;
 	} else if(CheckFlag(EmulationFlags::Turbo)) {
 		return _turboSpeed;
-	} else if(CheckFlag(EmulationFlags::Rewind)) {
-		return _rewindSpeed;
 	} else {
 		return _emulationSpeed;
 	}

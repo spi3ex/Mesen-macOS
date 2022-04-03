@@ -286,8 +286,7 @@ void Debugger::SetBreakpoints(Breakpoint breakpoints[], uint32_t length)
 	for(uint32_t j = 0; j < length; j++) {
 		Breakpoint &bp = breakpoints[j];
 		for(int i = 0; i < Debugger::BreakpointTypeCount; i++) {
-			bool isEnabled = bp.IsEnabled() && _console->GetSettings()->CheckFlag(EmulationFlags::DebuggerWindowEnabled);
-			if((bp.IsMarked() || isEnabled) && bp.HasBreakpointType((BreakpointType)i)) {
+			if((bp.IsMarked()) && bp.HasBreakpointType((BreakpointType)i)) {
 				_breakpoints[i].push_back(bp);
 
 				if(bp.HasCondition()) {
@@ -298,11 +297,6 @@ void Debugger::SetBreakpoints(Breakpoint breakpoints[], uint32_t length)
 					_breakpointRpnList[i].push_back(ExpressionData());
 				}
 
-				if(isEnabled) {
-					bool isReadWriteBp = i == BreakpointType::ReadVram || i == BreakpointType::ReadRam || i == BreakpointType::WriteVram || i == BreakpointType::WriteRam || i == BreakpointType::DummyReadRam || i == BreakpointType::DummyWriteRam;
-					_bpDummyCpuRequired |= isReadWriteBp;
-				}
-
 				_hasBreakpoint[i] = true;
 			}
 		}
@@ -311,9 +305,6 @@ void Debugger::SetBreakpoints(Breakpoint breakpoints[], uint32_t length)
 
 bool Debugger::ProcessBreakpoints(BreakpointType type, OperationInfo &operationInfo, bool allowBreak, bool allowMark)
 {
-	//Disable breakpoints if debugger window is closed
-	allowBreak &= _console->GetSettings()->CheckFlag(EmulationFlags::DebuggerWindowEnabled);
-
 	if(_runToCycle != -1) {
 		//Disable all breakpoints while stepping backwards
 		return false;
@@ -1362,11 +1353,7 @@ void Debugger::StopCodeRunner()
 	//Break debugger when code has finished executing
 	SetNextStatement(_returnToAddress);
 
-	if(_console->GetSettings()->CheckFlag(EmulationFlags::DebuggerWindowEnabled)) {
-		Step(1);
-	} else {
-		Run();
-	}
+	Run();
 }
 
 void Debugger::GetNesHeader(uint8_t* header)
