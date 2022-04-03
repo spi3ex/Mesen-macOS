@@ -46,19 +46,10 @@ bool KeyManager::IsMouseButtonPressed(MouseButton button)
 	return false;
 }
 
-vector<uint32_t> KeyManager::GetPressedKeys()
-{
-	if(_keyManager != nullptr) {
-		return _keyManager->GetPressedKeys();
-	}
-	return vector<uint32_t>();
-}
-
 string KeyManager::GetKeyName(uint32_t keyCode)
 {
-	if(_keyManager != nullptr) {
+	if(_keyManager != nullptr)
 		return _keyManager->GetKeyName(keyCode);
-	}
 	return "";
 }
 
@@ -68,13 +59,6 @@ uint32_t KeyManager::GetKeyCode(string keyName)
 		return _keyManager->GetKeyCode(keyName);
 	}
 	return 0;
-}
-
-void KeyManager::UpdateDevices()
-{
-	if(_keyManager != nullptr) {
-		_keyManager->UpdateDevices();
-	}
 }
 
 void KeyManager::SetMouseMovement(int16_t x, int16_t y)

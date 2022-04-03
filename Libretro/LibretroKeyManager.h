@@ -77,23 +77,19 @@ public:
 
 			shared_ptr<FdsSystemActionManager> fdsSam = _console->GetSystemActionManager<FdsSystemActionManager>();
 			if(fdsSam) {
-				if(ProcessAction(RETRO_DEVICE_ID_JOYPAD_L)) {
+				if(ProcessAction(RETRO_DEVICE_ID_JOYPAD_L))
 					fdsSam->InsertNextDisk();
-				}
 				
-				if(ProcessAction(RETRO_DEVICE_ID_JOYPAD_R)) {
+				if(ProcessAction(RETRO_DEVICE_ID_JOYPAD_R))
 					fdsSam->SwitchDiskSide();
-				}
 			}
 			
 			shared_ptr<VsSystemActionManager> vsSam = _console->GetSystemActionManager<VsSystemActionManager>();
 			if(vsSam) {
-				if(ProcessAction(RETRO_DEVICE_ID_JOYPAD_L2)) {
+				if(ProcessAction(RETRO_DEVICE_ID_JOYPAD_L2))
 					vsSam->InsertCoin(0);
-				}
-				if(ProcessAction(RETRO_DEVICE_ID_JOYPAD_R2)) {
+				if(ProcessAction(RETRO_DEVICE_ID_JOYPAD_R2))
 					vsSam->InsertCoin(1);
-				}
 			}
 		}
 	}
@@ -105,20 +101,11 @@ public:
 		return false;
 	}
 
-	virtual void UpdateDevices() override
-	{
-	}
-
 	virtual bool IsMouseButtonPressed(MouseButton button) override
 	{
 		return _mouseButtons[(int)button];
 	}
 
-	virtual vector<uint32_t> GetPressedKeys() override
-	{
-		return vector<uint32_t>();
-	}
-	
 	virtual string GetKeyName(uint32_t keyCode) override
 	{
 		return string();

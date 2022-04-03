@@ -366,7 +366,6 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 
 			//Reset components before creating rewindmanager, otherwise the first save state it takes will be invalid
 			if(!forPowerCycle) {
-				KeyManager::UpdateDevices();
 				_rewindManager.reset(new RewindManager(shared_from_this()));
 				_notificationManager->RegisterNotificationListener(_rewindManager);
 			} else {
@@ -610,9 +609,8 @@ void Console::RunSingleFrame()
 
 	while(_ppu->GetFrameCount() == lastFrameNumber) {
 		_cpu->Exec();
-		if(_slave) {
+		if(_slave)
 			RunSlaveCpu();
-		}
 	}
 
 	_settings->DisableOverclocking(_disableOcNextFrame || IsNsf());
@@ -641,9 +639,8 @@ void Console::RunFrame()
 	uint32_t frameCount = _ppu->GetFrameCount();
 	while(_ppu->GetFrameCount() == frameCount) {
 		_cpu->Exec();
-		if(_slave) {
+		if(_slave)
 			RunSlaveCpu();
-		}
 	}
 }
 
