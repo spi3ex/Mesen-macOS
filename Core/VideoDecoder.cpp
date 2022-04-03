@@ -133,10 +133,6 @@ uint32_t VideoDecoder::GetFrameCount()
 
 void VideoDecoder::UpdateFrameSync(void *ppuOutputBuffer, HdScreenInfo *hdScreenInfo)
 {
-	if(_settings->IsRunAheadFrame()) {
-		return;
-	}
-
 	if(_frameChanged) {
 		//Last frame isn't done decoding yet - sometimes Signal() introduces a 25-30ms delay
 		while(_frameChanged) {
@@ -154,10 +150,6 @@ void VideoDecoder::UpdateFrameSync(void *ppuOutputBuffer, HdScreenInfo *hdScreen
 
 void VideoDecoder::UpdateFrame(void *ppuOutputBuffer, HdScreenInfo *hdScreenInfo)
 {
-	if(_settings->IsRunAheadFrame()) {
-		return;
-	}
-
 	if(_frameChanged) {
 		//Last frame isn't done decoding yet - sometimes Signal() introduces a 25-30ms delay
 		while(_frameChanged) {
