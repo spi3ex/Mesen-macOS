@@ -63,8 +63,6 @@ public:
 	void RegisterInputRecorder(IInputRecorder* recorder);
 	void UnregisterInputRecorder(IInputRecorder* recorder);
 
-	vector<ControlDeviceState> GetPortStates();
-
 	shared_ptr<BaseControlDevice> GetControlDevice(uint8_t port);
 	vector<shared_ptr<BaseControlDevice>> GetControlDevices();
 	bool HasKeyboard();
