@@ -145,8 +145,6 @@ public:
 	void ResetRunTimers();
 	void Stop(int stopCode = 0);
 		
-	int32_t GetStopCode();
-		
 	void RunSingleFrame();
 	void RunSlaveCpu();
 	bool UpdateHdPackMode();
@@ -201,10 +199,6 @@ public:
 	void PauseOnNextFrame();
 
 	void SetNextFrameOverclockStatus(bool disabled);
-
-	bool IsDebuggerAttached();
-
-	double GetFps();
 
 	void InitializeRam(void* data, uint32_t length);
 	static void InitializeRam(RamPowerOnState powerOnState, void* data, uint32_t length);

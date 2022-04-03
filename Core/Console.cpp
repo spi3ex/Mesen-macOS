@@ -13,7 +13,6 @@
 #include "Debugger.h"
 #include "MessageManager.h"
 #include "EmulationSettings.h"
-#include "../Utilities/sha1.h"
 #include "../Utilities/Timer.h"
 #include "../Utilities/FolderUtilities.h"
 #include "VirtualFile.h"
@@ -537,7 +536,10 @@ void Console::ReloadRom(bool forPowerCycle)
 void Console::Reset(bool softReset)
 {
 	if(_initialized) {
-		bool needSuspend = softReset ? _systemActionManager->Reset() : _systemActionManager->PowerCycle();
+		if (softReset)
+			_systemActionManager->Reset();
+		else
+			_systemActionManager->PowerCycle();
 	}
 }
 
@@ -860,13 +862,6 @@ double Console::GetFrameDelay()
 	return frameDelay;
 }
 
-double Console::GetFps()
-{
-	if(_model == NesModel::NTSC)
-		return _settings->CheckFlag(EmulationFlags::IntegerFpsMode) ? 60.0 : 60.098812;
-	return _settings->CheckFlag(EmulationFlags::IntegerFpsMode) ? 50.0 : 50.006978;
-}
-
 void Console::SaveState(ostream &saveStream)
 {
 	if(_initialized) {
@@ -945,19 +940,9 @@ void Console::ResetLagCounter()
 	Resume();
 }
 
-bool Console::IsDebuggerAttached()
-{
-	return false;
-}
-
 void Console::SetNextFrameOverclockStatus(bool disabled)
 {
 	_disableOcNextFrame = disabled;
-}
-
-int32_t Console::GetStopCode()
-{
-	return _stopCode;
 }
 
 void Console::InitializeRam(void* data, uint32_t length)
