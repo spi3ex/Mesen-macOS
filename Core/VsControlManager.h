@@ -6,7 +6,6 @@
 #include "VsZapper.h"
 #include <assert.h>
 #include "StandardController.h"
-#include "MovieManager.h"
 #include "IInputProvider.h"
 
 class BaseControlDevice;

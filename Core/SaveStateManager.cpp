@@ -5,7 +5,6 @@
 #include "EmulationSettings.h"
 #include "VideoDecoder.h"
 #include "Debugger.h"
-#include "MovieManager.h"
 #include "RomData.h"
 #include "DefaultVideoFilter.h"
 #include "PPU.h"
@@ -96,10 +95,6 @@ bool SaveStateManager::LoadState(istream &stream, bool hashCheckRequired)
 				}
 			}
 		}
-
-		//Stop any movie that might have been playing/recording if a state is loaded
-		//(Note: Loading a state is disabled in the UI while a movie is playing/recording)
-		MovieManager::Stop();
 
 		_console->LoadState(stream, fileFormatVersion);
 

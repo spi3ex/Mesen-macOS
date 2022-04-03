@@ -6,7 +6,6 @@
 #include "VirtualFile.h"
 
 class BaseMapper;
-class HistoryViewer;
 class APU;
 class CPU;
 class PPU;
@@ -46,8 +45,6 @@ private:
 	SimpleLock _runLock;
 	SimpleLock _stopLock;
 	atomic<uint32_t> _pauseCounter;
-
-	shared_ptr<HistoryViewer> _historyViewer;
 
 	shared_ptr<CPU> _cpu;
 	shared_ptr<PPU> _ppu;
@@ -127,7 +124,6 @@ public:
 	ControlManager* GetControlManager();
 	MemoryManager* GetMemoryManager();
 	CheatManager* GetCheatManager();
-	HistoryViewer* GetHistoryViewer();
 
 	bool LoadMatchingRom(string romName, HashInfo hashInfo);
 	string FindMatchingRom(string romName, HashInfo hashInfo);

@@ -21,7 +21,6 @@
 #include "NsfPpu.h"
 #include "SoundMixer.h"
 #include "NsfMapper.h"
-#include "MovieManager.h"
 #include "SaveStateManager.h"
 #include "HdPackBuilder.h"
 #include "HdAudioDevice.h"
@@ -39,7 +38,6 @@
 #include "VideoDecoder.h"
 #include "VideoRenderer.h"
 #include "NotificationManager.h"
-#include "HistoryViewer.h"
 #include "ConsolePauseHelper.h"
 #include "EventManager.h"
 
@@ -65,7 +63,6 @@ Console::Console(shared_ptr<Console> master, EmulationSettings* initialSettings)
 
 Console::~Console()
 {
-	MovieManager::Stop();
 }
 
 void Console::Init()
@@ -266,7 +263,6 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 				_patchFilename = patchFile;
 				
 				//Changed game, stop all recordings
-				MovieManager::Stop();
 				_soundMixer->StopRecording();
 				StopRecordingHdPack();
 			}
@@ -468,11 +464,6 @@ CheatManager* Console::GetCheatManager()
 	return _cheatManager.get();
 }
 
-HistoryViewer* Console::GetHistoryViewer()
-{
-	return _historyViewer.get();
-}
-
 VirtualFile Console::GetRomPath()
 {
 	return static_cast<VirtualFile>(_romFilepath);
@@ -640,9 +631,6 @@ void Console::Run()
 					RunSlaveCpu();
 			}
 
-			if(_historyViewer) {
-				_historyViewer->ProcessEndOfFrame();
-			}
 			_settings->DisableOverclocking(_disableOcNextFrame || IsNsf());
 			_disableOcNextFrame = false;
 
@@ -734,7 +722,6 @@ void Console::Run()
 
 	StopRecordingHdPack();
 
-	MovieManager::Stop();
 	_soundMixer->StopRecording();
 
 	_settings->ClearFlags(EmulationFlags::ForceMaxSpeed);

@@ -6,7 +6,6 @@
 #include "FdsAudio.h"
 #include "MemoryManager.h"
 #include "BatteryManager.h"
-#include "MovieManager.h"
 
 void FDS::InitMapper()
 {
@@ -553,5 +552,5 @@ bool FDS::IsDiskInserted()
 
 bool FDS::IsAutoInsertDiskEnabled()
 {
-	return !_disableAutoInsertDisk && _settings->CheckFlag(EmulationFlags::FdsAutoInsertDisk) && !MovieManager::Playing() && !MovieManager::Recording();
+	return !_disableAutoInsertDisk && _settings->CheckFlag(EmulationFlags::FdsAutoInsertDisk);
 }

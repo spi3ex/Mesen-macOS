@@ -3,7 +3,6 @@
 #include <algorithm>
 #include "stdafx.h"
 #include "MessageManager.h"
-#include "GameClient.h"
 #include "KeyManager.h"
 #include "../Utilities/SimpleLock.h"
 

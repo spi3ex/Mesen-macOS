@@ -3,7 +3,6 @@
 #include "BaseMapper.h"
 #include "EmulationSettings.h"
 #include "Console.h"
-#include "GameServerConnection.h"
 #include "MemoryManager.h"
 #include "IKeyManager.h"
 #include "IInputProvider.h"
@@ -288,12 +287,6 @@ void ControlManager::UpdateInputState()
 
 		device->OnAfterSetState();
 		//log += "|" + device->GetTextState();
-	}
-
-	if(!_console->GetSettings()->IsRunAheadFrame()) {
-		for(IInputRecorder* recorder : _inputRecorders) {
-			recorder->RecordInput(_controlDevices);
-		}
 	}
 
 	//Used by VS System games
