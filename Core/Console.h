@@ -6,7 +6,6 @@
 #include "VirtualFile.h"
 
 class BaseMapper;
-class RewindManager;
 class HistoryViewer;
 class APU;
 class CPU;
@@ -48,7 +47,6 @@ private:
 	SimpleLock _stopLock;
 	atomic<uint32_t> _pauseCounter;
 
-	shared_ptr<RewindManager> _rewindManager;
 	shared_ptr<HistoryViewer> _historyViewer;
 
 	shared_ptr<CPU> _cpu;
@@ -129,7 +127,6 @@ public:
 	ControlManager* GetControlManager();
 	MemoryManager* GetMemoryManager();
 	CheatManager* GetCheatManager();
-	shared_ptr<RewindManager> GetRewindManager();
 	HistoryViewer* GetHistoryViewer();
 
 	bool LoadMatchingRom(string romName, HashInfo hashInfo);
@@ -209,8 +206,6 @@ public:
 	void StartRecordingHdPack(string saveFolder, ScaleFilterType filterType, uint32_t scale, uint32_t flags, uint32_t chrRamBankSize);
 	void StopRecordingHdPack();
 	
-	void CopyRewindData(shared_ptr<Console> sourceConsole);
-
 	uint8_t* GetRamBuffer(uint16_t address);
 		
 	void DebugAddTrace(const char *log);

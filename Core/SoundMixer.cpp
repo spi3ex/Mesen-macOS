@@ -4,7 +4,6 @@
 #include "SoundMixer.h"
 #include "CPU.h"
 #include "VideoRenderer.h"
-#include "RewindManager.h"
 #include "OggMixer.h"
 #include "Console.h"
 #include "BaseMapper.h"

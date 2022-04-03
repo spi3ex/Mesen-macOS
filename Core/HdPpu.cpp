@@ -4,7 +4,6 @@
 #include "Console.h"
 #include "HdNesPack.h"
 #include "VideoDecoder.h"
-#include "RewindManager.h"
 #include "HdPackConditions.h"
 #include "NotificationManager.h"
 #include "BaseMapper.h"

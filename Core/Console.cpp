@@ -22,7 +22,6 @@
 #include "SoundMixer.h"
 #include "NsfMapper.h"
 #include "MovieManager.h"
-#include "RewindManager.h"
 #include "SaveStateManager.h"
 #include "HdPackBuilder.h"
 #include "HdAudioDevice.h"
@@ -105,8 +104,6 @@ void Console::Release(bool forShutdown)
 	if(_master) {
 		_master->_notificationManager->SendNotification(ConsoleNotificationType::VsDualSystemStopped);
 	}
-
-	_rewindManager.reset();
 
 	_hdPackBuilder.reset();
 	_hdData.reset();
@@ -363,14 +360,6 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 
 			ResetComponents(false);
 
-			//Reset components before creating rewindmanager, otherwise the first save state it takes will be invalid
-			if(!forPowerCycle) {
-				_rewindManager.reset(new RewindManager(shared_from_this()));
-				_notificationManager->RegisterNotificationListener(_rewindManager);
-			} else {
-				_rewindManager->Initialize();
-			}
-
 			//Poll controller input after creating rewind manager, to make sure it catches the first frame's input
 			_controlManager->UpdateInputState();
 
@@ -477,11 +466,6 @@ MemoryManager* Console::GetMemoryManager()
 CheatManager* Console::GetCheatManager()
 {
 	return _cheatManager.get();
-}
-
-shared_ptr<RewindManager> Console::GetRewindManager()
-{
-	return _rewindManager;
 }
 
 HistoryViewer* Console::GetHistoryViewer()
@@ -659,7 +643,6 @@ void Console::Run()
 			if(_historyViewer) {
 				_historyViewer->ProcessEndOfFrame();
 			}
-			_rewindManager->ProcessEndOfFrame();
 			_settings->DisableOverclocking(_disableOcNextFrame || IsNsf());
 			_disableOcNextFrame = false;
 
@@ -1183,20 +1166,6 @@ bool Console::IsRecordingTapeFile()
 bool Console::IsNsf()
 {
 	return std::dynamic_pointer_cast<NsfMapper>(_mapper) != nullptr;
-}
-
-void Console::CopyRewindData(shared_ptr<Console> sourceConsole)
-{
-	sourceConsole->Pause();
-	Pause();
-
-	//Disable battery saving for this instance
-	_batteryManager->SetSaveEnabled(false);
-	_historyViewer.reset(new HistoryViewer(shared_from_this()));
-	sourceConsole->_rewindManager->CopyHistory(_historyViewer);
-
-	Resume();
-	sourceConsole->Resume();
 }
 
 uint8_t* Console::GetRamBuffer(uint16_t address)

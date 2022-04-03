@@ -6,7 +6,6 @@
 #include "VideoDecoder.h"
 #include "Debugger.h"
 #include "BaseMapper.h"
-#include "RewindManager.h"
 #include "ControlManager.h"
 #include "MemoryManager.h"
 #include "Console.h"

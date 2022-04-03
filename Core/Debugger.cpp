@@ -19,7 +19,6 @@
 #include "DisassemblyInfo.h"
 #include "PPU.h"
 #include "MemoryManager.h"
-#include "RewindManager.h"
 #include "DebugBreakHelper.h"
 #include "ScriptHost.h"
 #include "StandardController.h"
@@ -95,7 +94,6 @@ Debugger::Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<
 	_runToCycle = -1;
 	_prevInstructionCycle = -1;
 	_curInstructionCycle = -1;
-	_needRewind = false;
 
 	//Only enable break on uninitialized reads when debugger is opened at power on/reset
 	_enableBreakOnUninitRead = _cpu->GetPC() == 0;
@@ -705,32 +703,6 @@ bool Debugger::ProcessRamOperation(MemoryOperationType type, uint16_t &addr, uin
 			value = _memoryManager->DebugRead(addr, true);
 			_cpu->SetDebugPC(addr);
 			_nextReadAddr = -1;
-		} else if(_needRewind) {
-			//Step back - Need to load a state, and then alter the current opcode based on the new program counter
-			if(!_rewindCache.empty()) {
-				//Restore the state, and the cycle number of the instruction that preceeded that state
-				//Otherwise, the target cycle number when building the next cache will be incorrect
-				_console->LoadState(_rewindCache.back());
-				_curInstructionCycle = _rewindPrevInstructionCycleCache.back();
-				
-				_rewindCache.pop_back();
-				_rewindPrevInstructionCycleCache.pop_back();
-				
-				//This state is for the instruction we want to stop on, break here.
-				_runToCycle = -1;
-				Step(1);
-			} else {
-				_console->GetRewindManager()->StartRewinding(true);
-				
-				//Adjust the cycle counter by 1 because the state was taken before the instruction started
-				//whereas the CPU already read the first byte of the instruction by the time we get here
-				State cpuState;
-				_cpu->GetState(cpuState);
-				cpuState.CycleCount++;
-				_cpu->SetState(cpuState);
-			}
-			UpdateProgramCounter(addr, value);
-			_needRewind = false;
 		}
 		ProcessScriptSaveState(addr, value);
 
@@ -798,8 +770,6 @@ bool Debugger::ProcessRamOperation(MemoryOperationType type, uint16_t &addr, uin
 
 		if(_runToCycle != -1) {
 			if((int64_t)_cpu->GetCycleCount() >= _runToCycle) {
-				//Step back operation is done, revert RewindManager's state & break debugger
-				_console->GetRewindManager()->StopRewinding(true);
 				_runToCycle = -1;
 				Step(1);
 			} else if(_runToCycle - (int64_t)_cpu->GetCycleCount() < 500) {
@@ -916,7 +886,7 @@ bool Debugger::ProcessRamOperation(MemoryOperationType type, uint16_t &addr, uin
 		if(_runToCycle == -1 && (type == MemoryOperationType::ExecOpCode || type == MemoryOperationType::ExecOperand)) {
 			_memoryAccessCounter->ProcessMemoryExec(addressInfo, _cpu->GetCycleCount());
 		}
-		if(!_needRewind && type == MemoryOperationType::ExecOpCode) {
+		if(type == MemoryOperationType::ExecOpCode) {
 			UpdateCallstack(_lastInstruction, addr);
 		}
 	}
@@ -1120,7 +1090,6 @@ void Debugger::StepBack()
 {
 	if(_runToCycle == -1 && _prevInstructionCycle < _curInstructionCycle) {
 		_runToCycle = _prevInstructionCycle;
-		_needRewind = true;
 		Run();
 	}
 }

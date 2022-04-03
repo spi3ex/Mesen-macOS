@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "EmulationSettings.h"
 #include "Console.h"
-#include "RewindManager.h"
 
 //Version 0.9.9
 uint16_t EmulationSettings::_versionMajor = 0;

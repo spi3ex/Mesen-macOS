@@ -9,7 +9,6 @@
 #include "HdVideoFilter.h"
 #include "ScaleFilter.h"
 #include "VideoRenderer.h"
-#include "RewindManager.h"
 #include "Console.h"
 #include "PPU.h"
 #include "HdData.h"
@@ -124,8 +123,7 @@ void VideoDecoder::DecodeFrame(bool synchronous)
 
 	_frameChanged = false;
 	
-	//Rewind manager will take care of sending the correct frame to the video renderer
-	_console->GetRewindManager()->SendFrame(outputBuffer, frameInfo.Width, frameInfo.Height, synchronous);
+	_console->GetVideoRenderer()->UpdateFrame(outputBuffer, frameInfo.Width, frameInfo.Height);
 }
 
 uint32_t VideoDecoder::GetFrameCount()

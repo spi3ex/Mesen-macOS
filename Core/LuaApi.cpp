@@ -10,7 +10,6 @@
 #include "ScriptingContext.h"
 #include "DebugHud.h"
 #include "VideoDecoder.h"
-#include "RewindManager.h"
 #include "SaveStateManager.h"
 #include "Console.h"
 #include "IKeyManager.h"
@@ -591,7 +590,6 @@ int LuaApi::Rewind(lua_State *lua)
 	checkparams();
 	checksavestateconditions();
 	errorCond(seconds <= 0, "seconds must be >= 1");
-	_console->GetRewindManager()->RewindSeconds(seconds);
 	return l.ReturnCount();
 }
 

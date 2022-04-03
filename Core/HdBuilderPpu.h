@@ -3,7 +3,6 @@
 #include "PPU.h"
 #include "HdNesPack.h"
 #include "VideoDecoder.h"
-#include "RewindManager.h"
 #include "HdPackBuilder.h"
 #include "HdPpu.h"
 
