@@ -628,16 +628,6 @@ void Console::RunSlaveCpu()
 	}
 }
 
-void Console::RunFrame()
-{
-	uint32_t frameCount = _ppu->GetFrameCount();
-	while(_ppu->GetFrameCount() == frameCount) {
-		_cpu->Exec();
-		if(_slave)
-			RunSlaveCpu();
-	}
-}
-
 void Console::Run()
 {
 	Timer clockTimer;
@@ -656,12 +646,12 @@ void Console::Run()
 
 	try {
 		while(true) {
-			stringstream runAheadState;
-			bool useRunAhead = _settings->GetRunAheadFrames() > 0 && !IsNsf() && !_rewindManager->IsRewinding() && _settings->GetEmulationSpeed() > 0 && _settings->GetEmulationSpeed() <= 100;
-			if(useRunAhead) {
-				RunFrameWithRunAhead(runAheadState);
-			} else {
-				RunFrame();
+			uint32_t frameCount = _ppu->GetFrameCount();
+			while(_ppu->GetFrameCount() == frameCount)
+			{
+				_cpu->Exec();
+				if(_slave)
+					RunSlaveCpu();
 			}
 
 			if(_historyViewer) {
@@ -701,12 +691,6 @@ void Console::Run()
 
 			//Sleep until we're ready to start the next frame
 			clockTimer.WaitUntil(targetTime);
-
-			if(useRunAhead) {
-				_settings->SetRunAheadFrameFlag(true);
-				LoadState(runAheadState);
-				_settings->SetRunAheadFrameFlag(false);
-			}
 
 			if(_pauseCounter > 0) {
 				//Need to temporarely pause the emu (to save/load a state, etc.)
@@ -786,26 +770,6 @@ void Console::Run()
 
 	_notificationManager->SendNotification(ConsoleNotificationType::GameStopped);
 	_notificationManager->SendNotification(ConsoleNotificationType::EmulationStopped);
-}
-
-void Console::RunFrameWithRunAhead(std::stringstream& runAheadState)
-{
-	uint32_t runAheadFrames = _settings->GetRunAheadFrames();
-	_settings->SetRunAheadFrameFlag(true);
-	//Run a single frame and save the state (no audio/video)
-	RunFrame();
-	SaveState(runAheadState);
-	while(runAheadFrames > 1) {
-		//Run extra frames if the requested run ahead frame count is higher than 1
-		runAheadFrames--;
-		RunFrame();
-	}
-	_apu->EndFrame();
-	_settings->SetRunAheadFrameFlag(false);
-
-	//Run one frame normally (with audio/video output)
-	RunFrame();
-	_apu->EndFrame();
 }
 
 void Console::ResetRunTimers()
