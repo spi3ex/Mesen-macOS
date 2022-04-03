@@ -27,10 +27,6 @@ private:
 	static std::list<string> _log;
 	
 public:
-	static void SetOsdState(bool enabled);
-
-	static string Localize(string key);
-
 	static void RegisterMessageManager(IMessageManager* messageManager);
 	static void UnregisterMessageManager(IMessageManager* messageManager);
 	static void DisplayMessage(string title, string message, string param1 = "", string param2 = "");

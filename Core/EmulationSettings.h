@@ -392,45 +392,6 @@ struct KeyMappingSet
 	}
 };
 
-struct KeyCombination
-{
-	uint32_t Key1 = 0;
-	uint32_t Key2 = 0;
-	uint32_t Key3 = 0;
-
-	vector<uint32_t> GetKeys()
-	{
-		vector<uint32_t> result;
-		if(Key1) {
-			result.push_back(Key1);
-		}
-		if(Key2) {
-			result.push_back(Key2);
-		}
-		if(Key3) {
-			result.push_back(Key3);
-		}
-		return result;
-	}
-
-	bool IsSubsetOf(KeyCombination keyCombination)
-	{
-		vector<uint32_t> myKeys = GetKeys();
-		vector<uint32_t> otherKeys = keyCombination.GetKeys();
-
-		if(otherKeys.size() > myKeys.size()) {
-			for(size_t i = 0; i < myKeys.size(); i++) {
-				if(std::find(otherKeys.begin(), otherKeys.end(), myKeys[i]) == otherKeys.end()) {
-					//Current key combination contains a key not found in the other combination, so it's not a subset
-					return false;
-				}
-			}
-			return true;
-		}
-		return false;
-	}
-};
-
 enum class Language
 {
 	//SystemDefault = 0,  //This value is never used by the C++ core
@@ -476,21 +437,6 @@ struct AudioFilterSettings
 	int32_t CrossFadeRatio = 0;
 };
 
-enum class InputDisplayPosition
-{
-	TopLeft = 0,
-	TopRight = 1,
-	BottomLeft = 2,
-	BottomRight = 3
-};
-
-struct InputDisplaySettings
-{
-	uint8_t VisiblePorts;
-	InputDisplayPosition DisplayPosition;
-	bool DisplayHorizontally;
-};
-
 class EmulationSettings
 {
 private:
@@ -499,7 +445,6 @@ private:
 	static uint16_t _versionMajor;
 	static uint8_t _versionMinor;
 	static uint8_t _versionRevision;
-	static Language _displayLanguage;
 
 	static SimpleLock _equalizerLock;
 	static SimpleLock _lock;
@@ -595,15 +540,7 @@ private:
 	int32_t _nsfMoveToNextTrackTime = 120;
 	bool _nsfDisableApuIrqs = true;
 
-	InputDisplaySettings _inputDisplaySettings = { 0, InputDisplayPosition::TopLeft, false };
-
-	uint32_t _autoSaveDelay = 5;
-	bool _autoSaveNotify = false;
-
 	bool _keyboardModeEnabled = false;
-
-	std::unordered_map<uint32_t, KeyCombination> _emulatorKeys[3];
-	std::unordered_map<uint32_t, vector<KeyCombination>> _shortcutSupersets[3];
 
 	RamPowerOnState _ramPowerOnState = RamPowerOnState::AllZeros;
 	uint32_t _dipSwitches = 0;
@@ -666,16 +603,6 @@ public:
 	bool CheckFlag(EmulationFlags flag)
 	{
 		return (_flags & flag) == flag;
-	}
-
-	static void SetDisplayLanguage(Language lang)
-	{
-		_displayLanguage = lang;
-	}
-
-	static Language GetDisplayLanguage()
-	{
-		return _displayLanguage;
 	}
 
 	bool NeedsPause()
@@ -1298,16 +1225,6 @@ public:
 		return _nsfDisableApuIrqs;
 	}
 
-	void SetInputDisplaySettings(uint8_t visiblePorts, InputDisplayPosition displayPosition, bool displayHorizontally)
-	{
-		_inputDisplaySettings = { visiblePorts, displayPosition, displayHorizontally };
-	}
-
-	InputDisplaySettings GetInputDisplaySettings()
-	{
-		return _inputDisplaySettings;
-	}
-
 	void SetRamPowerOnState(RamPowerOnState state)
 	{
 		_ramPowerOnState = state;
@@ -1316,18 +1233,6 @@ public:
 	RamPowerOnState GetRamPowerOnState()
 	{
 		return _ramPowerOnState;
-	}
-
-	void SetAutoSaveOptions(uint32_t delayInMinutes, bool showMessage)
-	{
-		_autoSaveDelay = delayInMinutes;
-		_autoSaveNotify = showMessage;
-	}
-
-	uint32_t GetAutoSaveDelay(bool &showMessage)
-	{
-		showMessage = _autoSaveNotify;
-		return _autoSaveDelay;
 	}
 
 	void SetDipSwitches(uint32_t dipSwitches)

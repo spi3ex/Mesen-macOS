@@ -378,12 +378,6 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 			FolderUtilities::AddKnownGameFolder(romFile.GetFolderPath());
 
 			if(IsMaster()) {
-				if(!forPowerCycle) {
-					string modelName = _model == NesModel::PAL ? "PAL" : (_model == NesModel::Dendy ? "Dendy" : "NTSC");
-					string messageTitle = MessageManager::Localize("GameLoaded") + " (" + modelName + ")";
-					MessageManager::DisplayMessage(messageTitle, FolderUtilities::GetFilename(GetRomInfo().RomName, false));
-				}
-
 				_settings->ClearFlags(EmulationFlags::ForceMaxSpeed);
 
 				if(_slave) {

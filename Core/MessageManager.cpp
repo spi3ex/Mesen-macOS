@@ -756,7 +756,6 @@ std::unordered_map<string, string> MessageManager::_itResources = {
 std::list<string> MessageManager::_log;
 SimpleLock MessageManager::_logLock;
 SimpleLock MessageManager::_messageLock;
-bool MessageManager::_osdEnabled = false;
 IMessageManager* MessageManager::_messageManager = nullptr;
 
 void MessageManager::RegisterMessageManager(IMessageManager* messageManager)
@@ -773,41 +772,6 @@ void MessageManager::UnregisterMessageManager(IMessageManager* messageManager)
 	}
 }
 
-void MessageManager::SetOsdState(bool enabled)
-{
-	_osdEnabled = enabled;
-}
-
-string MessageManager::Localize(string key)
-{
-	std::unordered_map<string, string> *resources = nullptr;
-	switch(EmulationSettings::GetDisplayLanguage()) {
-		case Language::English: resources = &_enResources; break;
-		case Language::French: resources = &_frResources; break;
-		case Language::Japanese: resources = &_jaResources; break;
-		case Language::Russian: resources = &_ruResources; break;
-		case Language::Spanish: resources = &_esResources; break;
-		case Language::Ukrainian: resources = &_ukResources; break;
-		case Language::Portuguese: resources = &_ptResources; break;
-		case Language::Catalan: resources = &_caResources; break;
-		case Language::Chinese: resources = &_zhResources; break;
-		case Language::Italian: resources = &_itResources; break;
-	}
-	if(resources) {
-		if(resources->find(key) != resources->end()) {
-			return (*resources)[key];
-		} else if(EmulationSettings::GetDisplayLanguage() != Language::English) {
-			//Fallback on English if resource key is missing another language
-			resources = &_enResources;
-			if(resources->find(key) != resources->end()) {
-				return (*resources)[key];
-			}
-		}
-	}
-
-	return key;
-}
-
 void MessageManager::DisplayMessage(string title, string message, string param1, string param2)
 {
 	if(MessageManager::_messageManager) {
@@ -816,24 +780,16 @@ void MessageManager::DisplayMessage(string title, string message, string param1,
 			return;
 		}
 
-		title = Localize(title);
-		message = Localize(message);
-
 		size_t startPos = message.find(u8"%1");
 		if(startPos != std::string::npos) {
 			message.replace(startPos, 2, param1);
 		}
 
 		startPos = message.find(u8"%2");
-		if(startPos != std::string::npos) {
+		if(startPos != std::string::npos)
 			message.replace(startPos, 2, param2);
-		}
 
-		if(_osdEnabled) {
-			MessageManager::_messageManager->DisplayMessage(title, message);
-		} else {
-			MessageManager::Log("[" + title + "] " + message);
-		}
+		MessageManager::Log("[" + title + "] " + message);
 	}
 }
 
