@@ -14,15 +14,12 @@ const vector<uint32_t> EmulationSettings::_speedValues = { { 1, 3, 6, 12, 25, 50
 
 uint32_t EmulationSettings::GetEmulationSpeed(bool ignoreTurbo)
 {
-	if(ignoreTurbo) {
-		return _emulationSpeed;
-	} else if(CheckFlag(EmulationFlags::ForceMaxSpeed)) {
+	if(ignoreTurbo) { }
+	else if(CheckFlag(EmulationFlags::ForceMaxSpeed))
 		return 0;
-	} else if(CheckFlag(EmulationFlags::Turbo)) {
+	else if(CheckFlag(EmulationFlags::Turbo))
 		return _turboSpeed;
-	} else {
-		return _emulationSpeed;
-	}
+	return 100;
 }
 
 double EmulationSettings::GetAspectRatio(shared_ptr<Console> console)

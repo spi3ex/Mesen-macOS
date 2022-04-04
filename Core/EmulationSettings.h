@@ -391,21 +391,6 @@ struct KeyMappingSet
 	}
 };
 
-enum class Language
-{
-	//SystemDefault = 0,  //This value is never used by the C++ core
-	English = 1,
-	French = 2,
-	Japanese = 3,
-	Russian = 4,
-	Spanish = 5,
-	Ukrainian = 6,
-	Portuguese = 7,
-	Catalan = 8,
-	Chinese = 9,
-	Italian = 10,
-};
-
 enum class MouseDevice
 {
 	Unknown = 0,
@@ -485,21 +470,18 @@ private:
 	uint64_t _flags = 0;
 	
 	bool _audioSettingsChanged = false;
-	uint32_t _audioLatency = 50;
 	double _channelVolume[11] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
 	double _channelPanning[11] = { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 };
 	EqualizerFilterType _equalizerFilterType = EqualizerFilterType::None;
 	vector<double> _bandGains = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 	vector<double> _bands = { { 40,56,80,113,160,225,320,450,600,750,1000,2000,3000,4000,5000,6000,7000,10000,12500,15000 } };
 	double _masterVolume = 1.0;
-	double _volumeReduction = 0.75;
 	uint32_t _sampleRate = 48000;
 	AudioFilterSettings _audioFilterSettings;
 
 	NesModel _model = NesModel::Auto;
 	PpuModel _ppuModel = PpuModel::Ppu2C02;
 
-	uint32_t _emulationSpeed = 100;
 	uint32_t _turboSpeed = 300;
 
 	bool _disableOverclocking = false;
@@ -720,9 +702,6 @@ public:
 	void SetMasterVolume(double volume, double volumeReduction = -1.0)
 	{
 		_masterVolume = volume;
-		if(volumeReduction >= 0) {
-			_volumeReduction = volumeReduction;
-		}
 		_audioSettingsChanged = true;
 	}
 
@@ -786,12 +765,6 @@ public:
 		return _sampleRate;
 	}
 
-	void SetAudioLatency(uint32_t msLatency)
-	{
-		_audioLatency = msLatency;
-		_audioSettingsChanged = true;
-	}
-
 	void SetAudioFilterSettings(AudioFilterSettings settings)
 	{
 		_audioFilterSettings = settings;
@@ -810,45 +783,6 @@ public:
 			_audioSettingsChanged = false;
 		}
 		return value;
-	}
-
-	//0: No limit, Number: % of default speed (50/60fps)
-	void SetEmulationSpeed(uint32_t emulationSpeed, bool displaySpeed = false)
-	{
-		if(_emulationSpeed != emulationSpeed) {
-			_emulationSpeed = emulationSpeed;
-			if(displaySpeed) {
-				MessageManager::DisplayMessage("EmulationSpeed", _emulationSpeed == 0 ? "EmulationMaximumSpeed" : "EmulationSpeedPercent", std::to_string(_emulationSpeed));
-			}
-		}
-	}
-
-	void IncreaseEmulationSpeed()
-	{
-		if(_emulationSpeed == _speedValues.back()) {
-			SetEmulationSpeed(0, true);
-		} else if(_emulationSpeed != 0) {
-			for(size_t i = 0; i < _speedValues.size(); i++) {
-				if(_speedValues[i] > _emulationSpeed) {
-					SetEmulationSpeed(_speedValues[i], true);
-					break;
-				}
-			}
-		}
-	}
-
-	void DecreaseEmulationSpeed()
-	{
-		if(_emulationSpeed == 0) {
-			SetEmulationSpeed(_speedValues.back(), true);
-		} else if(_emulationSpeed > _speedValues.front()) {
-			for(int i = (int)_speedValues.size() - 1; i >= 0; i--) {
-				if(_speedValues[i] < _emulationSpeed) {
-					SetEmulationSpeed(_speedValues[i], true);
-					break;
-				}
-			}
-		}
 	}
 
 	uint32_t GetEmulationSpeed(bool ignoreTurbo = false);
@@ -907,19 +841,9 @@ public:
 		return _masterVolume;
 	}
 
-	double GetVolumeReduction()
-	{
-		return _volumeReduction;
-	}
-
 	double GetChannelPanning(AudioChannel channel)
 	{
 		return _channelPanning[(int)channel];
-	}
-
-	uint32_t GetAudioLatency()
-	{
-		return _audioLatency;
 	}
 
 	void SetVideoFilterType(VideoFilterType videoFilterType)
@@ -999,20 +923,11 @@ public:
 	double GetAspectRatio(shared_ptr<Console> console);
 	bool GetStaticAspectRatio()
 	{
-		if(_aspectRatio == VideoAspectRatio::StandardS || _aspectRatio == VideoAspectRatio::WidescreenS) {
+		if(_aspectRatio == VideoAspectRatio::StandardS || _aspectRatio == VideoAspectRatio::WidescreenS)
 			return true; 
-		} else {
-			return false;
-		}
+		return false;
 	}
 	void InitializeInputDevices(GameInputType inputType, GameSystem system, bool silent);
-
-	void SetVideoScale(double scale)
-	{
-		if(_videoScale != scale) {
-			_videoScale = scale;
-		}
-	}
 
 	double GetVideoScale()
 	{
@@ -1027,16 +942,6 @@ public:
 	uint32_t GetScreenRotation()
 	{
 		return _screenRotation;
-	}
-
-	void SetExclusiveRefreshRate(uint32_t refreshRate)
-	{
-		_exclusiveRefreshRate = refreshRate;
-	}
-
-	uint32_t GetExclusiveRefreshRate()
-	{
-		return _exclusiveRefreshRate;
 	}
 
 	void SetExpansionDevice(ExpansionPortDevice expansionDevice)
@@ -1101,11 +1006,9 @@ public:
 	double GetMouseSensitivity(MouseDevice device)
 	{
 		auto result = _mouseSensitivity.find((int)device);
-		if(result != _mouseSensitivity.end()) {
+		if(result != _mouseSensitivity.end())
 			return result->second;
-		} else {
-			return 1.0;
-		}
+		return 1.0;
 	}
 
 	void SetControllerDeadzoneSize(uint32_t deadzoneSize)
@@ -1216,15 +1119,5 @@ public:
 			_keyboardModeEnabled = false;
 			MessageManager::DisplayMessage("Input", "KeyboardModeDisabled");
 		}
-	}
-
-	void SetPauseScreenMessage(string message)
-	{
-		_pauseScreenMessage = message;
-	}
-
-	string GetPauseScreenMessage()
-	{
-		return _pauseScreenMessage;
 	}
 };

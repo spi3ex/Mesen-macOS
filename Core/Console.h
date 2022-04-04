@@ -152,10 +152,6 @@ public:
 	ConsoleFeatures GetAvailableFeatures();
 	void InputBarcode(uint64_t barcode, uint32_t digitCount);
 
-	void LoadTapeFile(string filepath);
-	void StartRecordingTapeFile(string filepath);
-	void StopRecordingTapeFile();
-	bool IsRecordingTapeFile();
 	bool IsNsf();
 		
 	void Reset(bool softReset = true);

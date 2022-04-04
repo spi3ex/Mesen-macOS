@@ -729,11 +729,8 @@ bool Console::IsPaused()
 
 void Console::UpdateNesModel(bool sendNotification)
 {
-	bool configChanged = false;
-	if(_settings->NeedControllerUpdate()) {
+	if(_settings->NeedControllerUpdate())
 		_controlManager->UpdateControlDevices();
-		configChanged = true;
-	}
 
 	NesModel model = _settings->GetNesModel();
 	if(model == NesModel::Auto) {
@@ -743,10 +740,8 @@ void Console::UpdateNesModel(bool sendNotification)
 			default: model = NesModel::NTSC; break;
 		}
 	}
-	if(_model != model) {
+	if(_model != model)
 		_model = model;
-		configChanged = true;
-	}
 
 	_cpu->SetMasterClockDivider(model);
 	_mapper->SetNesModel(model);
@@ -756,22 +751,18 @@ void Console::UpdateNesModel(bool sendNotification)
 
 double Console::GetFrameDelay()
 {
-	uint32_t emulationSpeed = _settings->GetEmulationSpeed();
-	double frameDelay;
-	if(emulationSpeed == 0) {
-		frameDelay = 0;
-	} else {
-		//60.1fps (NTSC), 50.01fps (PAL/Dendy)
-		switch(_model) {
-			default:
-			case NesModel::NTSC: frameDelay = _settings->CheckFlag(EmulationFlags::IntegerFpsMode) ? 16.6666666666666666667 : 16.63926405550947; break;
-			case NesModel::PAL:
-			case NesModel::Dendy: frameDelay = _settings->CheckFlag(EmulationFlags::IntegerFpsMode) ? 20 : 19.99720920217466; break;
-		}
-		frameDelay /= (double)emulationSpeed / 100.0;
+	//60.1fps (NTSC), 50.01fps (PAL/Dendy)
+	switch(_model)
+	{
+		case NesModel::PAL:
+		case NesModel::Dendy:
+			return _settings->CheckFlag(EmulationFlags::IntegerFpsMode) ? 20 : 19.99720920217466;
+		default:
+		case NesModel::NTSC:
+			break;
 	}
 
-	return frameDelay;
+	return _settings->CheckFlag(EmulationFlags::IntegerFpsMode) ? 16.6666666666666666667 : 16.63926405550947;
 }
 
 void Console::SaveState(ostream &saveStream)
@@ -1039,58 +1030,6 @@ void Console::InputBarcode(uint64_t barcode, uint32_t digitCount)
 	}
 }
 
-void Console::LoadTapeFile(string filepath)
-{
-	shared_ptr<ControlManager> controlManager = _controlManager;
-	if(controlManager) {
-		shared_ptr<FamilyBasicDataRecorder> dataRecorder = std::dynamic_pointer_cast<FamilyBasicDataRecorder>(controlManager->GetControlDevice(BaseControlDevice::ExpDevicePort2));
-		if(dataRecorder) {
-			Pause();
-			dataRecorder->LoadFromFile(filepath);
-			Resume();
-		}
-	}
-}
-
-void Console::StartRecordingTapeFile(string filepath)
-{
-	shared_ptr<ControlManager> controlManager = _controlManager;
-	if(controlManager) {
-		shared_ptr<FamilyBasicDataRecorder> dataRecorder = std::dynamic_pointer_cast<FamilyBasicDataRecorder>(controlManager->GetControlDevice(BaseControlDevice::ExpDevicePort2));
-		if(dataRecorder) {
-			Pause();
-			dataRecorder->StartRecording(filepath);
-			Resume();
-		}
-	}
-}
-
-void Console::StopRecordingTapeFile()
-{
-	shared_ptr<ControlManager> controlManager = _controlManager;
-	if(controlManager) {
-		shared_ptr<FamilyBasicDataRecorder> dataRecorder = std::dynamic_pointer_cast<FamilyBasicDataRecorder>(controlManager->GetControlDevice(BaseControlDevice::ExpDevicePort2));
-		if(dataRecorder) {
-			Pause();
-			dataRecorder->StopRecording();
-			Resume();
-		}
-	}
-}
-
-bool Console::IsRecordingTapeFile()
-{
-	shared_ptr<ControlManager> controlManager = _controlManager;
-	if(controlManager) {
-		shared_ptr<FamilyBasicDataRecorder> dataRecorder = std::dynamic_pointer_cast<FamilyBasicDataRecorder>(controlManager->GetControlDevice(BaseControlDevice::ExpDevicePort2));
-		if(dataRecorder) {
-			return dataRecorder->IsRecording();
-		}
-	}
-
-	return false;
-}
-
 bool Console::IsNsf()
 {
 	return std::dynamic_pointer_cast<NsfMapper>(_mapper) != nullptr;
@@ -1102,14 +1041,14 @@ uint8_t* Console::GetRamBuffer(uint16_t address)
 	AddressTypeInfo addrInfo;
 	_mapper->GetAbsoluteAddressAndType(address, &addrInfo);
 	
-	if(addrInfo.Address >= 0) {
-		if(addrInfo.Type == AddressType::InternalRam) {
+	if(addrInfo.Address >= 0)
+	{
+		if(addrInfo.Type == AddressType::InternalRam)
 			return _memoryManager->GetInternalRAM() + addrInfo.Address;
-		} else if(addrInfo.Type == AddressType::WorkRam) {
+		else if(addrInfo.Type == AddressType::WorkRam)
 			return _mapper->GetWorkRam() + addrInfo.Address;
-		} else if(addrInfo.Type == AddressType::SaveRam) {
+		else if(addrInfo.Type == AddressType::SaveRam)
 			return _mapper->GetSaveRam() + addrInfo.Address;
-		}
 	}
 	return nullptr;
 }
