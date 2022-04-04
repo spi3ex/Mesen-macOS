@@ -14,7 +14,6 @@
 #include "HdData.h"
 #include "HdNesPack.h"
 #include "RotateFilter.h"
-#include "NotificationManager.h"
 
 VideoDecoder::VideoDecoder(shared_ptr<Console> console)
 {
@@ -113,10 +112,7 @@ void VideoDecoder::DecodeFrame(bool synchronous)
 
 	ScreenSize screenSize;
 	GetScreenSize(screenSize, true);
-	if(_previousScale != _console->GetSettings()->GetVideoScale() || screenSize.Height != _previousScreenSize.Height || screenSize.Width != _previousScreenSize.Width) {
-		_console->GetNotificationManager()->SendNotification(ConsoleNotificationType::ResolutionChanged);
-	}
-	_previousScale = _console->GetSettings()->GetVideoScale();
+	_previousScale      = _console->GetSettings()->GetVideoScale();
 	_previousScreenSize = screenSize;
 	
 	_lastFrameInfo = frameInfo;

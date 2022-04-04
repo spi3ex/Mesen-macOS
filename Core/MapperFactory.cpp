@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "NotificationManager.h"
 #include "MapperFactory.h"
 #include "RomLoader.h"
 #include "UnifBoards.h"
@@ -680,11 +679,8 @@ shared_ptr<BaseMapper> MapperFactory::InitializeFromFile(shared_ptr<Console> con
 		}
 
 		shared_ptr<BaseMapper> mapper(GetMapperFromID(romData));
-		if(mapper) {
+		if(mapper)
 			return mapper;
-		}
-	} else if(loader.GetRomData().BiosMissing) {
-		console->GetNotificationManager()->SendNotification(ConsoleNotificationType::BiosNotFound, (void*)loader.GetRomData().Info.Format);
 	}
 	return nullptr;
 }

@@ -37,7 +37,6 @@
 #include "CheatManager.h"
 #include "VideoDecoder.h"
 #include "VideoRenderer.h"
-#include "NotificationManager.h"
 #include "ConsolePauseHelper.h"
 #include "EventManager.h"
 
@@ -67,7 +66,6 @@ Console::~Console()
 
 void Console::Init()
 {
-	_notificationManager.reset(new NotificationManager());
 	_batteryManager.reset(new BatteryManager());
 	
 	_videoRenderer.reset(new VideoRenderer());
@@ -96,10 +94,6 @@ void Console::Release(bool forShutdown)
 
 		_soundMixer.reset();
 		_notificationManager.reset();
-	}
-
-	if(_master) {
-		_master->_notificationManager->SendNotification(ConsoleNotificationType::VsDualSystemStopped);
 	}
 
 	_hdPackBuilder.reset();
@@ -253,10 +247,6 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 		shared_ptr<BaseMapper> mapper = MapperFactory::InitializeFromFile(shared_from_this(), romFile, romData);
 		if(mapper) {
 			bool isDifferentGame = _romFilepath != (string)romFile || _patchFilename != (string)patchFile;
-			if(_mapper) {
-				//Send notification only if a game was already running and we successfully loaded the new one
-				_notificationManager->SendNotification(ConsoleNotificationType::GameStopped, (void*)1);
-			}
 
 			if(isDifferentGame) {
 				_romFilepath = romFile;
@@ -363,15 +353,6 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 
 			if(IsMaster()) {
 				_settings->ClearFlags(EmulationFlags::ForceMaxSpeed);
-
-				if(_slave) {
-					_notificationManager->SendNotification(ConsoleNotificationType::VsDualSystemStarted);
-				}
-			}
-
-			//Used by netplay to take save state after UpdateInputState() is called above, to ensure client+server are in sync
-			if(!_master) {
-				_notificationManager->SendNotification(ConsoleNotificationType::GameInitCompleted);
 			}
 
 			Resume();
@@ -414,11 +395,6 @@ APU* Console::GetApu()
 shared_ptr<SoundMixer> Console::GetSoundMixer()
 {
 	return _soundMixer;
-}
-
-shared_ptr<NotificationManager> Console::GetNotificationManager()
-{
-	return _notificationManager;
 }
 
 EmulationSettings* Console::GetSettings()
@@ -534,11 +510,6 @@ void Console::ResetComponents(bool softReset)
 	_controlManager->Reset(softReset);
 
 	_resetRunTimers = true;
-
-	//This notification MUST be sent before the UpdateInputState() below to allow MovieRecorder to grab the first frame's worth of inputs
-	if(!_master) {
-		_notificationManager->SendNotification(softReset ? ConsoleNotificationType::GameReset : ConsoleNotificationType::GameLoaded);
-	}
 }
 
 void Console::Stop(int stopCode)
@@ -676,8 +647,6 @@ void Console::Run()
 
 			bool pausedRequired = _settings->NeedsPause();
 			if(pausedRequired && !_stop) {
-				_notificationManager->SendNotification(ConsoleNotificationType::GamePaused);
-
 				_runLock.Release();
 
 				while(pausedRequired && !_stop) {
@@ -689,7 +658,6 @@ void Console::Run()
 				_paused = false;
 					
 				_runLock.Acquire();
-				_notificationManager->SendNotification(ConsoleNotificationType::GameResumed);
 				lastFrameTimer.Reset();
 
 				//Reset the timer to avoid speed up after a pause
@@ -710,8 +678,6 @@ void Console::Run()
 	_paused = false;
 	_running = false;
 
-	_notificationManager->SendNotification(ConsoleNotificationType::BeforeEmulationStop);
-
 	StopRecordingHdPack();
 
 	_soundMixer->StopRecording();
@@ -731,9 +697,6 @@ void Console::Run()
 	
 	_stopLock.Release();
 	_runLock.Release();
-
-	_notificationManager->SendNotification(ConsoleNotificationType::GameStopped);
-	_notificationManager->SendNotification(ConsoleNotificationType::EmulationStopped);
 }
 
 void Console::ResetRunTimers()
@@ -783,20 +746,12 @@ void Console::UpdateNesModel(bool sendNotification)
 	if(_model != model) {
 		_model = model;
 		configChanged = true;
-
-		if(sendNotification) {
-			MessageManager::DisplayMessage("Region", model == NesModel::PAL ? "PAL" : (model == NesModel::Dendy ? "Dendy" : "NTSC"));
-		}
 	}
 
 	_cpu->SetMasterClockDivider(model);
 	_mapper->SetNesModel(model);
 	_ppu->SetNesModel(model);
 	_apu->SetNesModel(model);
-
-	if(configChanged && sendNotification) {
-		_notificationManager->SendNotification(ConsoleNotificationType::ConfigChanged);
-	}
 }
 
 double Console::GetFrameDelay()
@@ -872,7 +827,6 @@ void Console::LoadState(istream &loadStream, uint32_t stateVersion)
 			_slave->LoadState(loadStream, stateVersion);
 		}
 		
-		_notificationManager->SendNotification(ConsoleNotificationType::StateLoaded);
 		UpdateNesModel(false);
 	}
 }

@@ -5,7 +5,6 @@
 #include "HdNesPack.h"
 #include "VideoDecoder.h"
 #include "HdPackConditions.h"
-#include "NotificationManager.h"
 #include "BaseMapper.h"
 #include "MemoryManager.h"
 
@@ -143,8 +142,6 @@ HdPpu::~HdPpu()
 
 void HdPpu::SendFrame()
 {
-	_console->GetNotificationManager()->SendNotification(ConsoleNotificationType::PpuFrameDone, _currentOutputBuffer);
-
 	_info->FrameNumber = _frameCount;
 	_info->WatchedAddressValues.clear();
 	for(uint32_t address : _hdData->WatchedMemoryAddresses) {

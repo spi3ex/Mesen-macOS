@@ -9,7 +9,6 @@
 #include "ControlManager.h"
 #include "MemoryManager.h"
 #include "Console.h"
-#include "NotificationManager.h"
 
 PPU::PPU(shared_ptr<Console> console)
 {
@@ -1162,8 +1161,6 @@ void PPU::DebugCopyOutputBuffer(uint16_t *target)
 void PPU::SendFrame()
 {
 	UpdateGrayscaleAndIntensifyBits();
-
-	_console->GetNotificationManager()->SendNotification(ConsoleNotificationType::PpuFrameDone, _currentOutputBuffer);
 
 	_console->GetVideoDecoder()->UpdateFrameSync(_currentOutputBuffer);
 #if 0

@@ -24,7 +24,6 @@
 #include "StandardController.h"
 #include "Breakpoint.h"
 #include "CodeDataLogger.h"
-#include "NotificationManager.h"
 #include "DummyCpu.h"
 #include "EventManager.h"
 
@@ -627,11 +626,6 @@ void Debugger::ProcessPpuCycle()
 {
 	if(_proccessPpuCycle[_ppu->GetCurrentCycle()]) {
 		int32_t currentCycle = (_ppu->GetCurrentCycle() << 9) + _ppu->GetCurrentScanline();
-		for(auto updateCycle : _ppuViewerUpdateCycle) {
-			if(updateCycle.second == currentCycle) {
-				_console->GetNotificationManager()->SendNotification(ConsoleNotificationType::PpuViewerDisplayFrame, (void*)(uint64_t)updateCycle.first);
-			}
-		}
 
 		if(_ppu->GetCurrentCycle() == 0) {
 			if(_breakOnScanline == _ppu->GetCurrentScanline()) {
@@ -919,8 +913,6 @@ bool Debugger::SleepUntilResume(BreakSource source, uint32_t breakpointId, Break
 				((uint64_t)(bpType & 0x0F) << 8) |
 				((uint64_t)source & 0xFF)
 			);
-
-			_console->GetNotificationManager()->SendNotification(ConsoleNotificationType::CodeBreak, (void*)(uint64_t)param);
 
 			ProcessEvent(EventType::CodeBreak);
 			_stepOverAddr = -1;
@@ -1546,9 +1538,6 @@ void Debugger::ProcessEvent(EventType type)
 			break;
 
 		case EventType::StartFrame:
-			//Update the event viewer
-			_console->GetNotificationManager()->SendNotification(ConsoleNotificationType::EventViewerDisplayFrame);
-
 			//Clear the current frame/event log
 			if(CheckFlag(DebuggerFlags::PpuPartialDraw)) {
 				_ppu->DebugUpdateFrameBuffer(CheckFlag(DebuggerFlags::PpuShowPreviousFrame));
