@@ -11,17 +11,7 @@ class MessageManager
 private:
 	static IMessageManager* _messageManager;
 	static std::unordered_map<string, string> _enResources;
-	static std::unordered_map<string, string> _frResources;
-	static std::unordered_map<string, string> _jaResources;
-	static std::unordered_map<string, string> _ruResources;
-	static std::unordered_map<string, string> _esResources;
-	static std::unordered_map<string, string> _ukResources;
-	static std::unordered_map<string, string> _ptResources;
-	static std::unordered_map<string, string> _caResources;
-	static std::unordered_map<string, string> _zhResources;
-	static std::unordered_map<string, string> _itResources;
 
-	static bool _osdEnabled;
 	static SimpleLock _logLock;
 	static SimpleLock _messageLock;
 	static std::list<string> _log;
