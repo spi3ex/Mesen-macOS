@@ -80,9 +80,7 @@ private:
 	bool _paused = false;
 	bool _stop = false;
 	bool _running = false;
-	int32_t _stopCode = 0;
 
-	bool _pauseOnNextFrameRequested = false;
 	bool _resetRunTimers = false;
 
 	bool _disableOcNextFrame = false;
@@ -189,7 +187,6 @@ public:
 	bool IsExecutionStopped();
 
 	bool IsPaused();
-	void PauseOnNextFrame();
 
 	void SetNextFrameOverclockStatus(bool disabled);
 

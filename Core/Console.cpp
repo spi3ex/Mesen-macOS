@@ -544,7 +544,6 @@ void Console::ResetComponents(bool softReset)
 void Console::Stop(int stopCode)
 {
 	_stop = true;
-	_stopCode = stopCode;
 
 	_stopLock.Acquire();
 	_stopLock.Release();
@@ -675,12 +674,6 @@ void Console::Run()
 				_runLock.Acquire();
 			}
 
-			if(_pauseOnNextFrameRequested) {
-				//Used by "Run Single Frame" option
-				_settings->SetFlags(EmulationFlags::Paused);
-				_pauseOnNextFrameRequested = false;
-			}
-
 			bool pausedRequired = _settings->NeedsPause();
 			if(pausedRequired && !_stop) {
 				_notificationManager->SendNotification(ConsoleNotificationType::GamePaused);
@@ -711,7 +704,6 @@ void Console::Run()
 			}
 		}
 	} catch(const std::runtime_error &ex) {
-		_stopCode = -1;
 		MessageManager::DisplayMessage("Error", "GameCrash", ex.what());
 	}
 
@@ -770,11 +762,6 @@ bool Console::IsPaused()
 	if(_master)
 		return _master->_paused;
 	return _paused;
-}
-
-void Console::PauseOnNextFrame()
-{
-	_pauseOnNextFrameRequested = true;
 }
 
 void Console::UpdateNesModel(bool sendNotification)
