@@ -111,7 +111,6 @@ SOURCES_CXX := $(LIBRETRO_DIR)/libretro.cpp \
                $(UTIL_DIR)/UTF8Util.cpp \
                $(UTIL_DIR)/WavReader.cpp \
                $(UTIL_DIR)/ZipReader.cpp \
-               $(UTIL_DIR)/ZipWriter.cpp \
                $(UTIL_DIR)/HQX/hq2x.cpp \
                $(UTIL_DIR)/HQX/hq3x.cpp \
                $(UTIL_DIR)/HQX/hq4x.cpp \
