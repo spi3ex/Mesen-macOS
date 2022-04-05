@@ -2,10 +2,8 @@
 
 #include "stdafx.h"
 #include <atomic>
-#include <deque>
 #include <unordered_set>
 using std::atomic;
-using std::deque;
 using std::unordered_set;
 
 #include "DebuggerTypes.h"
@@ -41,7 +39,6 @@ class Debugger
 private:
 	static constexpr int BreakpointTypeCount = 8;
 
-	//Must be static to be thread-safe when switching game
 	static string _disassemblerOutput;
 
 	shared_ptr<Disassembler> _disassembler;
@@ -67,10 +64,6 @@ private:
 	int _nextScriptId;
 	vector<shared_ptr<ScriptHost>> _scripts;
 	
-	atomic<int32_t> _preventResume;
-	atomic<bool> _stopFlag;
-	atomic<bool> _executionStopped;
-	atomic<int32_t> _suspendCount;
 	vector<Breakpoint> _breakpoints[BreakpointTypeCount];
 	vector<ExpressionData> _breakpointRpnList[BreakpointTypeCount];
 	bool _hasBreakpoint[BreakpointTypeCount] = {};
@@ -80,16 +73,7 @@ private:
 	uint32_t _opCodeCycle;
 	MemoryOperationType _memoryOperationType;
 
-	deque<StackFrameInfo> _callstack;
-	deque<int32_t> _subReturnAddresses;
-
-	int32_t _stepOutReturnAddress;
-
 	unordered_set<uint32_t> _functionEntryPoints;
-
-	unique_ptr<ExpressionEvaluator> _watchExpEval;
-	unique_ptr<ExpressionEvaluator> _bpExpEval;
-	DebugState _debugState;
 
 	//Used to alter the executing address via "Set Next Statement"
 	uint16_t *_currentReadAddr;
@@ -100,28 +84,9 @@ private:
 	uint32_t _flags;
 
 	string _romName;
-	atomic<int32_t> _stepCount;
-	atomic<int32_t> _ppuStepCount;
-	atomic<int32_t> _stepCycleCount;
-	atomic<uint8_t> _lastInstruction;
-	atomic<bool> _stepOut;
-	atomic<int32_t> _stepOverAddr;
 	BreakSource _breakSource;
 	
 	atomic<bool> _released;
-
-	bool _enableBreakOnUninitRead;
-	
-	atomic<bool> _breakRequested;
-	bool _pausedForDebugHelper;
-
-	atomic<int32_t> _breakOnScanline;
-
-	bool _proccessPpuCycle[341];
-	std::unordered_map<int, int> _ppuViewerUpdateCycle;
-
-	uint16_t _ppuScrollX;
-	uint16_t _ppuScrollY;
 
 	int64_t _prevInstructionCycle;
 	int64_t _curInstructionCycle;
@@ -132,10 +97,6 @@ private:
 	vector<uint64_t> _rewindPrevInstructionCycleCache;
 
 	uint32_t _inputOverride[4];
-
-private:
-	void UpdatePpuCyclesToProcess();
-	void ResetStepState();
 
 public:
 	Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<PPU> ppu, shared_ptr<APU> apu, shared_ptr<MemoryManager> memoryManager, shared_ptr<BaseMapper> mapper);
@@ -192,7 +153,6 @@ public:
 	shared_ptr<PerformanceTracker> GetPerformanceTracker();
 	shared_ptr<EventManager> GetEventManager();
 
-	void StartCodeRunner(uint8_t *byteCode, uint32_t codeLength);
 	void StopCodeRunner();
 
 	void GetNesHeader(uint8_t* header);
@@ -200,13 +160,7 @@ public:
 	bool HasPrgChrChanges();
 
 	int32_t LoadScript(string name, string content, int32_t scriptId);
-	void RemoveScript(int32_t scriptId);
 
-	void ResetCounters();
-
-	void UpdateProgramCounter(uint16_t &addr, uint8_t &value);
-
-	void ProcessScriptSaveState(uint16_t &addr, uint8_t &value);
 	void ProcessEvent(EventType type);
 
 	uint32_t GetScreenPixel(uint8_t x, uint8_t y);

@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include <thread>
 #include "../Utilities/FolderUtilities.h"
 #include "MessageManager.h"
 #include "Debugger.h"
@@ -50,50 +49,22 @@ Debugger::Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<
 	_memoryAccessCounter.reset(new MemoryAccessCounter(this));
 	_eventManager.reset(new EventManager(this, cpu.get(), ppu.get(), _console->GetSettings()));
 
-	_bpExpEval.reset(new ExpressionEvaluator(this));
-	_watchExpEval.reset(new ExpressionEvaluator(this));
-
-#if _DEBUG
-	_bpExpEval->RunTests();
-#endif
-
-	_stepOut = false;
-	_stepCount = -1;
-	_stepOverAddr = -1;
-	_stepCycleCount = -1;
-	_ppuStepCount = -1;
-	_breakRequested = false;
-	_pausedForDebugHelper = false;
-	_breakOnScanline = -2;
 	_breakSource = BreakSource::Unspecified;
 
 	memset(_hasBreakpoint, 0, sizeof(_hasBreakpoint));
 
-	_preventResume = 0;
-	_stopFlag = false;
-	_suspendCount = 0;
-
 	_opCodeCycle = 0;
-	_lastInstruction = 0;
-
-	_stepOutReturnAddress = -1;
 
 	_currentReadAddr = nullptr;
 	_currentReadValue = nullptr;
 	_nextReadAddr = -1;
 	_returnToAddress = 0;
 
-	_ppuScrollX = 0;
-	_ppuScrollY = 0;
-
 	_flags = 0;
 
 	_runToCycle = -1;
 	_prevInstructionCycle = -1;
 	_curInstructionCycle = -1;
-
-	//Only enable break on uninitialized reads when debugger is opened at power on/reset
-	_enableBreakOnUninitRead = _cpu->GetPC() == 0;
 
 	_disassemblerOutput = "";
 	
@@ -109,8 +80,6 @@ Debugger::Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<
 	_nextScriptId = 0;
 
 	_released = false;
-
-	UpdatePpuCyclesToProcess();
 }
 
 Debugger::~Debugger()
@@ -124,8 +93,6 @@ void Debugger::ReleaseDebugger()
 {
 	if(!_released) {
 		_codeDataLogger->SaveCdlFile(FolderUtilities::CombinePath(FolderUtilities::GetDebuggerFolder(), FolderUtilities::GetFilename(_romName, false) + ".cdl"));
-
-		_stopFlag = true;
 
 		{
 			for(shared_ptr<ScriptHost> script : _scripts) {
@@ -153,10 +120,6 @@ Console* Debugger::GetConsole()
 
 void Debugger::Resume()
 {
-	_suspendCount--;
-	if(_suspendCount < 0) {
-		_suspendCount = 0;
-	}
 }
 
 void Debugger::SetFlags(uint32_t flags)
@@ -277,50 +240,25 @@ void Debugger::SetState(DebugState state)
 
 void Debugger::Break()
 {
-	_breakRequested = true;
-}
-
-void Debugger::ResetStepState()
-{
-	_ppuStepCount = -1;
-	_stepOverAddr = -1;
-	_stepCycleCount = -1;
-	_stepCount = -1;
-	_breakOnScanline = -2;
-	_stepOut = false;
 }
 
 void Debugger::PpuStep(uint32_t count)
 {
-	ResetStepState();
-	_ppuStepCount = count;
 	_breakSource = BreakSource::PpuStep;
 }
 
 void Debugger::Step(uint32_t count, BreakSource source)
 {
-	//Run CPU for [count] INSTRUCTIONS before breaking again
-	ResetStepState();
-	_stepCount = count;
 	_breakSource = source;
 }
 
 void Debugger::StepCycles(uint32_t count)
 {
-	//Run CPU for [count] CYCLES before breaking again
-	ResetStepState();
-	_stepCycleCount = count;
 	_breakSource = BreakSource::CpuStep;
 }
 
 void Debugger::Run()
 {
-	//Resume execution after a breakpoint has been hit
-	_ppuStepCount = -1;
-	_stepCount = -1;
-	_breakOnScanline = -2;
-	_stepCycleCount = -1;
-	_stepOut = false;
 }
 
 void Debugger::GenerateCodeOutput()
@@ -451,26 +389,6 @@ void Debugger::GetPpuAbsoluteAddressAndType(uint32_t relativeAddr, PpuAddressTyp
 	return _mapper->GetPpuAbsoluteAddressAndType(relativeAddr, info);
 }
 
-void Debugger::UpdatePpuCyclesToProcess()
-{
-	memset(_proccessPpuCycle, 0, sizeof(_proccessPpuCycle));
-	for(auto updateCycle : _ppuViewerUpdateCycle) {
-		int16_t cycle = updateCycle.second >> 9;
-		if(cycle < 341) {
-			_proccessPpuCycle[cycle] = true;
-		}
-	}
-	_proccessPpuCycle[0] = true;
-}
-
-void Debugger::StartCodeRunner(uint8_t *byteCode, uint32_t codeLength)
-{
-	_codeRunner.reset(new CodeRunner(vector<uint8_t>(byteCode, byteCode + codeLength), this));
-	_memoryManager->RegisterIODevice(_codeRunner.get());
-	_returnToAddress = _cpu->GetDebugPC();
-	SetNextStatement(CodeRunner::BaseAddress);
-}
-
 void Debugger::StopCodeRunner()
 {
 	_memoryManager->UnregisterIODevice(_codeRunner.get());
@@ -527,48 +445,6 @@ int Debugger::LoadScript(string name, string content, int32_t scriptId)
 	return -1;
 }
 
-void Debugger::RemoveScript(int32_t scriptId)
-{
-	DebugBreakHelper helper(this);
-	_scripts.erase(std::remove_if(_scripts.begin(), _scripts.end(), [=](const shared_ptr<ScriptHost>& script) {
-		if(script->GetScriptId() == scriptId) {
-			//Send a ScriptEnded event before unloading the script
-			script->ProcessEvent(EventType::ScriptEnded);
-			return true;
-		}
-		return false;
-	}), _scripts.end());
-	_hasScript = _scripts.size() > 0;
-}
-
-void Debugger::ResetCounters()
-{
-	//This is called when loading a state (among other things)
-	//Prevent counter reset when using step back (_runToCycle != 0), because step back will load a state
-	if(_runToCycle == -1) {
-		_memoryAccessCounter->ResetCounts();
-	}
-}
-
-void Debugger::UpdateProgramCounter(uint16_t &addr, uint8_t &value)
-{
-	addr = _cpu->GetPC();
-	value = _memoryManager->DebugRead(addr, true);
-	_cpu->SetDebugPC(addr);
-}
-
-void Debugger::ProcessScriptSaveState(uint16_t &addr, uint8_t &value)
-{
-	if(_hasScript) {
-		for(shared_ptr<ScriptHost> &script : _scripts) {
-			if(script->ProcessSavestate()) {
-				//Adjust PC and current addr/value if a state was loaded due to a call to loadSavestateAsync
-				UpdateProgramCounter(addr, value);
-			}
-		}
-	}
-}
-
 void Debugger::ProcessEvent(EventType type)
 {
 	if(_hasScript) {
@@ -611,7 +487,7 @@ void Debugger::ProcessEvent(EventType type)
 		case EventType::Nmi: _eventManager->AddDebugEvent(DebugEventType::Nmi); break;
 		case EventType::Irq: _eventManager->AddDebugEvent(DebugEventType::Irq); break;
 		case EventType::SpriteZeroHit: _eventManager->AddDebugEvent(DebugEventType::SpriteZeroHit); break;
-		case EventType::Reset: _enableBreakOnUninitRead = true; break;
+		case EventType::Reset: break;
 
 		case EventType::BusConflict: 
 			break;
