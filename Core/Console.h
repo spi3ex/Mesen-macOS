@@ -120,7 +120,6 @@ public:
 
 	void SaveBatteries();
 
-	void Run();
 	void Stop(int stopCode = 0);
 		
 	void RunSingleFrame();

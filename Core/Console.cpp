@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include <random>
-#include <thread>
 #include "Console.h"
 #include "CPU.h"
 #include "PPU.h"
@@ -537,59 +536,6 @@ void Console::RunSlaveCpu()
 			break;
 		}
 	}
-}
-
-void Console::Run()
-{
-	UpdateNesModel(true);
-
-	_running = true;
-
-	try {
-		while(true) {
-			uint32_t frameCount = _ppu->GetFrameCount();
-			while(_ppu->GetFrameCount() == frameCount)
-			{
-				_cpu->Exec();
-				if(_slave)
-					RunSlaveCpu();
-			}
-
-			_settings->DisableOverclocking(_disableOcNextFrame || IsNsf());
-			_disableOcNextFrame = false;
-
-			//Update model (ntsc/pal) and get delay for next frame
-			UpdateNesModel(true);
-
-			_systemActionManager->ProcessSystemActions();
-
-			if(_stop) {
-				_stop = false;
-				break;
-			}
-		}
-	} catch(const std::runtime_error &ex) {
-		MessageManager::DisplayMessage("Error", "GameCrash", ex.what());
-	}
-
-	_running = false;
-
-	StopRecordingHdPack();
-
-	_soundMixer->StopRecording();
-
-	_settings->ClearFlags(EmulationFlags::ForceMaxSpeed);
-
-	_initialized = false;
-
-	if(!_romFilepath.empty() && _mapper) {
-		//Ensure we save any battery file before unloading anything
-		SaveBatteries();
-	}
-
-	_romFilepath = "";
-
-	Release(false);
 }
 
 void Console::UpdateNesModel(bool sendNotification)
