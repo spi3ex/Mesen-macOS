@@ -496,8 +496,6 @@ ExpressionData* ExpressionEvaluator::PrivateGetRpnList(string expression, bool& 
 {
 	ExpressionData *cachedData = nullptr;
 	{
-		LockHandler lock = _cacheLock.AcquireSafe();
-
 		auto result = _cache.find(expression);
 		if(result != _cache.end()) {
 			cachedData = &(result->second);
@@ -510,7 +508,6 @@ ExpressionData* ExpressionEvaluator::PrivateGetRpnList(string expression, bool& 
 		ExpressionData data;
 		success = ToRpn(fixedExp, data);
 		if(success) {
-			LockHandler lock = _cacheLock.AcquireSafe();
 			_cache[expression] = data;
 			cachedData = &_cache[expression];
 		}

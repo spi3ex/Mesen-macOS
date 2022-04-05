@@ -8,7 +8,6 @@ using std::atomic;
 using std::deque;
 using std::unordered_set;
 
-#include "../Utilities/SimpleLock.h"
 #include "DebuggerTypes.h"
 
 class CPU;
@@ -67,7 +66,6 @@ private:
 	bool _breakOnFirstCycle;
 
 	bool _hasScript;
-	SimpleLock _scriptLock;
 	int _nextScriptId;
 	vector<shared_ptr<ScriptHost>> _scripts;
 	
@@ -95,8 +93,6 @@ private:
 	unique_ptr<ExpressionEvaluator> _bpExpEval;
 	DebugState _debugState;
 
-	SimpleLock _breakLock;
-
 	//Used to alter the executing address via "Set Next Statement"
 	uint16_t *_currentReadAddr;
 	uint8_t *_currentReadValue;
@@ -115,7 +111,6 @@ private:
 	BreakSource _breakSource;
 	
 	atomic<bool> _released;
-	SimpleLock _releaseLock;
 
 	bool _enableBreakOnUninitRead;
 	
@@ -157,7 +152,7 @@ public:
 	Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<PPU> ppu, shared_ptr<APU> apu, shared_ptr<MemoryManager> memoryManager, shared_ptr<BaseMapper> mapper);
 	~Debugger();
 
-	void ReleaseDebugger(bool needPause);
+	void ReleaseDebugger();
 
 	void SetPpu(shared_ptr<PPU> ppu);
 	Console* GetConsole();

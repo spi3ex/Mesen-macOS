@@ -4,7 +4,6 @@
 #include <deque>
 #include <unordered_map>
 #include <unordered_set>
-#include "../Utilities/SimpleLock.h"
 #include "DebuggerTypes.h"
 
 class Debugger;
@@ -115,7 +114,6 @@ private:
 	static const std::unordered_set<string> _operators;
 
 	std::unordered_map<string, ExpressionData, StringHasher> _cache;
-	SimpleLock _cacheLock;
 
 	int64_t operandStack[1000];
 	Debugger* _debugger;

@@ -118,20 +118,18 @@ Debugger::Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<
 Debugger::~Debugger()
 {
 	if(!_released) {
-		ReleaseDebugger(true);
+		ReleaseDebugger();
 	}
 }
 
-void Debugger::ReleaseDebugger(bool needPause)
+void Debugger::ReleaseDebugger()
 {
-	auto lock = _releaseLock.AcquireSafe();
 	if(!_released) {
 		_codeDataLogger->SaveCdlFile(FolderUtilities::CombinePath(FolderUtilities::GetDebuggerFolder(), FolderUtilities::GetFilename(_romName, false) + ".cdl"));
 
 		_stopFlag = true;
 
 		{
-			auto lock = _scriptLock.AcquireSafe();
 			for(shared_ptr<ScriptHost> script : _scripts) {
 				//Send a ScriptEnded event to all active scripts
 				script->ProcessEvent(EventType::ScriptEnded);
@@ -139,9 +137,6 @@ void Debugger::ReleaseDebugger(bool needPause)
 			_scripts.clear();
 			_hasScript = false;
 		}
-
-		_breakLock.Acquire();
-		_breakLock.Release();
 
 		_released = true;
 	}
@@ -865,8 +860,6 @@ bool Debugger::SleepUntilResume(BreakSource source, uint32_t breakpointId, Break
 
 	if((stepCount == 0 || breakRequested) && !_stopFlag && _suspendCount == 0) {
 		//Break
-		auto lock = _breakLock.AcquireSafe();
-				
 		if(preventResume == 0) {
 			if(source == BreakSource::Unspecified) {
 				source = _breakSource;
@@ -1232,7 +1225,6 @@ bool Debugger::HasPrgChrChanges()
 int Debugger::LoadScript(string name, string content, int32_t scriptId)
 {
 	DebugBreakHelper helper(this);
-	auto lock = _scriptLock.AcquireSafe();
 	
 	if(scriptId < 0) {
 		shared_ptr<ScriptHost> script(new ScriptHost(_nextScriptId++));
@@ -1259,7 +1251,6 @@ int Debugger::LoadScript(string name, string content, int32_t scriptId)
 void Debugger::RemoveScript(int32_t scriptId)
 {
 	DebugBreakHelper helper(this);
-	auto lock = _scriptLock.AcquireSafe();
 	_scripts.erase(std::remove_if(_scripts.begin(), _scripts.end(), [=](const shared_ptr<ScriptHost>& script) {
 		if(script->GetScriptId() == scriptId) {
 			//Send a ScriptEnded event before unloading the script

@@ -15,7 +15,6 @@ ScriptingContext::ScriptingContext(Debugger *debugger)
 
 void ScriptingContext::Log(string message)
 {
-	auto lock = _logLock.AcquireSafe();
 	_logRows.push_back(message);
 	if(_logRows.size() > 500) {
 		_logRows.pop_front();

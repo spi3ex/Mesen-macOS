@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.h"
 #include <deque>
-#include "../Utilities/SimpleLock.h"
 #include "DebuggerTypes.h"
 
 class Debugger;
@@ -23,7 +22,6 @@ private:
 	static string _log;
 
 	std::deque<string> _logRows;
-	SimpleLock _logLock;
 	bool _inStartFrameEvent = false;
 	bool _inExecOpEvent = false;
 

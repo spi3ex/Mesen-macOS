@@ -1,7 +1,6 @@
 #pragma once
 
 #include "stdafx.h"
-#include "../Utilities/SimpleLock.h"
 #include "DebuggerTypes.h"
 
 class Debugger;
@@ -62,8 +61,6 @@ private:
 	uint32_t _readChrSize = 0;
 	uint32_t _drawnChrSize = 0;
 
-	SimpleLock _lock;
-	
 	void CalculateStats();
 
 public:
@@ -88,9 +85,4 @@ public:
 	bool IsDrawn(uint32_t absoluteAddr);
 
 	void SetCdlData(uint8_t *cdlData, uint32_t length);
-	void GetCdlData(uint32_t offset, uint32_t length, DebugMemoryType memoryType, uint8_t* cdlData);
-
-	void StripData(uint8_t* romBuffer, CdlStripFlag flag);
-
-	void MarkPrgBytesAs(uint32_t start, uint32_t end, CdlPrgFlags type);
 };
