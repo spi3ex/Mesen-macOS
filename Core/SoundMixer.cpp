@@ -20,6 +20,11 @@ SoundMixer::SoundMixer(shared_ptr<Console> console)
 	_blipBufRight = blip_new(SoundMixer::MaxSamplesPerFrame);
 	_sampleRate = _settings->GetSampleRate();
 	_model = NesModel::NTSC;
+
+	// Reserve enough space in the output audio buffer
+	// for PAL content at a sample rate of 96 kHz
+	_audioSampleBuffer.resize(((size_t)((float)MaxSampleRate / 50.00697796826829) + 1) << 1);
+	_audioSampleBufferPos = 0;
 }
 
 SoundMixer::~SoundMixer()
@@ -31,6 +36,9 @@ SoundMixer::~SoundMixer()
 
 	blip_delete(_blipBufLeft);
 	blip_delete(_blipBufRight);
+
+	_audioSampleBuffer.clear();
+	_audioSampleBufferPos = 0;
 }
 
 void SoundMixer::StreamState(bool saving)
@@ -129,13 +137,15 @@ void SoundMixer::PlayAudioBuffer(uint32_t time)
 		_crossFeedFilter.ApplyFilter(_outputBuffer, sampleCount, filterSettings.CrossFadeRatio);
 	}
 
-	if(!_console->IsPaused())
-	{
-		if(!_skipMode && _sendAudioSample) {
-			for(uint32_t total = 0; total < sampleCount; ) {
-				total += (uint32_t)_sendAudioSample(_outputBuffer + total*2, sampleCount - total);
-			}
+	if(!_console->IsPaused() && !_skipMode) {
+		size_t sampleBufferSize = _audioSampleBuffer.size();
+		if (sampleBufferSize - _audioSampleBufferPos < (sampleCount << 1)) {
+			_audioSampleBuffer.resize((sampleBufferSize + (sampleCount << 1)) * 1.5);
 		}
+		for(size_t i = 0; i < (sampleCount << 1); i++) {
+			_audioSampleBuffer[i + _audioSampleBufferPos] = _outputBuffer[i];
+		}
+		_audioSampleBufferPos += (sampleCount << 1);
 	}
 
 	if(_settings->NeedAudioSettingsUpdate()) {
@@ -149,6 +159,18 @@ void SoundMixer::PlayAudioBuffer(uint32_t time)
 			UpdateRates(false);
 		}
 	}
+}
+
+void SoundMixer::UploadAudioSamples()
+{
+	size_t sampleCount = _audioSampleBufferPos >> 1;
+	if (!_sendAudioSample || !sampleCount) {
+		return;
+	}
+	for(size_t total = 0; total < sampleCount; ) {
+		total += _sendAudioSample(_audioSampleBuffer.data() + (total << 1), sampleCount - total);
+	}
+	_audioSampleBufferPos = 0;
 }
 
 void SoundMixer::SetNesModel(NesModel model)

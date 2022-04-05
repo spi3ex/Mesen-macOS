@@ -48,7 +48,7 @@ static bool _hdPacksEnabled = false;
 static string _mesenVersion = "";
 static int32_t _saveStateSize = -1;
 static bool _shiftButtonsClockwise = false;
-static int32_t _audioSampleRate = 44100;
+static int32_t _audioSampleRate = 48000;
 
 //Include game database as a byte array (representing the MesenDB.txt file)
 #include "MesenDB.inc"
@@ -171,7 +171,7 @@ extern "C" {
 			{ MesenRamState, "Default power-on state for RAM; All 0s (Default)|All 1s|Random Values" },
 			{ MesenFdsAutoSelectDisk, "FDS: Automatically insert disks; disabled|enabled" },
 			{ MesenFdsFastForwardLoad, "FDS: Fast forward while loading; disabled|enabled" },
-			{ MesenAudioSampleRate, "Sound Output Sample Rate; 96000|192000|384000|11025|22050|44100|48000" },
+			{ MesenAudioSampleRate, "Sound Output Sample Rate; 48000|96000|11025|22050|44100" },
 			{ NULL, NULL },
 		};
 
@@ -557,6 +557,7 @@ extern "C" {
 			int old_value = _audioSampleRate;
 
 			_audioSampleRate = atoi(var.value);
+			_audioSampleRate = (_audioSampleRate > 96000) ? 96000 : _audioSampleRate;
 
 			if(old_value != _audioSampleRate) {
 				_console->GetSettings()->SetSampleRate(_audioSampleRate);
@@ -700,6 +701,8 @@ extern "C" {
 			_renderer->GetSystemAudioVideoInfo(avInfo);
 			retroEnv(RETRO_ENVIRONMENT_SET_GEOMETRY, &avInfo);
 		}
+
+		_console->GetSoundMixer()->UploadAudioSamples();
 	}
 
 	RETRO_API size_t retro_serialize_size()
