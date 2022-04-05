@@ -19,7 +19,6 @@ VideoDecoder::VideoDecoder(shared_ptr<Console> console)
 {
 	_console = console;
 	_settings = _console->GetSettings();
-	_frameChanged = false;
 	UpdateVideoFilter();
 }
 
@@ -117,8 +116,6 @@ void VideoDecoder::DecodeFrame(bool synchronous)
 	
 	_lastFrameInfo = frameInfo;
 
-	_frameChanged = false;
-	
 	_console->GetVideoRenderer()->UpdateFrame(outputBuffer, frameInfo.Width, frameInfo.Height);
 }
 
@@ -129,14 +126,6 @@ uint32_t VideoDecoder::GetFrameCount()
 
 void VideoDecoder::UpdateFrameSync(void *ppuOutputBuffer, HdScreenInfo *hdScreenInfo)
 {
-	if(_frameChanged) {
-		//Last frame isn't done decoding yet - sometimes Signal() introduces a 25-30ms delay
-		while(_frameChanged) {
-			//Spin until decode is done
-		}
-		//At this point, we are sure that the decode thread is no longer busy
-	}
-
 	_frameNumber = _console->GetFrameCount();
 	_hdScreenInfo = hdScreenInfo;
 	_ppuOutputBuffer = (uint16_t*)ppuOutputBuffer;
@@ -146,19 +135,9 @@ void VideoDecoder::UpdateFrameSync(void *ppuOutputBuffer, HdScreenInfo *hdScreen
 
 void VideoDecoder::UpdateFrame(void *ppuOutputBuffer, HdScreenInfo *hdScreenInfo)
 {
-	if(_frameChanged) {
-		//Last frame isn't done decoding yet - sometimes Signal() introduces a 25-30ms delay
-		while(_frameChanged) {
-			//Spin until decode is done
-		}
-		//At this point, we are sure that the decode thread is no longer busy
-	}
-	
 	_frameNumber = _console->GetFrameCount();
 	_hdScreenInfo = hdScreenInfo;
 	_ppuOutputBuffer = (uint16_t*)ppuOutputBuffer;
-	_frameChanged = true;
-	_waitForFrame.Signal();
 
 	_frameCount++;
 }

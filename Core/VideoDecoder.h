@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.h"
 
-#include "../Utilities/AutoResetEvent.h"
 #include "EmulationSettings.h"
 #include "FrameInfo.h"
 
@@ -29,9 +28,6 @@ private:
 	bool _hdFilterEnabled = false;
 	uint32_t _frameNumber = 0;
 
-	AutoResetEvent _waitForFrame;
-	
-	atomic<bool> _frameChanged;
 	uint32_t _frameCount = 0;
 
 	ScreenSize _previousScreenSize = {};
