@@ -8,7 +8,6 @@
 #include "VideoDecoder.h"
 #include "Disassembler.h"
 #include "MMC5.h"
-#include "DebugBreakHelper.h"
 
 MemoryDumper::MemoryDumper(shared_ptr<PPU> ppu, shared_ptr<MemoryManager> memoryManager, shared_ptr<BaseMapper> mapper, shared_ptr<CodeDataLogger> codeDataLogger, Debugger* debugger, shared_ptr<Disassembler> disassembler)
 {
@@ -61,7 +60,6 @@ bool MemoryDumper::HasUndoHistory()
 void MemoryDumper::PerformUndo()
 {
 	if(!_undoHistory.empty()) {
-		DebugBreakHelper helper(_debugger);
 		_mapper->RestorePrgChrBackup(_undoHistory.back());
 		_undoHistory.pop_back();
 		_debugger->UpdateCdlCache();

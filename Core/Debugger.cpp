@@ -18,7 +18,6 @@
 #include "DisassemblyInfo.h"
 #include "PPU.h"
 #include "MemoryManager.h"
-#include "DebugBreakHelper.h"
 #include "ScriptHost.h"
 #include "StandardController.h"
 #include "Breakpoint.h"
@@ -49,8 +48,6 @@ Debugger::Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<
 	_memoryAccessCounter.reset(new MemoryAccessCounter(this));
 	_eventManager.reset(new EventManager(this, cpu.get(), ppu.get(), _console->GetSettings()));
 
-	_breakSource = BreakSource::Unspecified;
-
 	memset(_hasBreakpoint, 0, sizeof(_hasBreakpoint));
 
 	_opCodeCycle = 0;
@@ -62,7 +59,6 @@ Debugger::Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<
 
 	_flags = 0;
 
-	_runToCycle = -1;
 	_prevInstructionCycle = -1;
 	_curInstructionCycle = -1;
 
@@ -118,10 +114,6 @@ Console* Debugger::GetConsole()
 	return _console.get();
 }
 
-void Debugger::Resume()
-{
-}
-
 void Debugger::SetFlags(uint32_t flags)
 {
 	bool needUpdate = ((flags ^ _flags) & (int)DebuggerFlags::DisplayOpCodesInLowerCase) != 0;
@@ -140,7 +132,6 @@ bool Debugger::CheckFlag(DebuggerFlags flag)
 bool Debugger::LoadCdlFile(string cdlFilepath)
 {
 	if(_codeDataLogger->LoadCdlFile(cdlFilepath)) {
-		//Can't use DebugBreakHelper due to the fact this is called in the constructor
 		UpdateCdlCache();
 		return true;
 	}
@@ -149,21 +140,18 @@ bool Debugger::LoadCdlFile(string cdlFilepath)
 
 void Debugger::SetCdlData(uint8_t* cdlData, uint32_t length)
 {
-	DebugBreakHelper helper(this);
 	_codeDataLogger->SetCdlData(cdlData, length);
 	UpdateCdlCache();
 }
 
 void Debugger::ResetCdl()
 {
-	DebugBreakHelper helper(this);
 	_codeDataLogger->Reset();
 	UpdateCdlCache();
 }
 
 void Debugger::UpdateCdlCache()
 {
-	DebugBreakHelper helper(this);
 
 	_disassembler->Reset();
 	for(int i = 0, len = _mapper->GetMemorySize(DebugMemoryType::PrgRom); i < len; i++) {
@@ -208,9 +196,6 @@ shared_ptr<LabelManager> Debugger::GetLabelManager()
 
 void Debugger::GetApuState(ApuState *state)
 {
-	//Pause the emulation
-	DebugBreakHelper helper(this);
-
 	//Force APU to catch up before we retrieve its state
 	_apu->Run();
 
@@ -236,29 +221,6 @@ void Debugger::SetState(DebugState state)
 	if(state.CPU.PC != _cpu->GetPC()) {
 		SetNextStatement(state.CPU.PC);
 	}
-}
-
-void Debugger::Break()
-{
-}
-
-void Debugger::PpuStep(uint32_t count)
-{
-	_breakSource = BreakSource::PpuStep;
-}
-
-void Debugger::Step(uint32_t count, BreakSource source)
-{
-	_breakSource = source;
-}
-
-void Debugger::StepCycles(uint32_t count)
-{
-	_breakSource = BreakSource::CpuStep;
-}
-
-void Debugger::Run()
-{
 }
 
 void Debugger::GenerateCodeOutput()
@@ -299,14 +261,13 @@ const char* Debugger::GetCode(uint32_t &length)
 	GenerateCodeOutput();
 	bool forceRefresh = length == (uint32_t)-1;
 	length = (uint32_t)_disassemblerOutput.size();
-	if(!forceRefresh && previousCode.compare(_disassemblerOutput) == 0) {
+	if(!forceRefresh && previousCode.compare(_disassemblerOutput) == 0)
 		//Return null pointer if the code is identical to last call
-		//This avois the UTF8->UTF16 conversion that the UI needs to do
+		//This avoids the UTF8->UTF16 conversion that the UI 
+                //needs to do
 		//before comparing the strings
 		return nullptr;
-	} else {
-		return _disassemblerOutput.c_str();
-	}
+	return _disassemblerOutput.c_str();
 }
 
 int32_t Debugger::GetRelativeAddress(uint32_t addr, AddressType type)
@@ -353,9 +314,6 @@ void Debugger::SetNextStatement(uint16_t addr)
 		//Can't change the address right away (CPU is in the middle of an instruction)
 		//Address will change after current instruction is done executing
 		_nextReadAddr = addr;
-
-		//Force the current instruction to finish
-		Step(1);
 	}
 }
 
@@ -396,8 +354,6 @@ void Debugger::StopCodeRunner()
 	
 	//Break debugger when code has finished executing
 	SetNextStatement(_returnToAddress);
-
-	Run();
 }
 
 void Debugger::GetNesHeader(uint8_t* header)
@@ -408,7 +364,6 @@ void Debugger::GetNesHeader(uint8_t* header)
 
 void Debugger::RevertPrgChrChanges()
 {
-	DebugBreakHelper helper(this);
 	_mapper->RevertPrgChrChanges();
 	_disassembler->Reset();
 	UpdateCdlCache();
@@ -421,8 +376,6 @@ bool Debugger::HasPrgChrChanges()
 
 int Debugger::LoadScript(string name, string content, int32_t scriptId)
 {
-	DebugBreakHelper helper(this);
-	
 	if(scriptId < 0) {
 		shared_ptr<ScriptHost> script(new ScriptHost(_nextScriptId++));
 		script->LoadScript(name, content, this);

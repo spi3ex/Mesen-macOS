@@ -4,7 +4,6 @@
 #include "CPU.h"
 #include "PPU.h"
 #include "Debugger.h"
-#include "DebugBreakHelper.h"
 #include "DefaultVideoFilter.h"
 
 EventManager::EventManager(Debugger *debugger, CPU *cpu, PPU *ppu, EmulationSettings *settings)
@@ -46,8 +45,6 @@ void EventManager::AddDebugEvent(DebugEventType type, uint16_t address, uint8_t 
 
 void EventManager::GetEvents(DebugEventInfo *eventArray, uint32_t &maxEventCount, bool getPreviousFrameData)
 {
-	DebugBreakHelper breakHelper(_debugger);
-
 	vector<DebugEventInfo> &events = getPreviousFrameData ? _prevDebugEvents : _debugEvents;
 	uint32_t eventCount = std::min(maxEventCount, (uint32_t)events.size());
 	memcpy(eventArray, events.data(), eventCount * sizeof(DebugEventInfo));
@@ -56,7 +53,6 @@ void EventManager::GetEvents(DebugEventInfo *eventArray, uint32_t &maxEventCount
 
 uint32_t EventManager::GetEventCount(bool getPreviousFrameData)
 {
-	DebugBreakHelper breakHelper(_debugger);
 	return (uint32_t)(getPreviousFrameData ? _prevDebugEvents.size() : _debugEvents.size());
 }
 

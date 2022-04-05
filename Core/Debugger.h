@@ -84,18 +84,12 @@ private:
 	uint32_t _flags;
 
 	string _romName;
-	BreakSource _breakSource;
 	
 	atomic<bool> _released;
 
 	int64_t _prevInstructionCycle;
 	int64_t _curInstructionCycle;
-	int64_t _runToCycle;
-	bool _needRewind;
 	
-	vector<stringstream> _rewindCache;
-	vector<uint64_t> _rewindPrevInstructionCycleCache;
-
 	uint32_t _inputOverride[4];
 
 public:
@@ -115,15 +109,6 @@ public:
 	void GetApuState(ApuState *state);
 	void GetState(DebugState *state, bool includeMapperInfo = true);
 	void SetState(DebugState state);
-
-	void Resume();
-
-	void Break();
-
-	void PpuStep(uint32_t count = 1);
-	void Step(uint32_t count = 1, BreakSource source = BreakSource::CpuStep);
-	void StepCycles(uint32_t cycleCount = 1);
-	void Run();
 
 	bool LoadCdlFile(string cdlFilepath);
 	void SetCdlData(uint8_t* cdlData, uint32_t length);

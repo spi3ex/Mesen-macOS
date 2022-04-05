@@ -2,7 +2,6 @@
 #include "MemoryAccessCounter.h"
 #include "Console.h"
 #include "CPU.h"
-#include "DebugBreakHelper.h"
 #include "Debugger.h"
 #include "MemoryDumper.h"
 #include "PPU.h"
@@ -114,14 +113,11 @@ void MemoryAccessCounter::ProcessMemoryExec(AddressTypeInfo& addressInfo, uint64
 
 void MemoryAccessCounter::ResetCounts()
 {
-	DebugBreakHelper helper(_debugger);
 	for(int i = 0; i < 4; i++) {
-		for(int j = 0; j < _counters[i].size(); j++) {
+		for(int j = 0; j < _counters[i].size(); j++)
 			_counters[i][j] = { (uint32_t)j };
-		}
-		for(int j = 0; j < _ppuCounters[i].size(); j++) {
+		for(int j = 0; j < _ppuCounters[i].size(); j++)
 			_ppuCounters[i][j] = { (uint32_t)j };
-		}
 	}
 }
 
