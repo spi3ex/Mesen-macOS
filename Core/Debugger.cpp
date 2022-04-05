@@ -20,7 +20,6 @@
 #include "MemoryManager.h"
 #include "ScriptHost.h"
 #include "StandardController.h"
-#include "Breakpoint.h"
 #include "CodeDataLogger.h"
 #include "DummyCpu.h"
 #include "EventManager.h"
@@ -47,8 +46,6 @@ Debugger::Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<
 
 	_memoryAccessCounter.reset(new MemoryAccessCounter(this));
 	_eventManager.reset(new EventManager(this, cpu.get(), ppu.get(), _console->GetSettings()));
-
-	memset(_hasBreakpoint, 0, sizeof(_hasBreakpoint));
 
 	_opCodeCycle = 0;
 
@@ -177,11 +174,9 @@ bool Debugger::IsMarkedAsCode(uint16_t relativeAddress)
 {
 	AddressTypeInfo info;
 	GetAbsoluteAddressAndType(relativeAddress, &info);
-	if(info.Address >= 0 && info.Type == AddressType::PrgRom) {
+	if(info.Address >= 0 && info.Type == AddressType::PrgRom)
 		return _codeDataLogger->IsCode(info.Address);
-	} else {
-		return false;
-	}
+	return false;
 }
 
 shared_ptr<CodeDataLogger> Debugger::GetCodeDataLogger()

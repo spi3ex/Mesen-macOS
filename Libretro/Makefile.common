@@ -28,7 +28,6 @@ SOURCES_CXX := $(LIBRETRO_DIR)/libretro.cpp \
                $(CORE_DIR)/BaseVideoFilter.cpp \
                $(CORE_DIR)/BatteryManager.cpp \
                $(CORE_DIR)/BisqwitNtscFilter.cpp \
-               $(CORE_DIR)/Breakpoint.cpp \
                $(CORE_DIR)/CheatManager.cpp \
                $(CORE_DIR)/CodeDataLogger.cpp \
                $(CORE_DIR)/CodeRunner.cpp \

@@ -24,7 +24,6 @@ class BaseMapper;
 class ScriptHost;
 class TraceLogger;
 class PerformanceTracker;
-class Breakpoint;
 class CodeDataLogger;
 class ExpressionEvaluator;
 class DummyCpu;
@@ -37,8 +36,6 @@ enum class CdlStripFlag;
 class Debugger
 {
 private:
-	static constexpr int BreakpointTypeCount = 8;
-
 	static string _disassemblerOutput;
 
 	shared_ptr<Disassembler> _disassembler;
@@ -64,10 +61,6 @@ private:
 	int _nextScriptId;
 	vector<shared_ptr<ScriptHost>> _scripts;
 	
-	vector<Breakpoint> _breakpoints[BreakpointTypeCount];
-	vector<ExpressionData> _breakpointRpnList[BreakpointTypeCount];
-	bool _hasBreakpoint[BreakpointTypeCount] = {};
-
 	vector<uint8_t> _frozenAddresses;
 
 	uint32_t _opCodeCycle;
