@@ -172,29 +172,21 @@ public:
 	void GetFunctionEntryPoints(int32_t* entryPoints, int32_t maxCount);
 	int32_t GetFunctionEntryPointCount();
 
-	void GetCallstack(StackFrameInfo* callstackArray, uint32_t &callstackSize);
-	
 	void GetInstructionProgress(InstructionProgress &state);
 	void GetApuState(ApuState *state);
 	void GetState(DebugState *state, bool includeMapperInfo = true);
 	void SetState(DebugState state);
 
-	void Suspend();
 	void Resume();
 
 	void Break();
-	void ResumeFromBreak();
 
 	void PpuStep(uint32_t count = 1);
 	void Step(uint32_t count = 1, BreakSource source = BreakSource::CpuStep);
 	void StepCycles(uint32_t cycleCount = 1);
-	void StepOver();
-	void StepOut();
-	void StepBack();
 	void Run();
 
 	void BreakImmediately(BreakSource source);
-	void BreakOnScanline(int16_t scanline);
 
 	bool LoadCdlFile(string cdlFilepath);
 	void SetCdlData(uint8_t* cdlData, uint32_t length);
@@ -205,14 +197,7 @@ public:
 
 	void SetNextStatement(uint16_t addr);
 
-	void SetPpuViewerScanlineCycle(int32_t ppuViewerId, int32_t scanline, int32_t cycle);
-	void ClearPpuViewerSettings(int32_t ppuViewer);
-
 	bool IsExecutionStopped();
-
-	bool IsPauseIconShown();
-	void PreventResume();
-	void AllowResume();
 
 	void GenerateCodeOutput();
 	const char* GetCode(uint32_t &length);
@@ -233,8 +218,6 @@ public:
 	shared_ptr<PerformanceTracker> GetPerformanceTracker();
 	shared_ptr<EventManager> GetEventManager();
 
-	int32_t EvaluateExpression(string expression, EvalResultType &resultType, bool useCache);
-	
 	bool IsPpuCycleToProcess();
 	void ProcessPpuCycle();
 	bool ProcessRamOperation(MemoryOperationType type, uint16_t &addr, uint8_t &value);
@@ -242,30 +225,18 @@ public:
 	void ProcessVramWriteOperation(uint16_t addr, uint8_t &value);
 	
 	void SetLastFramePpuScroll(uint16_t addr, uint8_t xScroll, bool updateHorizontalScrollOnly);
-	uint32_t GetPpuScroll();
 
 	void ProcessInterrupt(uint16_t cpuAddr, uint16_t destCpuAddr, bool forNmi);
 	
-	void AddTrace(const char *log);
-
-	void SetFreezeState(uint16_t address, bool frozen);
-	void GetFreezeState(uint16_t startAddress, uint16_t length, bool* freezeState);
-
 	void StartCodeRunner(uint8_t *byteCode, uint32_t codeLength);
 	void StopCodeRunner();
 
 	void GetNesHeader(uint8_t* header);
-	void SaveRomToDisk(string filename, bool saveAsIps, uint8_t* header, CdlStripFlag cdlStripflag);
 	void RevertPrgChrChanges();
 	bool HasPrgChrChanges();
 
-	int32_t FindSubEntryPoint(uint16_t relativeAddress);
-	
-	void SetInputOverride(uint8_t port, uint32_t state);
-
 	int32_t LoadScript(string name, string content, int32_t scriptId);
 	void RemoveScript(int32_t scriptId);
-	const char* GetScriptLog(int32_t scriptId);
 
 	void ResetCounters();
 

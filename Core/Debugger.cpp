@@ -171,12 +171,6 @@ Console* Debugger::GetConsole()
 	return _console.get();
 }
 
-void Debugger::Suspend()
-{
-	_suspendCount++;
-	while(_executionStopped) {}
-}
-
 void Debugger::Resume()
 {
 	_suspendCount--;
@@ -515,19 +509,6 @@ void Debugger::ProcessAllBreakpoints(OperationInfo &operationInfo)
 				}
 			}
 		}
-	}
-}
-
-int32_t Debugger::EvaluateExpression(string expression, EvalResultType &resultType, bool useCache)
-{
-	DebugState state;
-	OperationInfo operationInfo { 0, 0, MemoryOperationType::DummyRead };
-	GetState(&state);
-	if(useCache) {
-		return _watchExpEval->Evaluate(expression, state, resultType, operationInfo);
-	} else {
-		ExpressionEvaluator expEval(this);
-		return expEval.Evaluate(expression, state, resultType, operationInfo);
 	}
 }
 
@@ -1008,11 +989,6 @@ void Debugger::Break()
 	_breakRequested = true;
 }
 
-void Debugger::ResumeFromBreak()
-{
-	_breakRequested = false;
-}
-
 void Debugger::ResetStepState()
 {
 	_ppuStepCount = -1;
@@ -1046,37 +1022,6 @@ void Debugger::StepCycles(uint32_t count)
 	_breakSource = BreakSource::CpuStep;
 }
 
-void Debugger::StepOut()
-{
-	if(_subReturnAddresses.empty()) {
-		return;
-	}
-
-	ResetStepState();
-	_stepOut = true;
-	_stepOutReturnAddress = _subReturnAddresses.back();
-}
-
-void Debugger::StepOver()
-{
-	if(_lastInstruction == 0x20 || _lastInstruction == 0x00) {
-		//We are on a JSR/BRK instruction, need to continue until the following instruction
-		_stepOverAddr = _cpu->GetPC() + (_lastInstruction == 0x20 ? 3 : 1);
-		Run();
-	} else {
-		//Except for JSR & BRK, StepOver behaves the same as StepTnto
-		Step(1);
-	}
-}
-
-void Debugger::StepBack()
-{
-	if(_runToCycle == -1 && _prevInstructionCycle < _curInstructionCycle) {
-		_runToCycle = _prevInstructionCycle;
-		Run();
-	}
-}
-
 void Debugger::Run()
 {
 	//Resume execution after a breakpoint has been hit
@@ -1091,12 +1036,6 @@ void Debugger::BreakImmediately(BreakSource source)
 {
 	Step(1);
 	SleepUntilResume(source);
-}
-
-void Debugger::BreakOnScanline(int16_t scanline)
-{
-	Run();
-	_breakOnScanline = scanline;
 }
 
 void Debugger::GenerateCodeOutput()
@@ -1197,17 +1136,6 @@ void Debugger::SetNextStatement(uint16_t addr)
 	}
 }
 
-void Debugger::GetCallstack(StackFrameInfo* callstackArray, uint32_t &callstackSize)
-{
-	DebugBreakHelper helper(this);
-	int i = 0;
-	for(StackFrameInfo &info : _callstack) {
-		callstackArray[i] = info;
-		i++;
-	}
-	callstackSize = i;
-}
-
 int32_t Debugger::GetFunctionEntryPointCount()
 {
 	DebugBreakHelper helper(this);
@@ -1253,21 +1181,6 @@ bool Debugger::IsExecutionStopped()
 	return _executionStopped || _console->IsExecutionStopped();
 }
 
-bool Debugger::IsPauseIconShown()
-{
-	return (_executionStopped || _console->IsPaused()) && !CheckFlag(DebuggerFlags::HidePauseIcon) && _preventResume == 0 && !_pausedForDebugHelper;
-}
-
-void Debugger::PreventResume()
-{
-	_preventResume++;
-}
-
-void Debugger::AllowResume()
-{
-	_preventResume--;
-}
-
 void Debugger::GetAbsoluteAddressAndType(uint32_t relativeAddr, AddressTypeInfo* info)
 {
 	return _mapper->GetAbsoluteAddressAndType(relativeAddr, info);
@@ -1290,43 +1203,12 @@ void Debugger::UpdatePpuCyclesToProcess()
 	_proccessPpuCycle[0] = true;
 }
 
-void Debugger::SetPpuViewerScanlineCycle(int32_t ppuViewerId, int32_t scanline, int32_t cycle)
-{
-	DebugBreakHelper helper(this);
-	_ppuViewerUpdateCycle[ppuViewerId] = (cycle << 9) + scanline;
-	UpdatePpuCyclesToProcess();
-}
-
-void Debugger::ClearPpuViewerSettings(int32_t ppuViewer)
-{
-	DebugBreakHelper helper(this);
-	_ppuViewerUpdateCycle.erase(ppuViewer);
-	UpdatePpuCyclesToProcess();
-}
-
 void Debugger::SetLastFramePpuScroll(uint16_t addr, uint8_t xScroll, bool updateHorizontalScrollOnly)
 {
 	_ppuScrollX = ((addr & 0x1F) << 3) | xScroll | ((addr & 0x400) ? 0x100 : 0);
 	if(!updateHorizontalScrollOnly) {
 		_ppuScrollY = (((addr & 0x3E0) >> 2) | ((addr & 0x7000) >> 12)) + ((addr & 0x800) ? 240 : 0);
 	}
-}
-
-uint32_t Debugger::GetPpuScroll()
-{
-	return (_ppuScrollY << 16) | _ppuScrollX;
-}
-
-void Debugger::SetFreezeState(uint16_t address, bool frozen)
-{
-	_frozenAddresses[address] = frozen ? 1 : 0;
-}
-
-void Debugger::GetFreezeState(uint16_t startAddress, uint16_t length, bool* freezeState)
-{
-	for(uint16_t i = 0; i < length; i++) {
-		freezeState[i] = _frozenAddresses[startAddress + i] ? true : false;
-	}	
 }
 
 void Debugger::StartCodeRunner(uint8_t *byteCode, uint32_t codeLength)
@@ -1354,20 +1236,6 @@ void Debugger::GetNesHeader(uint8_t* header)
 	memcpy(header, &nesHeader, sizeof(NESHeader));
 }
 
-void Debugger::SaveRomToDisk(string filename, bool saveAsIps, uint8_t* header, CdlStripFlag cdlStripflag)
-{
-	vector<uint8_t> fileData;
-	_mapper->GetRomFileData(fileData, saveAsIps, header);
-
-	_codeDataLogger->StripData(fileData.data() + sizeof(NESHeader), cdlStripflag);
-
-	ofstream file(filename, ios::out | ios::binary);
-	if(file.good()) {
-		file.write((char*)fileData.data(), fileData.size());
-		file.close();
-	}
-}
-
 void Debugger::RevertPrgChrChanges()
 {
 	DebugBreakHelper helper(this);
@@ -1379,29 +1247,6 @@ void Debugger::RevertPrgChrChanges()
 bool Debugger::HasPrgChrChanges()
 {
 	return _mapper->HasPrgChrChanges();
-}
-
-int32_t Debugger::FindSubEntryPoint(uint16_t relativeAddress)
-{
-	AddressTypeInfo info;
-	int32_t address = relativeAddress;
-	do {
-		GetAbsoluteAddressAndType(address, &info);
-		if(info.Address < 0 || info.Type != AddressType::PrgRom || _codeDataLogger->IsData(info.Address)) {
-			break;
-		}
-		address--;
-		if(_codeDataLogger->IsSubEntryPoint(info.Address)) {
-			break;
-		}
-	} while(address >= 0);
-
-	return address > relativeAddress ? relativeAddress : (address + 1);
-}
-
-void Debugger::SetInputOverride(uint8_t port, uint32_t state)
-{
-	_inputOverride[port] = state;
 }
 
 int Debugger::LoadScript(string name, string content, int32_t scriptId)
@@ -1444,17 +1289,6 @@ void Debugger::RemoveScript(int32_t scriptId)
 		return false;
 	}), _scripts.end());
 	_hasScript = _scripts.size() > 0;
-}
-
-const char* Debugger::GetScriptLog(int32_t scriptId)
-{
-	auto lock = _scriptLock.AcquireSafe();
-	for(shared_ptr<ScriptHost> &script : _scripts) {
-		if(script->GetScriptId() == scriptId) {
-			return script->GetLog();
-		}
-	}
-	return "";
 }
 
 void Debugger::ResetCounters()
