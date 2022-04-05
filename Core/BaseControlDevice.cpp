@@ -34,7 +34,6 @@ void BaseControlDevice::InternalSetStateFromInput()
 
 void BaseControlDevice::StreamState(bool saving)
 {
-	auto lock = _stateLock.AcquireSafe();
 	VectorInfo<uint8_t> state{ &_state.State };
 	Stream(_strobe, state);
 }
@@ -68,25 +67,21 @@ void BaseControlDevice::StrobeProcessWrite(uint8_t value)
 
 void BaseControlDevice::ClearState()
 {
-	auto lock = _stateLock.AcquireSafe();
 	_state = ControlDeviceState();
 }
 
 ControlDeviceState BaseControlDevice::GetRawState()
 {
-	auto lock = _stateLock.AcquireSafe();
 	return _state;
 }
 
 void BaseControlDevice::SetRawState(ControlDeviceState state)
 {
-	auto lock = _stateLock.AcquireSafe();
 	_state = state;
 }
 
 void BaseControlDevice::SetTextState(string textState)
 {
-	auto lock = _stateLock.AcquireSafe();
 	ClearState();
 
 	if(IsRawString()) {
@@ -120,7 +115,6 @@ void BaseControlDevice::SetTextState(string textState)
 
 string BaseControlDevice::GetTextState()
 {
-	auto lock = _stateLock.AcquireSafe();
 	if(IsRawString()) {
 		return string((char*)_state.State.data(), _state.State.size());
 	} else {
@@ -142,7 +136,6 @@ string BaseControlDevice::GetTextState()
 
 void BaseControlDevice::EnsureCapacity(int32_t minBitCount)
 {
-	auto lock = _stateLock.AcquireSafe();
 	uint32_t minByteCount = minBitCount / 8 + 1 + (HasCoordinates() ? 32 : 0);
 	int32_t gap = minByteCount - (int32_t)_state.State.size();
 
@@ -173,7 +166,6 @@ uint32_t BaseControlDevice::GetByteIndex(uint8_t bit)
 
 bool BaseControlDevice::IsPressed(uint8_t bit)
 {
-	auto lock = _stateLock.AcquireSafe();
 	EnsureCapacity(bit);
 	uint8_t bitMask = 1 << (bit % 8);
 	return (_state.State[GetByteIndex(bit)] & bitMask) != 0;
@@ -190,7 +182,6 @@ void BaseControlDevice::SetBitValue(uint8_t bit, bool set)
 
 void BaseControlDevice::SetBit(uint8_t bit)
 {
-	auto lock = _stateLock.AcquireSafe();
 	EnsureCapacity(bit);
 	uint8_t bitMask = 1 << (bit % 8);
 	_state.State[GetByteIndex(bit)] |= bitMask;
@@ -198,7 +189,6 @@ void BaseControlDevice::SetBit(uint8_t bit)
 
 void BaseControlDevice::ClearBit(uint8_t bit)
 {
-	auto lock = _stateLock.AcquireSafe();
 	EnsureCapacity(bit);
 	uint8_t bitMask = 1 << (bit % 8);
 	_state.State[GetByteIndex(bit)] &= ~bitMask;
@@ -234,7 +224,6 @@ void BaseControlDevice::SetPressedState(uint8_t bit, bool enabled)
 
 void BaseControlDevice::SetCoordinates(MousePosition pos)
 {
-	auto lock = _stateLock.AcquireSafe();
 	EnsureCapacity(-1);
 
 	_state.State[0] = pos.X & 0xFF;
@@ -245,7 +234,6 @@ void BaseControlDevice::SetCoordinates(MousePosition pos)
 
 MousePosition BaseControlDevice::GetCoordinates()
 {
-	auto lock = _stateLock.AcquireSafe();
 	EnsureCapacity(-1);
 
 	MousePosition pos;

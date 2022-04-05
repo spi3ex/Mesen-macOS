@@ -182,8 +182,6 @@ vector<CodeInfo> CheatManager::GetCheats()
 
 void CheatManager::SetCheats(CheatInfo cheats[], uint32_t length)
 {
-	_console->Pause();
-
 	ClearCodes();
 
 	for(uint32_t i = 0; i < length; i++) {
@@ -194,8 +192,6 @@ void CheatManager::SetCheats(CheatInfo cheats[], uint32_t length)
 			case CheatType::ProActionRocky: AddProActionRockyCode(cheat.ProActionRockyCode); break;
 		}
 	}
-
-	_console->Resume();
 }
 
 void CheatManager::SetCheats(vector<CodeInfo> &cheats)

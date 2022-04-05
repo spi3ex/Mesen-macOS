@@ -37,7 +37,6 @@
 #include "CheatManager.h"
 #include "VideoDecoder.h"
 #include "VideoRenderer.h"
-#include "ConsolePauseHelper.h"
 #include "EventManager.h"
 
 Console::Console(shared_ptr<Console> master, EmulationSettings* initialSettings)
@@ -56,7 +55,6 @@ Console::Console(shared_ptr<Console> master, EmulationSettings* initialSettings)
 		KeyManager::SetSettings(_settings.get());
 	}
 
-	_pauseCounter = 0;
 	_model = NesModel::NTSC;
 }
 
@@ -224,8 +222,6 @@ bool Console::Initialize(VirtualFile &romFile)
 bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forPowerCycle)
 {
 	if(romFile.IsValid()) {
-		Pause();
-
 		if(!_romFilepath.empty() && _mapper) {
 			//Ensure we save any battery file before loading a new game
 			SaveBatteries();
@@ -354,16 +350,12 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 			if(IsMaster()) {
 				_settings->ClearFlags(EmulationFlags::ForceMaxSpeed);
 			}
-
-			Resume();
 			return true;
 		} else {
 			_hdData = originalHdPackData;
 
 			//Reset battery source to current game if new game failed to load
 			_batteryManager->Initialize(FolderUtilities::GetFilename(GetRomInfo().RomName, false));
-
-			Resume();
 		}
 	}
 
@@ -515,31 +507,6 @@ void Console::ResetComponents(bool softReset)
 void Console::Stop(int stopCode)
 {
 	_stop = true;
-
-	_stopLock.Acquire();
-	_stopLock.Release();
-}
-
-void Console::Pause()
-{
-	if(_master) {
-		//When trying to pause/resume the slave, we need to pause/resume the master instead
-		_master->Pause();
-	} else {
-		_pauseCounter++;
-		_runLock.Acquire();
-	}
-}
-
-void Console::Resume()
-{
-	if(_master) {
-		//When trying to pause/resume the slave, we need to pause/resume the master instead
-		_master->Resume();
-	} else {
-		_runLock.Release();
-		_pauseCounter--;
-	}
 }
 
 void Console::RunSingleFrame()
@@ -579,13 +546,6 @@ void Console::Run()
 {
 	Timer clockTimer;
 	Timer lastFrameTimer;
-	double targetTime;
-	double lastDelay = GetFrameDelay();
-
-	_runLock.Acquire();
-	_stopLock.Acquire();
-
-	targetTime = lastDelay;
 
 	UpdateNesModel(true);
 
@@ -606,63 +566,6 @@ void Console::Run()
 
 			//Update model (ntsc/pal) and get delay for next frame
 			UpdateNesModel(true);
-			double delay = GetFrameDelay();
-
-			if(_resetRunTimers || delay != lastDelay || (clockTimer.GetElapsedMS() - targetTime) > 300) {
-				//Reset the timers, this can happen in 3 scenarios:
-				//1) Target frame rate changed
-				//2) The console was reset/power cycled or the emulation was paused (with or without the debugger)
-				//3) As a satefy net, if we overshoot our target by over 300 milliseconds, the timer is reset, too.
-				//   This can happen when something slows the emulator down severely (or when breaking execution in VS when debugging Mesen itself, etc.)
-				clockTimer.Reset();
-				targetTime = 0;
-
-				_resetRunTimers = false;
-				lastDelay = delay;
-			}
-
-			targetTime += delay;
-				
-			//When sleeping for a long time (e.g <= 25% speed), sleep in small chunks and check to see if we need to stop sleeping between each sleep call
-			while(targetTime - clockTimer.GetElapsedMS() > 50) {
-				clockTimer.WaitUntil(clockTimer.GetElapsedMS() + 40);
-				if(delay != GetFrameDelay() || _stop || _settings->NeedsPause() || _pauseCounter > 0) {
-					targetTime = 0;
-					break;
-				}
-			}
-
-			//Sleep until we're ready to start the next frame
-			clockTimer.WaitUntil(targetTime);
-
-			if(_pauseCounter > 0) {
-				//Need to temporarely pause the emu (to save/load a state, etc.)
-				_runLock.Release();
-
-				//Spin wait until we are allowed to start again
-				while(_pauseCounter > 0) { }
-
-				_runLock.Acquire();
-			}
-
-			bool pausedRequired = _settings->NeedsPause();
-			if(pausedRequired && !_stop) {
-				_runLock.Release();
-
-				while(pausedRequired && !_stop) {
-					//Sleep until emulation is resumed
-					std::this_thread::sleep_for(std::chrono::duration<int, std::milli>(30));
-					pausedRequired = _settings->NeedsPause();
-					_paused = true;
-				}
-				_paused = false;
-					
-				_runLock.Acquire();
-				lastFrameTimer.Reset();
-
-				//Reset the timer to avoid speed up after a pause
-				_resetRunTimers = true;
-			}
 
 			_systemActionManager->ProcessSystemActions();
 
@@ -675,7 +578,6 @@ void Console::Run()
 		MessageManager::DisplayMessage("Error", "GameCrash", ex.what());
 	}
 
-	_paused = false;
 	_running = false;
 
 	StopRecordingHdPack();
@@ -694,37 +596,11 @@ void Console::Run()
 	_romFilepath = "";
 
 	Release(false);
-	
-	_stopLock.Release();
-	_runLock.Release();
 }
 
 void Console::ResetRunTimers()
 {
 	_resetRunTimers = true;
-}
-
-bool Console::IsRunning()
-{
-	//For slave CPU, return the master's state
-	if(_master)
-		return _master->IsRunning();
-	return !_stopLock.IsFree() && _running;
-}
-
-bool Console::IsExecutionStopped()
-{
-	//For slave CPU, return the master's state
-	if(_master)
-		return _master->IsPaused();
-	return _runLock.IsFree() || (!_runLock.IsFree() && _pauseCounter > 0) || !_running;
-}
-
-bool Console::IsPaused()
-{
-	if(_master)
-		return _master->_paused;
-	return _paused;
 }
 
 void Console::UpdateNesModel(bool sendNotification)
@@ -747,22 +623,6 @@ void Console::UpdateNesModel(bool sendNotification)
 	_mapper->SetNesModel(model);
 	_ppu->SetNesModel(model);
 	_apu->SetNesModel(model);
-}
-
-double Console::GetFrameDelay()
-{
-	//60.1fps (NTSC), 50.01fps (PAL/Dendy)
-	switch(_model)
-	{
-		case NesModel::PAL:
-		case NesModel::Dendy:
-			return _settings->CheckFlag(EmulationFlags::IntegerFpsMode) ? 20 : 19.99720920217466;
-		default:
-		case NesModel::NTSC:
-			break;
-	}
-
-	return _settings->CheckFlag(EmulationFlags::IntegerFpsMode) ? 16.6666666666666666667 : 16.63926405550947;
 }
 
 void Console::SaveState(ostream &saveStream)
@@ -830,18 +690,6 @@ void Console::LoadState(uint8_t *buffer, uint32_t bufferSize)
 	LoadState(stream);
 }
 
-uint32_t Console::GetLagCounter()
-{
-	return _controlManager->GetLagCounter();
-}
-
-void Console::ResetLagCounter()
-{
-	Pause();
-	_controlManager->ResetLagCounter();
-	Resume();
-}
-
 void Console::SetNextFrameOverclockStatus(bool disabled)
 {
 	_disableOcNextFrame = disabled;
@@ -897,8 +745,6 @@ void Console::LoadHdPack(VirtualFile &romFile, VirtualFile &patchFile)
 
 void Console::StartRecordingHdPack(string saveFolder, ScaleFilterType filterType, uint32_t scale, uint32_t flags, uint32_t chrRamBankSize)
 {
-	ConsolePauseHelper helper(this);
-
 	std::stringstream saveState;
 	SaveState(saveState);
 	
@@ -916,8 +762,6 @@ void Console::StartRecordingHdPack(string saveFolder, ScaleFilterType filterType
 void Console::StopRecordingHdPack()
 {
 	if(_hdPackBuilder) {
-		ConsolePauseHelper helper(this);
-
 		std::stringstream saveState;
 		SaveState(saveState);
 
@@ -938,7 +782,6 @@ void Console::StopRecordingHdPack()
 bool Console::UpdateHdPackMode()
 {
 	//Switch back and forth between HD PPU and regular PPU as needed
-	Pause();
 
 	VirtualFile romFile = _romFilepath;
 	VirtualFile patchFile = _patchFilename;
@@ -968,8 +811,6 @@ bool Console::UpdateHdPackMode()
 		modeChanged = true;
 	}
 
-	Resume();
-	
 	return modeChanged;
 }
 

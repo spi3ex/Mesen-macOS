@@ -4,7 +4,6 @@
 #include "Snapshotable.h"
 #include "ControlManager.h"
 #include "ControlDeviceState.h"
-#include "../Utilities/SimpleLock.h"
 
 class Console;
 
@@ -18,7 +17,6 @@ protected:
 	vector<KeyMapping> _keyMappings;
 	bool _strobe;
 	uint8_t _port;
-	SimpleLock _stateLock;
 
 	virtual void RefreshStateBuffer() { }
 	virtual void StreamState(bool saving);

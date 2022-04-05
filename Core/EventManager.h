@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.h"
 #include "Types.h"
-#include "../Utilities/SimpleLock.h"
 
 enum class DebugEventType : uint8_t;
 struct DebugEventInfo;
@@ -25,7 +24,6 @@ private:
 	vector<DebugEventInfo> _snapshot;
 	uint16_t _snapshotScanline = 0;
 	uint16_t _snapshotCycle = 0;
-	SimpleLock _lock;
 
 	uint32_t _scanlineCount = 262;
 	uint16_t *_ppuBuffer = nullptr;
@@ -45,10 +43,6 @@ public:
 	void GetEvents(DebugEventInfo *eventArray, uint32_t &maxEventCount, bool getPreviousFrameData);
 	uint32_t GetEventCount(bool getPreviousFrameData);
 	void ClearFrameEvents();
-
-	void GetDisplayBuffer(uint32_t *buffer, EventViewerDisplayOptions options);
-
-	DebugEventInfo GetEvent(int16_t scanline, uint16_t cycle, EventViewerDisplayOptions &options);
 };
 
 struct EventViewerDisplayOptions

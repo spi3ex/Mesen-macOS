@@ -197,8 +197,6 @@ public:
 
 	void SetNextStatement(uint16_t addr);
 
-	bool IsExecutionStopped();
-
 	void GenerateCodeOutput();
 	const char* GetCode(uint32_t &length);
 

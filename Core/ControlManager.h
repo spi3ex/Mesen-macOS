@@ -1,7 +1,6 @@
 #pragma once
 
 #include "stdafx.h"
-#include "../Utilities/SimpleLock.h"
 #include "IMemoryHandler.h"
 #include "Snapshotable.h"
 
@@ -31,7 +30,6 @@ private:
 
 protected:
 	shared_ptr<Console> _console;
-	SimpleLock _deviceLock;
 	vector<shared_ptr<BaseControlDevice>> _controlDevices;
 	shared_ptr<BaseControlDevice> _systemActionManager;
 
@@ -49,7 +47,6 @@ public:
 	virtual void UpdateControlDevices();
 	void UpdateInputState();
 
-	uint32_t GetLagCounter();
 	void ResetLagCounter();
 
 	uint32_t GetPollCounter();

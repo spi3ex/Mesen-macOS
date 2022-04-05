@@ -97,8 +97,6 @@ Debugger::Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<
 	//Only enable break on uninitialized reads when debugger is opened at power on/reset
 	_enableBreakOnUninitRead = _cpu->GetPC() == 0;
 
-	_executionStopped = false;
-	
 	_disassemblerOutput = "";
 	
 	memset(_inputOverride, 0, sizeof(_inputOverride));
@@ -132,13 +130,6 @@ void Debugger::ReleaseDebugger(bool needPause)
 
 		_stopFlag = true;
 
-		if(needPause) {
-			//ReleaseDebugger is called in the callback for "BeforeEmulationStop"
-			//calling Pause in this scenario will cause a deadlock, but doing so is
-			//unnecessary, so we can just skip it.
-			_console->Pause();
-		}
-
 		{
 			auto lock = _scriptLock.AcquireSafe();
 			for(shared_ptr<ScriptHost> script : _scripts) {
@@ -151,10 +142,6 @@ void Debugger::ReleaseDebugger(bool needPause)
 
 		_breakLock.Acquire();
 		_breakLock.Release();
-
-		if(needPause) {
-			_console->Resume();
-		}
 
 		_released = true;
 	}
@@ -902,7 +889,6 @@ bool Debugger::SleepUntilResume(BreakSource source, uint32_t breakpointId, Break
 			}
 		}
 
-		_executionStopped = true;
 		_pausedForDebugHelper = breakRequested;
 		while((((stepCount == 0 || _breakRequested) && _suspendCount == 0) || _preventResume > 0) && !_stopFlag) {
 			std::this_thread::sleep_for(std::chrono::duration<int, std::milli>(10));
@@ -912,7 +898,6 @@ bool Debugger::SleepUntilResume(BreakSource source, uint32_t breakpointId, Break
 			stepCount = _stepCount.load();
 		}
 		_pausedForDebugHelper = false;
-		_executionStopped = false;
 		return true;
 	}
 	return false;
@@ -1174,11 +1159,6 @@ shared_ptr<MemoryAccessCounter> Debugger::GetMemoryAccessCounter()
 shared_ptr<EventManager> Debugger::GetEventManager()
 {
 	return _eventManager;
-}
-
-bool Debugger::IsExecutionStopped()
-{
-	return _executionStopped || _console->IsExecutionStopped();
 }
 
 void Debugger::GetAbsoluteAddressAndType(uint32_t relativeAddr, AddressTypeInfo* info)

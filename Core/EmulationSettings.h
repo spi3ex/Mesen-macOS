@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "MessageManager.h"
 #include "KeyManager.h"
-#include "../Utilities/SimpleLock.h"
 
 class Console;
 
@@ -430,9 +429,6 @@ private:
 	static uint8_t _versionMinor;
 	static uint8_t _versionRevision;
 
-	static SimpleLock _equalizerLock;
-	static SimpleLock _lock;
-
 	uint32_t _ppuPaletteArgb[11][64] = {
 		/* 2C02 */			{ 0xFF666666, 0xFF002A88, 0xFF1412A7, 0xFF3B00A4, 0xFF5C007E, 0xFF6E0040, 0xFF6C0600, 0xFF561D00, 0xFF333500, 0xFF0B4800, 0xFF005200, 0xFF004F08, 0xFF00404D, 0xFF000000, 0xFF000000, 0xFF000000, 0xFFADADAD, 0xFF155FD9, 0xFF4240FF, 0xFF7527FE, 0xFFA01ACC, 0xFFB71E7B, 0xFFB53120, 0xFF994E00, 0xFF6B6D00, 0xFF388700, 0xFF0C9300, 0xFF008F32, 0xFF007C8D, 0xFF000000, 0xFF000000, 0xFF000000, 0xFFFFFEFF, 0xFF64B0FF, 0xFF9290FF, 0xFFC676FF, 0xFFF36AFF, 0xFFFE6ECC, 0xFFFE8170, 0xFFEA9E22, 0xFFBCBE00, 0xFF88D800, 0xFF5CE430, 0xFF45E082, 0xFF48CDDE, 0xFF4F4F4F, 0xFF000000, 0xFF000000, 0xFFFFFEFF, 0xFFC0DFFF, 0xFFD3D2FF, 0xFFE8C8FF, 0xFFFBC2FF, 0xFFFEC4EA, 0xFFFECCC5, 0xFFF7D8A5, 0xFFE4E594, 0xFFCFEF96, 0xFFBDF4AB, 0xFFB3F3CC, 0xFFB5EBF2, 0xFFB8B8B8, 0xFF000000, 0xFF000000 },
 		/* 2C03 */			{ 0xFF6D6D6D, 0xFF002491, 0xFF0000DA, 0xFF6D48DA, 0xFF91006D, 0xFFB6006D, 0xFFB62400, 0xFF914800, 0xFF6D4800, 0xFF244800, 0xFF006D24, 0xFF009100, 0xFF004848, 0xFF000000, 0xFF000000, 0xFF000000, 0xFFB6B6B6, 0xFF006DDA, 0xFF0048FF, 0xFF9100FF, 0xFFB600FF, 0xFFFF0091, 0xFFFF0000, 0xFFDA6D00, 0xFF916D00, 0xFF249100, 0xFF009100, 0xFF00B66D, 0xFF009191, 0xFF000000, 0xFF000000, 0xFF000000, 0xFFFFFFFF, 0xFF6DB6FF, 0xFF9191FF, 0xFFDA6DFF, 0xFFFF00FF, 0xFFFF6DFF, 0xFFFF9100, 0xFFFFB600, 0xFFDADA00, 0xFF6DDA00, 0xFF00FF00, 0xFF48FFDA, 0xFF00FFFF, 0xFF000000, 0xFF000000, 0xFF000000, 0xFFFFFFFF, 0xFFB6DAFF, 0xFFDAB6FF, 0xFFFFB6FF, 0xFFFF91FF, 0xFFFFB6B6, 0xFFFFDA91, 0xFFFFFF48, 0xFFFFFF6D, 0xFFB6FF48, 0xFF91FF6D, 0xFF48FFDA, 0xFF91DAFF, 0xFF000000, 0xFF000000, 0xFF000000 },
@@ -539,8 +535,6 @@ public:
 	void SetFlags(uint64_t flags)
 	{
 		if((_flags & flags) != flags) {
-			//Need a lock to prevent flag changes from being ignored due to multithreaded access
-			LockHandler lock = _lock.AcquireSafe();
 			_flags |= flags;
 
 			_backgroundEnabled = !CheckFlag(EmulationFlags::DisableBackground);
@@ -563,8 +557,6 @@ public:
 	void ClearFlags(uint64_t flags)
 	{
 		if((_flags & flags) != 0) {
-			//Need a lock to prevent flag changes from being ignored due to multithreaded access
-			LockHandler lock = _lock.AcquireSafe();
 			_flags &= ~flags;
 
 			_backgroundEnabled = !CheckFlag(EmulationFlags::DisableBackground);
@@ -713,13 +705,11 @@ public:
 
 	vector<double> GetBandGains()
 	{
-		auto lock = _equalizerLock.AcquireSafe();
 		return _bandGains;
 	}
 
 	void SetBandGain(int band, double gain)
 	{
-		auto lock = _equalizerLock.AcquireSafe();
 		if(band < (int)_bandGains.size()) {
 			_bandGains[band] = gain;
 			_audioSettingsChanged = true;
@@ -728,13 +718,11 @@ public:
 
 	vector<double> GetEqualizerBands()
 	{
-		auto lock = _equalizerLock.AcquireSafe();
 		return _bands;
 	}
 
 	void SetEqualizerBands(double *bands, uint32_t bandCount)
 	{
-		auto lock = _equalizerLock.AcquireSafe();
 		_bands.clear();
 		_bandGains.clear();
 		for(uint32_t i = 0; i < bandCount; i++) {
