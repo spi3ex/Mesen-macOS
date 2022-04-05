@@ -11,7 +11,7 @@
 #include "HdPackConditions.h"
 #include "HdNesPack.h"
 
-#define checkConstraint(x, y) if(!(x)) { MessageManager::Log(y); return; }
+#define checkConstraint(x, y) if(!(x)) { return; }
 
 static const char windowsSlash = '\\';
 static const char unixSlash    = '/';
@@ -162,10 +162,8 @@ bool HdPackLoader::LoadPack()
 			vector<string> tokens;
 			if(lineContent.substr(0, 5) == "<ver>") {
 				_data->Version = stoi(lineContent.substr(5));
-				if(_data->Version > HdNesPack::CurrentVersion) {
-					MessageManager::Log("[HDPack] This HD Pack was built with a more recent version of Mesen - update Mesen to the latest version and try again.");
+				if(_data->Version > HdNesPack::CurrentVersion)
 					return false;
-				}
 			} else if(lineContent.substr(0, 7) == "<scale>") {
 				lineContent = lineContent.substr(7);
 				_data->Scale = std::stoi(lineContent);
@@ -212,7 +210,6 @@ bool HdPackLoader::LoadPack()
 
 		return true;
 	} catch(std::exception &ex) {
-		MessageManager::Log(string("[HDPack] Error loading HDPack: ") + ex.what() + " on line: " + currentLine);
 		return false;
 	}
 }
@@ -229,10 +226,8 @@ bool HdPackLoader::ProcessImgTag(string src)
 		PremultiplyAlpha(bitmapInfo.PixelData);
 		_hdNesBitmaps.push_back(bitmapInfo);
 		return true;
-	} else {
-		MessageManager::Log("[HDPack] Error loading HDPack: PNG file " + src + " could not be read.");
-		return false;
 	}
+	return false;
 }
 
 void HdPackLoader::PremultiplyAlpha(vector<uint32_t> &pixelData)
@@ -292,10 +287,8 @@ void HdPackLoader::ProcessPatchTag(vector<string> &tokens)
 	checkConstraint(tokens[1].size() == 40, string("[HDPack] Invalid SHA1 hash for patch (" + tokens[0] + "): " + tokens[1]));
 
 	vector<uint8_t> fileData;
-	if(!LoadFile(tokens[0], fileData)) {
-		MessageManager::Log(string("[HDPack] Patch file not found: " + tokens[1]));
+	if(!LoadFile(tokens[0], fileData))
 		return;
-	}
 
 	std::transform(tokens[1].begin(), tokens[1].end(), tokens[1].begin(), ::toupper);
 	if(_loadFromZip) {
@@ -410,8 +403,6 @@ void HdPackLoader::ProcessOptionTag(vector<string> &tokens)
 			_data->OptionFlags |= (int)HdPackOptions::DisableCache;
 		} else if(token == "disableOriginalTiles") {
 			_data->OptionFlags |= (int)HdPackOptions::DontRenderOriginalTiles;
-		} else {
-			MessageManager::Log("[HDPack] Invalid option: " + token);
 		}
 	}
 }
@@ -438,10 +429,8 @@ void HdPackLoader::ProcessConditionTag(vector<string> &tokens, bool createInvert
 		condition.reset(new HdPackMemoryCheckConstantCondition());
 	} else if(tokens[1] == "frameRange") {
 		condition.reset(new HdPackFrameRangeCondition());
-	} else {
-		MessageManager::Log("[HDPack] Invalid condition type: " + tokens[1]);
+	} else
 		return;
-	}
 
 	tokens[0].erase(tokens[0].find_last_not_of(" \n\r\t") + 1);
 	condition->Name = tokens[0];
@@ -600,12 +589,10 @@ void HdPackLoader::ProcessBackgroundTag(vector<string> &tokens, vector<HdPackCon
 				!dynamic_cast<HdPackMemoryCheckCondition*>(condition) &&
 				!dynamic_cast<HdPackMemoryCheckConstantCondition*>(condition) &&
 				!dynamic_cast<HdPackFrameRangeCondition*>(condition)
-			) {
-				MessageManager::Log("[HDPack] Invalid condition type for background: " + tokens[0]);
+			)
 				return;
-			} else {
+			else
 				backgroundInfo.Conditions.push_back(condition);
-			}
 		}
 
 		if(tokens.size() > 2) {
@@ -632,29 +619,21 @@ void HdPackLoader::ProcessBackgroundTag(vector<string> &tokens, vector<HdPackCon
 		}
 
 		_data->Backgrounds.push_back(backgroundInfo);
-	} else {
-		MessageManager::Log("[HDPack] Error while loading background: " + tokens[0]);
 	}
 }
 
 int HdPackLoader::ProcessSoundTrack(string albumString, string trackString, string filename)
 {
 	int album = std::stoi(albumString);
-	if(album < 0 || album > 255) {
-		MessageManager::Log("[HDPack] Invalid album value: " + albumString);
+	if(album < 0 || album > 255)
 		return -1;
-	}
 
 	int track = std::stoi(trackString);
-	if(track < 0 || track > 255) {
-		MessageManager::Log("[HDPack] Invalid track value: " + trackString);
+	if(track < 0 || track > 255)
 		return -1;
-	}
 
-	if(!CheckFile(filename)) {
-		MessageManager::Log("[HDPack] OGG file not found: " + filename);
+	if(!CheckFile(filename))
 		return -1;
-	}
 
 	return album * 256 + track;
 }
@@ -693,17 +672,11 @@ vector<HdPackCondition*> HdPackLoader::ParseConditionString(string conditionStri
 	for(string conditionName : conditionNames) {
 		conditionName.erase(conditionName.find_last_not_of(" \n\r\t") + 1);
 
-		bool found = false;
 		for(unique_ptr<HdPackCondition> &condition : conditions) {
 			if(conditionName == condition->Name) {
 				result.push_back(condition.get());
-				found = true;
 				break;
 			}
-		}
-
-		if(!found) {
-			MessageManager::Log("[HDPack] Condition not found: " + conditionName);
 		}
 	}
 

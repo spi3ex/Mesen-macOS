@@ -588,8 +588,6 @@ bool Debugger::IsPpuCycleToProcess()
 void Debugger::ProcessPpuCycle()
 {
 	if(_proccessPpuCycle[_ppu->GetCurrentCycle()]) {
-		int32_t currentCycle = (_ppu->GetCurrentCycle() << 9) + _ppu->GetCurrentScanline();
-
 		if(_ppu->GetCurrentCycle() == 0) {
 			if(_breakOnScanline == _ppu->GetCurrentScanline()) {
 				Step(1);
@@ -861,19 +859,9 @@ bool Debugger::SleepUntilResume(BreakSource source, uint32_t breakpointId, Break
 	if((stepCount == 0 || breakRequested) && !_stopFlag && _suspendCount == 0) {
 		//Break
 		if(preventResume == 0) {
-			if(source == BreakSource::Unspecified) {
+			if(source == BreakSource::Unspecified)
 				source = _breakSource;
-			}
 			_breakSource = BreakSource::Unspecified;
-
-			uint64_t param = (
-				((uint64_t)breakpointId << 40) | 
-				((uint64_t)bpValue << 32) |
-				((uint64_t)(bpAddress & 0xFFFF) << 16) | 
-				((uint64_t)((int)bpMemOpType & 0x0F) << 12) |
-				((uint64_t)(bpType & 0x0F) << 8) |
-				((uint64_t)source & 0xFF)
-			);
 
 			ProcessEvent(EventType::CodeBreak);
 			_stepOverAddr = -1;

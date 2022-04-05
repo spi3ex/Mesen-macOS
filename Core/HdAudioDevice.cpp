@@ -46,8 +46,6 @@ bool HdAudioDevice::PlayBgmTrack(uint8_t track, uint32_t startOffset)
 			_lastBgmTrack = trackId;
 			return true;
 		}
-	} else {
-		MessageManager::Log("[HDPack] Invalid album+track combination: " + std::to_string(_album) + ":" + std::to_string(track));
 	}
 	return false;
 }
@@ -55,12 +53,9 @@ bool HdAudioDevice::PlayBgmTrack(uint8_t track, uint32_t startOffset)
 bool HdAudioDevice::PlaySfx(uint8_t sfxNumber)
 {
 	auto result = _hdData->SfxFilesById.find(_album * 256 + sfxNumber);
-	if(result != _hdData->SfxFilesById.end()) {
+	if(result != _hdData->SfxFilesById.end())
 		return !_oggMixer->Play(result->second, true, 0);
-	} else {
-		MessageManager::Log("[HDPack] Invalid album+sfx number combination: " + std::to_string(_album) + ":" + std::to_string(sfxNumber));
-		return false;
-	}
+	return false;
 }
 
 void HdAudioDevice::ProcessControlFlags(uint8_t flags)

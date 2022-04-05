@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "SaveStateManager.h"
-#include "MessageManager.h"
 #include "Console.h"
 #include "EmulationSettings.h"
 #include "VideoDecoder.h"
@@ -49,16 +48,14 @@ bool SaveStateManager::LoadState(istream &stream, bool hashCheckRequired)
 		uint32_t emuVersion, fileFormatVersion;
 
 		stream.read((char*)&emuVersion, sizeof(emuVersion));
-		if(emuVersion > EmulationSettings::GetMesenVersion()) {
-			MessageManager::DisplayMessage("SaveStates", "SaveStateNewerVersion");
+		if(emuVersion > EmulationSettings::GetMesenVersion())
 			return false;
-		}
 
 		stream.read((char*)&fileFormatVersion, sizeof(fileFormatVersion));
-		if(fileFormatVersion <= 11) {
-			MessageManager::DisplayMessage("SaveStates", "SaveStateIncompatibleVersion");
+		if(fileFormatVersion <= 11)
 			return false;
-		} else {
+
+		{
 			int32_t mapperId = -1;
 			int32_t subMapperId = -1;
 			uint16_t id;
@@ -88,10 +85,8 @@ bool SaveStateManager::LoadState(istream &stream, bool hashCheckRequired)
 					//If mismatching states aren't allowed, or a game isn't loaded, or the mapper types don't match, try to find and load the matching ROM
 					HashInfo info;
 					info.Sha1 = hash;
-					if(!_console->LoadMatchingRom(romName, info)) {
-						MessageManager::DisplayMessage("SaveStates", "SaveStateMissingRom", romName);
+					if(!_console->LoadMatchingRom(romName, info))
 						return false;
-					}
 				}
 			}
 		}
@@ -100,6 +95,5 @@ bool SaveStateManager::LoadState(istream &stream, bool hashCheckRequired)
 
 		return true;
 	}
-	MessageManager::DisplayMessage("SaveStates", "SaveStateInvalidFile");
 	return false;
 }

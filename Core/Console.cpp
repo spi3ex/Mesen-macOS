@@ -359,7 +359,6 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 		}
 	}
 
-	MessageManager::DisplayMessage("Error", "CouldNotLoadFile", romFile.GetFileName());
 	return false;
 }
 

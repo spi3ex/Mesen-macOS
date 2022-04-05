@@ -3,7 +3,6 @@
 #include "CheatManager.h"
 #include "Console.h"
 #include "BaseMapper.h"
-#include "MessageManager.h"
 
 CheatManager::CheatManager(shared_ptr<Console> console)
 {
@@ -199,10 +198,9 @@ void CheatManager::SetCheats(vector<CodeInfo> &cheats)
 	//Used by NetPlay
 	ClearCodes();
 
-	if(cheats.size() > 0) {
-		MessageManager::DisplayMessage("Cheats", cheats.size() > 1 ? "CheatsApplied" : "CheatApplied", std::to_string(cheats.size()));
-		for(CodeInfo &cheat : cheats) {
+	if(cheats.size() > 0)
+	{
+		for(CodeInfo &cheat : cheats)
 			AddCode(cheat);
-		}
 	}
 }

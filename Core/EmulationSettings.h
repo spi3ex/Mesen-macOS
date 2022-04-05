@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include "stdafx.h"
-#include "MessageManager.h"
 #include "KeyManager.h"
 
 class Console;
@@ -795,10 +794,6 @@ public:
 	void SetPpuNmiConfig(uint32_t extraScanlinesBeforeNmi, uint32_t extraScanlinesAfterNmi)
 	{
 		if(_extraScanlinesBeforeNmi != extraScanlinesBeforeNmi || _extraScanlinesAfterNmi != extraScanlinesAfterNmi) {
-			if(extraScanlinesBeforeNmi > 0 || extraScanlinesAfterNmi > 0) {
-				MessageManager::DisplayMessage("PPU", "ScanlineTimingWarning");
-			}
-
 			_extraScanlinesBeforeNmi = extraScanlinesBeforeNmi;
 			_extraScanlinesAfterNmi = extraScanlinesAfterNmi;
 		}
@@ -1095,17 +1090,13 @@ public:
 
 	void EnableKeyboardMode()
 	{
-		if(!_keyboardModeEnabled) {
+		if(!_keyboardModeEnabled)
 			_keyboardModeEnabled = true;
-			MessageManager::DisplayMessage("Input", "KeyboardModeEnabled");
-		}
 	}
 
 	void DisableKeyboardMode()
 	{
-		if(_keyboardModeEnabled) {
+		if(_keyboardModeEnabled)
 			_keyboardModeEnabled = false;
-			MessageManager::DisplayMessage("Input", "KeyboardModeDisabled");
-		}
 	}
 };
