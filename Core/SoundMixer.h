@@ -33,6 +33,9 @@ private:
 	static constexpr uint32_t MaxChannelCount = 11;
 
 	retro_audio_sample_batch_t _sendAudioSample = nullptr;
+	vector<int16_t> _audioSampleBuffer;
+	size_t _audioSampleBufferPos = 0;
+
 	bool _skipMode = false;
 	EmulationSettings* _settings;
 	shared_ptr<WaveRecorder> _waveRecorder;
@@ -95,6 +98,7 @@ public:
 	void Reset();
 	
 	void PlayAudioBuffer(uint32_t cycle);
+	void UploadAudioSamples();
 	void AddDelta(AudioChannel channel, uint32_t time, int16_t delta);
 
 	void StartRecording(string filepath);
