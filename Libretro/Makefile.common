@@ -106,7 +106,6 @@ SOURCES_CXX := $(LIBRETRO_DIR)/libretro.cpp \
                $(UTIL_DIR)/stb_vorbis.cpp \
                $(UTIL_DIR)/stdafx.cpp \
                $(UTIL_DIR)/SZReader.cpp \
-               $(UTIL_DIR)/Timer.cpp \
                $(UTIL_DIR)/UpsPatcher.cpp \
                $(UTIL_DIR)/UTF8Util.cpp \
                $(UTIL_DIR)/WavReader.cpp \

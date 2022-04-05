@@ -12,7 +12,6 @@
 #include "Debugger.h"
 #include "MessageManager.h"
 #include "EmulationSettings.h"
-#include "../Utilities/Timer.h"
 #include "../Utilities/FolderUtilities.h"
 #include "VirtualFile.h"
 #include "HdBuilderPpu.h"
