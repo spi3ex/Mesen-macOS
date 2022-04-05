@@ -135,10 +135,4 @@ public:
 	int32_t Evaluate(ExpressionData &data, DebugState &state, EvalResultType &resultType, OperationInfo &operationInfo);
 	int32_t Evaluate(string expression, DebugState &state, EvalResultType &resultType, OperationInfo &operationInfo);
 	ExpressionData GetRpnList(string expression, bool &success);
-
-	bool Validate(string expression);
-
-#if _DEBUG
-	void RunTests();
-#endif
 };
