@@ -78,19 +78,15 @@ std::unordered_map<string, string> MessageManager::_enResources = {
 };
 
 std::list<string> MessageManager::_log;
-SimpleLock MessageManager::_logLock;
-SimpleLock MessageManager::_messageLock;
 IMessageManager* MessageManager::_messageManager = nullptr;
 
 void MessageManager::RegisterMessageManager(IMessageManager* messageManager)
 {
-	auto lock = _messageLock.AcquireSafe();
 	MessageManager::_messageManager = messageManager;
 }
 
 void MessageManager::UnregisterMessageManager(IMessageManager* messageManager)
 {
-	auto lock = _messageLock.AcquireSafe();
 	if(MessageManager::_messageManager == messageManager) {
 		MessageManager::_messageManager = nullptr;
 	}
@@ -99,7 +95,6 @@ void MessageManager::UnregisterMessageManager(IMessageManager* messageManager)
 void MessageManager::DisplayMessage(string title, string message, string param1, string param2)
 {
 	if(MessageManager::_messageManager) {
-		auto lock = _messageLock.AcquireSafe();
 		if(!MessageManager::_messageManager) {
 			return;
 		}
@@ -122,14 +117,4 @@ void MessageManager::Log(string message)
 	if(MessageManager::_messageManager) {
 		MessageManager::_messageManager->DisplayMessage("", message + "\n");
 	}
-}
-
-string MessageManager::GetLog()
-{
-	auto lock = _logLock.AcquireSafe();
-	stringstream ss;
-	for(string &msg : _log) {
-		ss << msg << "\n";
-	}
-	return ss.str();
 }

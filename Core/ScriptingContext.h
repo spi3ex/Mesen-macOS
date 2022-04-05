@@ -50,7 +50,6 @@ public:
 	virtual bool LoadScript(string scriptName, string scriptContent, Debugger* debugger) = 0;
 
 	void Log(string message);
-	const char* GetLog();
 
 	Debugger* GetDebugger();
 	string GetScriptName();

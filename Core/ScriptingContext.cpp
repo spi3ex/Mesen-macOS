@@ -22,17 +22,6 @@ void ScriptingContext::Log(string message)
 	}
 }
 
-const char* ScriptingContext::GetLog()
-{
-	auto lock = _logLock.AcquireSafe();
-	stringstream ss;
-	for(string &msg : _logRows) {
-		ss << msg << "\n";
-	}
-	_log = ss.str();
-	return _log.c_str();
-}
-
 Debugger* ScriptingContext::GetDebugger()
 {
 	return _debugger;

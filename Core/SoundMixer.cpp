@@ -137,7 +137,7 @@ void SoundMixer::PlayAudioBuffer(uint32_t time)
 		_crossFeedFilter.ApplyFilter(_outputBuffer, sampleCount, filterSettings.CrossFadeRatio);
 	}
 
-	if(!_console->IsPaused() && !_skipMode) {
+	if(!_skipMode) {
 		size_t sampleBufferSize = _audioSampleBuffer.size();
 		if (sampleBufferSize - _audioSampleBufferPos < (sampleCount << 1)) {
 			_audioSampleBuffer.resize((sampleBufferSize + (sampleCount << 1)) * 1.5);
@@ -312,7 +312,7 @@ void SoundMixer::UpdateEqualizers(bool forceUpdate)
 {
 	EqualizerFilterType type = _settings->GetEqualizerFilterType();
 	if(type != EqualizerFilterType::None) {
-		vector<double> bands = _settings->GetEqualizerBands();
+		vector<double> bands     = _settings->GetEqualizerBands();
 		vector<double> bandGains = _settings->GetBandGains();
 
 		if(bands.size() != _eqFrequencyGrid->get_number_of_bands()) {

@@ -54,21 +54,6 @@ void EventManager::GetEvents(DebugEventInfo *eventArray, uint32_t &maxEventCount
 	maxEventCount = eventCount;
 }
 
-DebugEventInfo EventManager::GetEvent(int16_t scanline, uint16_t cycle, EventViewerDisplayOptions &options)
-{
-	auto lock = _lock.AcquireSafe();
-
-	for(DebugEventInfo &evt : _sentEvents) {
-		if(evt.Cycle == cycle && evt.Scanline == scanline) {
-			return evt;
-		}
-	}
-
-	DebugEventInfo empty = {};
-	empty.ProgramCounter = 0xFFFFFFFF;
-	return empty;
-}
-
 uint32_t EventManager::GetEventCount(bool getPreviousFrameData)
 {
 	DebugBreakHelper breakHelper(_debugger);
@@ -170,51 +155,6 @@ void EventManager::DrawDot(uint32_t x, uint32_t y, uint32_t color, bool drawBack
 			buffer[pos] = color;
 		}
 	}
-}
-
-void EventManager::GetDisplayBuffer(uint32_t *buffer, EventViewerDisplayOptions options)
-{
-	auto lock = _lock.AcquireSafe();
-	_sentEvents.clear();
-
-	for(int i = 0; i < 341 * 2 * (int)_scanlineCount * 2; i++) {
-		buffer[i] = 0xFF555555;
-	}
-
-	uint16_t *src = _ppuBuffer;
-	uint32_t* pal = _settings->GetRgbPalette();
-	for(uint32_t y = 0, len = 240*2; y < len; y++) {
-		int rowOffset = (y + 2) * 341 * 2;
-
-		for(uint32_t x = 0; x < 256*2; x++) {
-			int srcOffset = ((y >> 1) << 8) | (x >> 1);
-			buffer[rowOffset + x + 1 * 2] = pal[src[srcOffset]];
-		}
-	}
-
-	if(options.ShowNtscBorders) {
-		DrawNtscBorders(buffer);
-	}
-
-	constexpr uint32_t currentScanlineColor = 0xFFFFFF55;
-	uint32_t scanlineOffset = _snapshotScanline * 2 * 341 * 2;
-	for(int i = 0; i < 341 * 2; i++) {
-		if(_snapshotScanline != 0) {
-			buffer[scanlineOffset + i] = currentScanlineColor;
-			buffer[scanlineOffset + 341 * 2 + i] = currentScanlineColor;
-		}
-	}
-
-	for(DebugEventInfo &evt : _snapshot) {
-		DrawEvent(evt, true, buffer, options);
-	}
-	for(DebugEventInfo &evt : _snapshot) {
-		DrawEvent(evt, false, buffer, options);
-	}
-
-	//Draw dot over current pixel
-	DrawDot(_snapshotCycle * 2, _snapshotScanline * 2, 0xFF990099, true, buffer);
-	DrawDot(_snapshotCycle * 2, _snapshotScanline * 2, 0xFFFF00FF, false, buffer);
 }
 
 void EventManager::DrawPixel(uint32_t *buffer, int32_t x, uint32_t y, uint32_t color)

@@ -16,12 +16,6 @@ int ScriptHost::GetScriptId()
 	return _scriptId;
 }
 
-const char* ScriptHost::GetLog()
-{
-	shared_ptr<ScriptingContext> context = _context;
-	return context ? context->GetLog() : "";
-}
-
 bool ScriptHost::LoadScript(string scriptName, string scriptContent, Debugger* debugger)
 {
 #ifndef LIBRETRO

@@ -867,11 +867,7 @@ int LuaApi::GetRomInfo(lua_State *lua)
 
 int LuaApi::GetLogWindowLog(lua_State *lua)
 {
-	LuaCallHelper l(lua);
-	checkparams();
-	
-	l.Return(MessageManager::GetLog());
-	return l.ReturnCount();
+        return 0;
 }
 
 int LuaApi::SetState(lua_State *lua)

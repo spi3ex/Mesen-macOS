@@ -1,8 +1,6 @@
 #pragma once
 
 #include "stdafx.h"
-#include <atomic>
-#include "../Utilities/SimpleLock.h"
 #include "VirtualFile.h"
 
 class BaseMapper;
@@ -42,10 +40,6 @@ enum class RamPowerOnState;
 class Console : public std::enable_shared_from_this<Console>
 {
 private:
-	SimpleLock _runLock;
-	SimpleLock _stopLock;
-	atomic<uint32_t> _pauseCounter;
-
 	shared_ptr<CPU> _cpu;
 	shared_ptr<PPU> _ppu;
 	shared_ptr<APU> _apu;
@@ -77,7 +71,6 @@ private:
 	string _romFilepath;
 	string _patchFilename;
 
-	bool _paused = false;
 	bool _stop = false;
 	bool _running = false;
 
@@ -90,9 +83,6 @@ private:
 	void LoadHdPack(VirtualFile &romFile, VirtualFile &patchFile);
 
 	void UpdateNesModel(bool sendNotification);
-	double GetFrameDelay();
-
-	void ExportStub();
 
 public:
 	Console(shared_ptr<Console> master = nullptr, EmulationSettings* initialSettings = nullptr);
@@ -159,12 +149,6 @@ public:
 	void ReloadRom(bool forPowerCycle = false);
 	void ResetComponents(bool softReset);
 
-	//Used to pause the emu loop to perform thread-safe operations
-	void Pause();
-
-	//Used to resume the emu loop after calling Pause()
-	void Resume();
-
 	void SaveState(ostream &saveStream);
 	void LoadState(istream &loadStream);
 	void LoadState(istream &loadStream, uint32_t stateVersion);
@@ -175,14 +159,6 @@ public:
 	RomInfo GetRomInfo();
 	uint32_t GetFrameCount();
 	NesModel GetModel();
-
-	uint32_t GetLagCounter();
-	void ResetLagCounter();
-
-	bool IsRunning();
-	bool IsExecutionStopped();
-
-	bool IsPaused();
 
 	void SetNextFrameOverclockStatus(bool disabled);
 

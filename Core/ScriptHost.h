@@ -15,7 +15,6 @@ public:
 	ScriptHost(int scriptId);
 
 	int GetScriptId();
-	const char* GetLog();
 
 	bool LoadScript(string scriptName, string scriptContent, Debugger* debugger);
 

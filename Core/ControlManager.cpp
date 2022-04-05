@@ -48,33 +48,28 @@ ControlManager::~ControlManager()
 
 void ControlManager::RegisterInputProvider(IInputProvider* provider)
 {
-	auto lock = _deviceLock.AcquireSafe();
 	_inputProviders.push_back(provider);
 }
 
 void ControlManager::UnregisterInputProvider(IInputProvider* provider)
 {
-	auto lock = _deviceLock.AcquireSafe();
 	vector<IInputProvider*> &vec = _inputProviders;
 	vec.erase(std::remove(vec.begin(), vec.end(), provider), vec.end());
 }
 
 void ControlManager::RegisterInputRecorder(IInputRecorder* provider)
 {
-	auto lock = _deviceLock.AcquireSafe();
 	_inputRecorders.push_back(provider);
 }
 
 void ControlManager::UnregisterInputRecorder(IInputRecorder* provider)
 {
-	auto lock = _deviceLock.AcquireSafe();
 	vector<IInputRecorder*> &vec = _inputRecorders;
 	vec.erase(std::remove(vec.begin(), vec.end(), provider), vec.end());
 }
 
 shared_ptr<BaseControlDevice> ControlManager::GetControlDevice(uint8_t port)
 {
-	auto lock = _deviceLock.AcquireSafe();
 
 	auto result = std::find_if(_controlDevices.begin(), _controlDevices.end(), [port](const shared_ptr<BaseControlDevice> control) { return control->GetPort() == port; });
 	if(result != _controlDevices.end()) {
@@ -149,7 +144,6 @@ shared_ptr<BaseControlDevice> ControlManager::CreateExpansionDevice(ExpansionPor
 
 void ControlManager::UpdateControlDevices()
 {
-	auto lock = _deviceLock.AcquireSafe();
 	EmulationSettings* settings = _console->GetSettings();
 
 	//Reset update flag
@@ -250,8 +244,6 @@ void ControlManager::UpdateInputState()
 
 	KeyManager::RefreshKeyState();
 
-	auto lock = _deviceLock.AcquireSafe();
-
 	//string log = "";
 	for(shared_ptr<BaseControlDevice> &device : _controlDevices) {
 		device->ClearState();
@@ -276,14 +268,7 @@ void ControlManager::UpdateInputState()
 	//Used by VS System games
 	RemapControllerButtons();
 
-	//MessageManager::Log(log);
-
 	_pollCounter++;
-}
-
-uint32_t ControlManager::GetLagCounter()
-{
-	return _lagCounter;
 }
 
 void ControlManager::ResetLagCounter()

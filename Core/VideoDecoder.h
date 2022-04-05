@@ -1,7 +1,6 @@
 #pragma once
 #include "stdafx.h"
 
-#include "../Utilities/SimpleLock.h"
 #include "../Utilities/AutoResetEvent.h"
 #include "EmulationSettings.h"
 #include "FrameInfo.h"

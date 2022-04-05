@@ -198,7 +198,6 @@ void VsControlManager::UpdateSlaveMasterBit(uint8_t slaveMasterBit)
 void VsControlManager::UpdateControlDevices()
 {
 	if(_console->GetDualConsole()) {
-		auto lock = _deviceLock.AcquireSafe();
 		_controlDevices.clear();
 		RegisterControlDevice(_systemActionManager);
 
