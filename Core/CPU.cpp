@@ -168,10 +168,6 @@ void CPU::Exec()
 
 void CPU::IRQ() 
 {
-#ifndef DUMMYCPU
-	uint16_t originalPc = PC();
-#endif
-
 	DummyRead();  //fetch opcode (and discard it - $00 (BRK) is forced into the opcode register instead)
 	DummyRead();  //read next instruction byte (actually the same as above, since PC increment is suppressed. Also discarded.)
 	Push((uint16_t)(PC()));
@@ -182,21 +178,11 @@ void CPU::IRQ()
 		SetFlags(PSFlags::Interrupt);
 
 		SetPC(MemoryReadWord(CPU::NMIVector));
-
-		#ifndef DUMMYCPU
-		_console->DebugAddTrace("NMI");
-		_console->DebugProcessInterrupt(originalPc, _state.PC, true);
-		#endif
 	} else {
 		Push((uint8_t)(PS() | PSFlags::Reserved));
 		SetFlags(PSFlags::Interrupt);
 
 		SetPC(MemoryReadWord(CPU::IRQVector));
-
-		#ifndef DUMMYCPU
-		_console->DebugAddTrace("IRQ");
-		_console->DebugProcessInterrupt(originalPc, _state.PC, false);
-		#endif
 	}
 }
 
@@ -210,19 +196,11 @@ void CPU::BRK() {
 		SetFlags(PSFlags::Interrupt);
 
 		SetPC(MemoryReadWord(CPU::NMIVector));
-
-		#ifndef DUMMYCPU
-		_console->DebugAddTrace("NMI");
-		#endif
 	} else {
 		Push((uint8_t)flags);
 		SetFlags(PSFlags::Interrupt);
 
 		SetPC(MemoryReadWord(CPU::IRQVector));
-
-		#ifndef DUMMYCPU
-		_console->DebugAddTrace("IRQ");
-		#endif
 	}
 
 	//Ensure we don't start an NMI right after running a BRK instruction (first instruction in IRQ handler must run first - needed for nmi_and_brk test)

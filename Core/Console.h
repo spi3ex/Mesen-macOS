@@ -168,14 +168,4 @@ public:
 	void StopRecordingHdPack();
 	
 	uint8_t* GetRamBuffer(uint16_t address);
-		
-	void DebugAddTrace(const char *log);
-	void DebugProcessPpuCycle();
-	void DebugProcessEvent(EventType type);
-	void DebugProcessInterrupt(uint16_t cpuAddr, uint16_t destCpuAddr, bool forNmi);
-	void DebugSetLastFramePpuScroll(uint16_t addr, uint8_t xScroll, bool updateHorizontalScrollOnly);
-	void DebugAddDebugEvent(DebugEventType type);
-	bool DebugProcessRamOperation(MemoryOperationType type, uint16_t &addr, uint8_t &value);
-	void DebugProcessVramReadOperation(MemoryOperationType type, uint16_t addr, uint8_t &value);
-	void DebugProcessVramWriteOperation(uint16_t addr, uint8_t &value);
 };

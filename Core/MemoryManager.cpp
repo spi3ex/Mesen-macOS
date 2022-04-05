@@ -122,7 +122,6 @@ uint8_t MemoryManager::Read(uint16_t addr, MemoryOperationType operationType)
 {
 	uint8_t value = _ramReadHandlers[addr]->ReadRAM(addr);
 	_console->GetCheatManager()->ApplyCodes(addr, value);
-	_console->DebugProcessRamOperation(operationType, addr, value);
 
 	_openBusHandler.SetOpenBus(value);
 
@@ -131,9 +130,7 @@ uint8_t MemoryManager::Read(uint16_t addr, MemoryOperationType operationType)
 
 void MemoryManager::Write(uint16_t addr, uint8_t value, MemoryOperationType operationType)
 {
-	if(_console->DebugProcessRamOperation(operationType, addr, value)) {
-		_ramWriteHandlers[addr]->WriteRAM(addr, value);
-	}
+	_ramWriteHandlers[addr]->WriteRAM(addr, value);
 }
 
 void MemoryManager::DebugWrite(uint16_t addr, uint8_t value, bool disableSideEffects)

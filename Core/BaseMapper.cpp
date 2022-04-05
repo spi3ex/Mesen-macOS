@@ -781,9 +781,6 @@ void BaseMapper::WriteRAM(uint16_t addr, uint8_t value)
 	if(_isWriteRegisterAddr[addr]) {
 		if(_hasBusConflicts) {
 			uint8_t prgValue = _prgPages[addr >> 8][(uint8_t)addr];
-			if(value != prgValue) {
-				_console->DebugProcessEvent(EventType::BusConflict);
-			}
 			value &= prgValue;
 		}
 		WriteRegister(addr, value);
@@ -858,8 +855,6 @@ void BaseMapper::DebugWriteVRAM(uint16_t addr, uint8_t value, bool disableSideEf
 
 void BaseMapper::WriteVRAM(uint16_t addr, uint8_t value)
 {
-	_console->DebugProcessVramWriteOperation(addr, value);
-
 	if(_chrMemoryAccess[addr >> 8] & MemoryAccessType::Write) {
 		_chrPages[addr >> 8][(uint8_t)addr] = value;
 	}

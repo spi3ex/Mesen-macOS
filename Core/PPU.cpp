@@ -197,10 +197,6 @@ void PPU::UpdateVideoRamAddr()
 	if(_scanline >= 240 || !IsRenderingEnabled()) {
 		_state.VideoRamAddr = (_state.VideoRamAddr + (_flags.VerticalWrite ? 32 : 1)) & 0x7FFF;
 
-		if(!_renderingEnabled) {
-			_console->DebugAddDebugEvent(DebugEventType::BgColorChange);
-		}
-
 		//Trigger memory read when setting the vram address - needed by MMC3 IRQ counter
 		//"Should be clocked when A12 changes to 1 via $2007 read/write"
 		SetBusAddress(_state.VideoRamAddr & 0x3FFF);
@@ -356,7 +352,6 @@ uint8_t PPU::ReadRAM(uint16_t addr)
 
 				if((_ppuBusAddress & 0x3FFF) >= 0x3F00 && !_settings->CheckFlag(EmulationFlags::DisablePaletteRead)) {
 					returnValue = ReadPaletteRAM(_ppuBusAddress) | (_openBus & 0xC0);
-					_console->DebugProcessVramReadOperation(MemoryOperationType::Read, _ppuBusAddress & 0x3FFF, returnValue);
 					openBusMask = 0xC0;
 				} else {
 					openBusMask = 0x00;
@@ -431,7 +426,6 @@ void PPU::WriteRAM(uint16_t addr, uint8_t value)
 				_needStateUpdate = true;
 				_updateVramAddrDelay = 3;
 				_updateVramAddr = _state.TmpVideoRamAddr;
-				_console->DebugSetLastFramePpuScroll(_updateVramAddr, _state.XScroll, false);
 			} else {
 				uint16_t newAddr = (_state.TmpVideoRamAddr & ~0xFF00) | ((value & 0x3F) << 8);
 				ProcessTmpAddrScrollGlitch(newAddr, _console->GetMemoryManager()->GetOpenBus() << 8, 0x0C00);
@@ -441,7 +435,6 @@ void PPU::WriteRAM(uint16_t addr, uint8_t value)
 		case PPURegisters::VideoMemoryData:
 			if((_ppuBusAddress & 0x3FFF) >= 0x3F00) {
 				WritePaletteRAM(_ppuBusAddress, value);
-				_console->DebugProcessVramWriteOperation(_ppuBusAddress & 0x3FFF, value);
 			} else {
 				if(_scanline >= 240 || !IsRenderingEnabled()) {
 					_console->GetMapper()->WriteVRAM(_ppuBusAddress & 0x3FFF, value);
@@ -566,8 +559,6 @@ void PPU::SetMaskRegister(uint8_t value)
 		_flags.IntensifyGreen = (_state.Mask & 0x20) == 0x20;
 		_intensifyColorBits = (_flags.IntensifyRed ? 0x40 : 0x00) | (_flags.IntensifyGreen ? 0x80 : 0x00) | (_flags.IntensifyBlue ? 0x100 : 0x00);
 	}
-
-	_console->DebugAddDebugEvent(DebugEventType::BgColorChange);
 }
 
 void PPU::UpdateStatusFlag()
@@ -841,8 +832,6 @@ uint8_t PPU::GetPixelColor()
 						//"... provided that background and sprite rendering are both enabled"
 						//"Should always miss when Y >= 239"
 						_statusFlags.Sprite0Hit = true;
-
-						_console->DebugProcessEvent(EventType::SpriteZeroHit);
 					}
 
 					if(_settings->GetSpritesEnabled() && (backgroundColor == 0 || !_spriteTiles[i].BackgroundPriority)) {
@@ -951,7 +940,6 @@ void PPU::ProcessScanline()
 			if(_prevRenderingEnabled) {
 				//copy horizontal scrolling value from t
 				_state.VideoRamAddr = (_state.VideoRamAddr & ~0x041F) | (_state.TmpVideoRamAddr & 0x041F);
-				_console->DebugSetLastFramePpuScroll(_state.VideoRamAddr, _state.XScroll, true);
 			}
 		}
 		if(IsRenderingEnabled()) {
@@ -981,9 +969,6 @@ void PPU::ProcessScanline()
 				_oamCopybuffer = _secondarySpriteRAM[0];
 			}
 			LoadTileInfo();
-			if(_scanline == -1) {
-				_console->DebugSetLastFramePpuScroll(_state.VideoRamAddr, _state.XScroll, false);
-			}
 		} else if(_prevRenderingEnabled && (_cycle == 328 || _cycle == 336)) {
 			LoadTileInfo();
 			_state.LowBitShift <<= 8;
@@ -1268,8 +1253,6 @@ void PPU::Exec()
 			UpdateMinimumDrawCycles();
 		}
 
-		_console->DebugProcessPpuCycle();
-		
 		UpdateApuStatus();
 		
 		if(_scanline == _settings->GetInputPollScanline()) {
@@ -1294,7 +1277,6 @@ void PPU::Exec()
 		//Cycle > 0
 		_cycle++;
 
-		_console->DebugProcessPpuCycle();
 		if(_scanline < 240) {
 			ProcessScanline();
 		} else if(_cycle == 1 && _scanline == _nmiScanline) {
@@ -1362,8 +1344,6 @@ void PPU::UpdateState()
 		_needStateUpdate = true;
 	}
 
-	_console->DebugAddDebugEvent(DebugEventType::BgColorChange);
-
 	if(_updateVramAddrDelay > 0) {
 		_updateVramAddrDelay--;
 		if(_updateVramAddrDelay == 0) {
@@ -1378,10 +1358,6 @@ void PPU::UpdateState()
 				}
 			} else {
 				_state.VideoRamAddr = _updateVramAddr;
-			}
-
-			if(!_renderingEnabled) {
-				_console->DebugAddDebugEvent(DebugEventType::BgColorChange);
 			}
 
 			//The glitches updates corrupt both V and T, so set the new value of V back into T

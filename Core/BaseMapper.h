@@ -189,9 +189,7 @@ public:
 	
 	__forceinline uint8_t ReadVRAM(uint16_t addr, MemoryOperationType type = MemoryOperationType::PpuRenderingRead)
 	{
-		uint8_t value = MapperReadVRAM(addr, type);
-		_console->DebugProcessVramReadOperation(type, addr, value);
-		return value;
+		return MapperReadVRAM(addr, type);
 	}
 
 	void DebugWriteVRAM(uint16_t addr, uint8_t value, bool disableSideEffects = true);
