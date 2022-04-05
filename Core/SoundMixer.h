@@ -12,7 +12,6 @@
 #include "CrossFeedFilter.h"
 
 class Console;
-class WaveRecorder;
 class OggMixer;
 
 namespace orfanidis_eq {
@@ -37,7 +36,6 @@ private:
 
 	bool _skipMode = false;
 	EmulationSettings* _settings;
-	shared_ptr<WaveRecorder> _waveRecorder;
 	double _fadeRatio;
 	uint32_t _muteFrameCount;
 	unique_ptr<OggMixer> _oggMixer;
