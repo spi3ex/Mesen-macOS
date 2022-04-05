@@ -61,8 +61,6 @@ private:
 	shared_ptr<MemoryManager> _memoryManager;
 	shared_ptr<BaseMapper> _mapper;
 	
-	shared_ptr<DummyCpu> _dummyCpu;
-	bool _bpDummyCpuRequired;
 	bool _breakOnFirstCycle;
 
 	bool _hasScript;
@@ -136,15 +134,6 @@ private:
 	uint32_t _inputOverride[4];
 
 private:
-	bool ProcessBreakpoints(BreakpointType type, OperationInfo &operationInfo, bool allowBreak = true, bool allowMark = true);
-	void ProcessAllBreakpoints(OperationInfo &operationInfo);
-	
-	void AddCallstackFrame(uint16_t source, uint16_t target, StackFrameFlags flags);
-	void UpdateCallstack(uint8_t currentInstruction, uint32_t addr);
-
-	void ProcessStepConditions(uint16_t addr);
-	bool SleepUntilResume(BreakSource source, uint32_t breakpointId = 0, BreakpointType bpType = BreakpointType::Global, uint16_t bpAddress = 0, uint8_t bpValue = 0, MemoryOperationType bpMemOpType = MemoryOperationType::Read);
-
 	void UpdatePpuCyclesToProcess();
 	void ResetStepState();
 
@@ -160,14 +149,8 @@ public:
 	void SetFlags(uint32_t flags);
 	bool CheckFlag(DebuggerFlags flag);
 	
-	void SetBreakpoints(Breakpoint breakpoints[], uint32_t length);
-
 	shared_ptr<LabelManager> GetLabelManager();
 
-	void GetFunctionEntryPoints(int32_t* entryPoints, int32_t maxCount);
-	int32_t GetFunctionEntryPointCount();
-
-	void GetInstructionProgress(InstructionProgress &state);
 	void GetApuState(ApuState *state);
 	void GetState(DebugState *state, bool includeMapperInfo = true);
 	void SetState(DebugState state);
@@ -180,8 +163,6 @@ public:
 	void Step(uint32_t count = 1, BreakSource source = BreakSource::CpuStep);
 	void StepCycles(uint32_t cycleCount = 1);
 	void Run();
-
-	void BreakImmediately(BreakSource source);
 
 	bool LoadCdlFile(string cdlFilepath);
 	void SetCdlData(uint8_t* cdlData, uint32_t length);
@@ -211,16 +192,6 @@ public:
 	shared_ptr<PerformanceTracker> GetPerformanceTracker();
 	shared_ptr<EventManager> GetEventManager();
 
-	bool IsPpuCycleToProcess();
-	void ProcessPpuCycle();
-	bool ProcessRamOperation(MemoryOperationType type, uint16_t &addr, uint8_t &value);
-	void ProcessVramReadOperation(MemoryOperationType type, uint16_t addr, uint8_t &value);
-	void ProcessVramWriteOperation(uint16_t addr, uint8_t &value);
-	
-	void SetLastFramePpuScroll(uint16_t addr, uint8_t xScroll, bool updateHorizontalScrollOnly);
-
-	void ProcessInterrupt(uint16_t cpuAddr, uint16_t destCpuAddr, bool forNmi);
-	
 	void StartCodeRunner(uint8_t *byteCode, uint32_t codeLength);
 	void StopCodeRunner();
 
@@ -236,8 +207,6 @@ public:
 	void UpdateProgramCounter(uint16_t &addr, uint8_t &value);
 
 	void ProcessScriptSaveState(uint16_t &addr, uint8_t &value);
-	void ProcessCpuOperation(uint16_t &addr, uint8_t &value, MemoryOperationType type);
-	void ProcessPpuOperation(uint16_t addr, uint8_t &value, MemoryOperationType type);
 	void ProcessEvent(EventType type);
 
 	uint32_t GetScreenPixel(uint8_t x, uint8_t y);
