@@ -74,8 +74,6 @@ private:
 	bool _stop = false;
 	bool _running = false;
 
-	bool _resetRunTimers = false;
-
 	bool _disableOcNextFrame = false;
 
 	bool _initialized = false;
@@ -123,7 +121,6 @@ public:
 	void SaveBatteries();
 
 	void Run();
-	void ResetRunTimers();
 	void Stop(int stopCode = 0);
 		
 	void RunSingleFrame();

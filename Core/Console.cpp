@@ -499,8 +499,6 @@ void Console::ResetComponents(bool softReset)
 	_apu->Reset(softReset);
 	_cpu->Reset(softReset, _model);
 	_controlManager->Reset(softReset);
-
-	_resetRunTimers = true;
 }
 
 void Console::Stop(int stopCode)
@@ -543,9 +541,6 @@ void Console::RunSlaveCpu()
 
 void Console::Run()
 {
-	Timer clockTimer;
-	Timer lastFrameTimer;
-
 	UpdateNesModel(true);
 
 	_running = true;
@@ -595,11 +590,6 @@ void Console::Run()
 	_romFilepath = "";
 
 	Release(false);
-}
-
-void Console::ResetRunTimers()
-{
-	_resetRunTimers = true;
 }
 
 void Console::UpdateNesModel(bool sendNotification)
