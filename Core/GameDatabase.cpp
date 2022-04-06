@@ -292,10 +292,6 @@ void GameDatabase::SetGameInfo(uint32_t romCrc, RomData &romData, bool updateRom
 			romData.Info.IsInDatabase = true;
 			UpdateRomData(info, romData);
 		}
-
-#ifdef _DEBUG
-		MessageManager::DisplayMessage("DB", "Mapper: " + std::to_string(romData.Info.MapperID) + "  Sub: " + std::to_string(romData.Info.SubMapperID) + "  System: " + info.System);
-#endif
 	} else {
 		MessageManager::Log("[DB] Game not found in database");
 	}

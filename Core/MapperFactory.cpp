@@ -298,21 +298,15 @@ Supported mappers:
 
 BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 {
-#ifdef _DEBUG
-	MessageManager::DisplayMessage("GameInfo", "Mapper", std::to_string(romData.Info.MapperID), std::to_string(romData.Info.SubMapperID));
-#endif
-
 	switch(romData.Info.MapperID) {
 		case 0: return new NROM();
 		case 1: return new MMC1();
 		case 2: return new UNROM();
 		case 3: return new CNROM(false);
 		case 4: 
-			if(romData.Info.SubMapperID == 3) {
+			if(romData.Info.SubMapperID == 3)
 				return new McAcc();
-			} else {
-				return new MMC3();
-			}
+			return new MMC3();
 
 		case 5: return new MMC5();
 		case 6: return new FrontFareast();

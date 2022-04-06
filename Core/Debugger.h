@@ -18,12 +18,10 @@ class Disassembler;
 class LabelManager;
 class MemoryDumper;
 class MemoryAccessCounter;
-class Profiler;
 class CodeRunner;
 class BaseMapper;
 class ScriptHost;
 class TraceLogger;
-class PerformanceTracker;
 class CodeDataLogger;
 class ExpressionEvaluator;
 class DummyCpu;
@@ -38,12 +36,10 @@ private:
 	static string _disassemblerOutput;
 
 	shared_ptr<Disassembler> _disassembler;
-	shared_ptr<Assembler> _assembler;
 	shared_ptr<MemoryDumper> _memoryDumper;
 	shared_ptr<CodeDataLogger> _codeDataLogger;
 	shared_ptr<MemoryAccessCounter> _memoryAccessCounter;
 	shared_ptr<LabelManager> _labelManager;
-	shared_ptr<PerformanceTracker> _performanceTracker;
 	unique_ptr<CodeRunner> _codeRunner;
 
 	shared_ptr<Console> _console;
@@ -53,14 +49,6 @@ private:
 	shared_ptr<MemoryManager> _memoryManager;
 	shared_ptr<BaseMapper> _mapper;
 	
-	bool _breakOnFirstCycle;
-
-	bool _hasScript;
-	int _nextScriptId;
-	vector<shared_ptr<ScriptHost>> _scripts;
-	
-	vector<uint8_t> _frozenAddresses;
-
 	uint32_t _opCodeCycle;
 	MemoryOperationType _memoryOperationType;
 
@@ -86,8 +74,6 @@ private:
 public:
 	Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<PPU> ppu, shared_ptr<APU> apu, shared_ptr<MemoryManager> memoryManager, shared_ptr<BaseMapper> mapper);
 	~Debugger();
-
-	void ReleaseDebugger();
 
 	void SetPpu(shared_ptr<PPU> ppu);
 	Console* GetConsole();
@@ -121,22 +107,9 @@ public:
 	void GetAbsoluteAddressAndType(uint32_t relativeAddr, AddressTypeInfo* info);
 	void GetPpuAbsoluteAddressAndType(uint32_t relativeAddr, PpuAddressTypeInfo* info);
 
-	shared_ptr<Profiler> GetProfiler();
-	shared_ptr<Assembler> GetAssembler();
-	shared_ptr<TraceLogger> GetTraceLogger();
 	shared_ptr<MemoryDumper> GetMemoryDumper();
-	shared_ptr<MemoryAccessCounter> GetMemoryAccessCounter();
-	shared_ptr<PerformanceTracker> GetPerformanceTracker();
 
 	void StopCodeRunner();
 
 	void GetNesHeader(uint8_t* header);
-	void RevertPrgChrChanges();
-	bool HasPrgChrChanges();
-
-	int32_t LoadScript(string name, string content, int32_t scriptId);
-
-	void ProcessEvent(EventType type);
-
-	uint32_t GetScreenPixel(uint8_t x, uint8_t y);
 };

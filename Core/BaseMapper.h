@@ -234,7 +234,5 @@ public:
 
 	vector<uint8_t> GetPrgChrCopy();
 	void RestorePrgChrBackup(vector<uint8_t>& backupData);
-	void RevertPrgChrChanges();
-	bool HasPrgChrChanges();
 	void CopyPrgChrRom(shared_ptr<BaseMapper> mapper);
 };

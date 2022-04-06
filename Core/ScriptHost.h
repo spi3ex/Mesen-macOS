@@ -16,10 +16,5 @@ public:
 
 	int GetScriptId();
 
-	bool LoadScript(string scriptName, string scriptContent, Debugger* debugger);
-
-	void ProcessEvent(EventType eventType);
-	bool ProcessSavestate();
-
 	bool CheckStateLoadedFlag();
 };

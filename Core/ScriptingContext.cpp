@@ -119,29 +119,6 @@ void ScriptingContext::UnregisterEventCallback(EventType type, int reference)
 	callbacks.erase(std::remove(callbacks.begin(), callbacks.end(), reference), callbacks.end());
 }
 
-void ScriptingContext::RequestSaveState(int slot)
-{
-	_saveSlot = slot;
-	if(_inExecOpEvent) {
-		SaveState();
-	} else {
-		_saveSlotData.erase(slot);
-	}
-}
-
-bool ScriptingContext::RequestLoadState(int slot)
-{
-	if(_saveSlotData.find(slot) != _saveSlotData.end()) {
-		_loadSlot = slot;
-		if(_inExecOpEvent) {
-			return LoadState();
-		} else {
-			return true;
-		}
-	}
-	return false;
-}
-
 void ScriptingContext::SaveState()
 {
 	if(_saveSlot >= 0) {
@@ -176,29 +153,4 @@ bool ScriptingContext::LoadState(string stateData)
 		_stateLoaded = true;
 	}
 	return result;
-}
-
-bool ScriptingContext::ProcessSavestate()
-{
-	SaveState();
-	return LoadState();
-}
-
-string ScriptingContext::GetSavestateData(int slot)
-{
-	if(slot >= 0) {
-		auto result = _saveSlotData.find(slot);
-		if(result != _saveSlotData.end()) {
-			return result->second;
-		}
-	}
-
-	return "";
-}
-
-void ScriptingContext::ClearSavestateData(int slot)
-{
-	if(slot >= 0) {
-		_saveSlotData.erase(slot);
-	}
 }

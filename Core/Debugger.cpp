@@ -34,10 +34,7 @@ Debugger::Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<
 	_memoryManager = memoryManager;
 	_mapper = mapper;
 
-	_breakOnFirstCycle = false;
-
 	_labelManager.reset(new LabelManager(_mapper));
-	_assembler.reset(new Assembler(_labelManager));
 	_disassembler.reset(new Disassembler(memoryManager.get(), mapper.get(), this));
 	_codeDataLogger.reset(new CodeDataLogger(this, mapper->GetMemorySize(DebugMemoryType::PrgRom), mapper->GetMemorySize(DebugMemoryType::ChrRom)));
 
@@ -61,14 +58,9 @@ Debugger::Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<
 	
 	memset(_inputOverride, 0, sizeof(_inputOverride));
 
-	_frozenAddresses.insert(_frozenAddresses.end(), 0x10000, 0);
-
 	if(!LoadCdlFile(FolderUtilities::CombinePath(FolderUtilities::GetDebuggerFolder(), FolderUtilities::GetFilename(_romName, false) + ".cdl"))) {
 		_disassembler->Reset();
 	}
-
-	_hasScript = false;
-	_nextScriptId = 0;
 
 	_released = false;
 }
@@ -76,23 +68,7 @@ Debugger::Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<
 Debugger::~Debugger()
 {
 	if(!_released) {
-		ReleaseDebugger();
-	}
-}
-
-void Debugger::ReleaseDebugger()
-{
-	if(!_released) {
 		_codeDataLogger->SaveCdlFile(FolderUtilities::CombinePath(FolderUtilities::GetDebuggerFolder(), FolderUtilities::GetFilename(_romName, false) + ".cdl"));
-
-		{
-			for(shared_ptr<ScriptHost> script : _scripts) {
-				//Send a ScriptEnded event to all active scripts
-				script->ProcessEvent(EventType::ScriptEnded);
-			}
-			_scripts.clear();
-			_hasScript = false;
-		}
 
 		_released = true;
 	}
@@ -113,7 +89,6 @@ void Debugger::SetFlags(uint32_t flags)
 {
 	bool needUpdate = ((flags ^ _flags) & (int)DebuggerFlags::DisplayOpCodesInLowerCase) != 0;
 	_flags = flags;
-	_breakOnFirstCycle = CheckFlag(DebuggerFlags::BreakOnFirstCycle);
 	if(needUpdate) {
 		_disassembler->BuildOpCodeTables(CheckFlag(DebuggerFlags::DisplayOpCodesInLowerCase));
 	}
@@ -310,19 +285,9 @@ void Debugger::SetNextStatement(uint16_t addr)
 	}
 }
 
-shared_ptr<Assembler> Debugger::GetAssembler()
-{
-	return _assembler;
-}
-
 shared_ptr<MemoryDumper> Debugger::GetMemoryDumper()
 {
 	return _memoryDumper;
-}
-
-shared_ptr<MemoryAccessCounter> Debugger::GetMemoryAccessCounter()
-{
-	return _memoryAccessCounter;
 }
 
 void Debugger::GetAbsoluteAddressAndType(uint32_t relativeAddr, AddressTypeInfo* info)
@@ -348,95 +313,4 @@ void Debugger::GetNesHeader(uint8_t* header)
 {
 	NESHeader nesHeader = _mapper->GetRomInfo().NesHeader;
 	memcpy(header, &nesHeader, sizeof(NESHeader));
-}
-
-void Debugger::RevertPrgChrChanges()
-{
-	_mapper->RevertPrgChrChanges();
-	_disassembler->Reset();
-	UpdateCdlCache();
-}
-
-bool Debugger::HasPrgChrChanges()
-{
-	return _mapper->HasPrgChrChanges();
-}
-
-int Debugger::LoadScript(string name, string content, int32_t scriptId)
-{
-	if(scriptId < 0) {
-		shared_ptr<ScriptHost> script(new ScriptHost(_nextScriptId++));
-		script->LoadScript(name, content, this);
-		_scripts.push_back(script);
-		_hasScript = true;
-		return script->GetScriptId();
-	} else {
-		auto result = std::find_if(_scripts.begin(), _scripts.end(), [=](shared_ptr<ScriptHost> &script) {
-			return script->GetScriptId() == scriptId;
-		});
-		if(result != _scripts.end()) {
-			//Send a ScriptEnded event before reloading the code
-			(*result)->ProcessEvent(EventType::ScriptEnded);
-
-			(*result)->LoadScript(name, content, this);
-			return scriptId;
-		}
-	}
-
-	return -1;
-}
-
-void Debugger::ProcessEvent(EventType type)
-{
-	if(_hasScript) {
-		for(shared_ptr<ScriptHost> &script : _scripts) {
-			script->ProcessEvent(type);
-		}
-	}
-	switch(type) {
-		case EventType::InputPolled:
-			for(int i = 0; i < 4; i++) {
-				if(_inputOverride[i] != 0) {
-					shared_ptr<StandardController> controller = std::dynamic_pointer_cast<StandardController>(_console->GetControlManager()->GetControlDevice(i));
-					if(controller) {
-						controller->SetBitValue(StandardController::Buttons::A, (_inputOverride[i] & 0x01) != 0);
-						controller->SetBitValue(StandardController::Buttons::B, (_inputOverride[i] & 0x02) != 0);
-						controller->SetBitValue(StandardController::Buttons::Select, (_inputOverride[i] & 0x04) != 0);
-						controller->SetBitValue(StandardController::Buttons::Start, (_inputOverride[i] & 0x08) != 0);
-						controller->SetBitValue(StandardController::Buttons::Up, (_inputOverride[i] & 0x10) != 0);
-						controller->SetBitValue(StandardController::Buttons::Down, (_inputOverride[i] & 0x20) != 0);
-						controller->SetBitValue(StandardController::Buttons::Left, (_inputOverride[i] & 0x40) != 0);
-						controller->SetBitValue(StandardController::Buttons::Right, (_inputOverride[i] & 0x80) != 0);
-					}
-				}
-			}
-			break;
-
-		case EventType::EndFrame:
-			_memoryDumper->GatherChrPaletteInfo();
-			break;
-
-		case EventType::StartFrame:
-			//Clear the current frame/event log
-			if(CheckFlag(DebuggerFlags::PpuPartialDraw)) {
-				_ppu->DebugUpdateFrameBuffer(CheckFlag(DebuggerFlags::PpuShowPreviousFrame));
-			}
-
-			break;
-
-		case EventType::Nmi: break;
-		case EventType::Irq: break;
-		case EventType::SpriteZeroHit: break;
-		case EventType::Reset: break;
-
-		case EventType::BusConflict: 
-			break;
-
-		default: break;
-	}
-}
-
-uint32_t Debugger::GetScreenPixel(uint8_t x, uint8_t y)
-{
-	return _ppu->GetPixel(x, y);
 }

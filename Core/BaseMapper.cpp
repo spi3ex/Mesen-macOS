@@ -27,14 +27,9 @@ uint16_t BaseMapper::InternalGetChrRamPageSize() { return std::min((uint32_t)Get
 	
 bool BaseMapper::ValidateAddressRange(uint16_t startAddr, uint16_t endAddr)
 {
-	if((startAddr & 0xFF) || (endAddr & 0xFF) != 0xFF) {
-		#ifdef _DEBUG
-			throw new std::runtime_error("Start/End address must be multiples of 256/0x100");
-		#else
-			//Ignore this request in release mode - granularity smaller than 256 bytes is not supported
+	//Ignore this request in release mode - granularity smaller than 256 bytes is not supported
+	if((startAddr & 0xFF) || (endAddr & 0xFF) != 0xFF)
 			return false;
-		#endif
-	}
 	return true;
 }
 
@@ -54,24 +49,16 @@ void BaseMapper::SetCpuMemoryMapping(uint16_t startAddr, uint16_t endAddr, int16
 			break;
 		case PrgMemoryType::SaveRam:
 			pageSize = InternalGetSaveRamPageSize();
-			if(pageSize == 0) {
-				#ifdef _DEBUG
-				MessageManager::DisplayMessage("Debug", "Tried to map undefined save ram.");
-				#endif
+			if(pageSize == 0)
 				return;
-			}
 			pageCount = _saveRamSize / pageSize;
 			
 			defaultAccessType |= MemoryAccessType::Write;
 			break;
 		case PrgMemoryType::WorkRam:
 			pageSize = InternalGetWorkRamPageSize();
-			if(pageSize == 0) {
-				#ifdef _DEBUG
-				MessageManager::DisplayMessage("Debug", "Tried to map undefined work ram.");
-				#endif
+			if(pageSize == 0)
 				return;
-			}
 
 			pageCount = _workRamSize / pageSize;
 			
@@ -81,12 +68,8 @@ void BaseMapper::SetCpuMemoryMapping(uint16_t startAddr, uint16_t endAddr, int16
 			throw new std::runtime_error("Invalid parameter");
 	}
 
-	if(pageCount == 0) {
-		#ifdef _DEBUG
-		MessageManager::DisplayMessage("Debug", "Tried to map undefined save/work ram.");
-		#endif
+	if(pageCount == 0)
 		return;
-	}
 
 	auto wrapPageNumber = [=](int16_t &page) -> void {
 		if(page < 0) {
@@ -101,10 +84,6 @@ void BaseMapper::SetCpuMemoryMapping(uint16_t startAddr, uint16_t endAddr, int16
 	accessType = accessType != -1 ? accessType : defaultAccessType;
 	
 	if((uint16_t)(endAddr - startAddr) >= pageSize) {
-		#ifdef _DEBUG
-		MessageManager::DisplayMessage("Debug", "Tried to map undefined prg - page size too small for selected range.");
-		#endif
-		
 		//If range is bigger than a single page, keep going until we reach the last page
 		uint32_t addr = startAddr;
 		while(addr <= endAddr - pageSize + 1) {
@@ -182,9 +161,6 @@ void BaseMapper::SetPpuMemoryMapping(uint16_t startAddr, uint16_t endAddr, uint1
 		case ChrMemoryType::Default:
 			pageSize = InternalGetChrPageSize();
 			if(pageSize == 0) {
-				#ifdef _DEBUG
-				MessageManager::DisplayMessage("Debug", "Tried to map undefined chr rom/ram.");
-				#endif
 				return;
 			}
 			pageCount = GetCHRPageCount();
@@ -195,23 +171,15 @@ void BaseMapper::SetPpuMemoryMapping(uint16_t startAddr, uint16_t endAddr, uint1
 
 		case ChrMemoryType::ChrRom:
 			pageSize = InternalGetChrPageSize();
-			if(pageSize == 0) {
-				#ifdef _DEBUG
-				MessageManager::DisplayMessage("Debug", "Tried to map undefined chr rom.");
-				#endif
+			if(pageSize == 0)
 				return;
-			}
 			pageCount = GetCHRPageCount();
 			break;
 
 		case ChrMemoryType::ChrRam:
 			pageSize = InternalGetChrRamPageSize();
-			if(pageSize == 0) {
-				#ifdef _DEBUG
-				MessageManager::DisplayMessage("Debug", "Tried to map undefined chr ram.");
-				#endif
+			if(pageSize == 0)
 				return;
-			}
 			pageCount = _chrRamSize / pageSize;
 			defaultAccessType |= MemoryAccessType::Write;
 			break;
@@ -223,19 +191,12 @@ void BaseMapper::SetPpuMemoryMapping(uint16_t startAddr, uint16_t endAddr, uint1
 			break;
 	}
 
-	if(pageCount == 0) {
-		#ifdef _DEBUG
-		MessageManager::DisplayMessage("Debug", "Tried to map undefined chr ram.");
-		#endif
+	if(pageCount == 0)
 		return;
-	}
 
 	pageNumber = pageNumber % pageCount;
 
 	if((uint16_t)(endAddr - startAddr) >= pageSize) {
-		#ifdef _DEBUG
-		MessageManager::DisplayMessage("Debug", "Tried to map undefined chr - page size too small for selected range.");
-		#endif
 
 		uint32_t addr = startAddr;
 		while(addr <= endAddr - pageSize + 1) {
@@ -328,9 +289,6 @@ void BaseMapper::SelectPRGPage(uint16_t slot, uint16_t page, PrgMemoryType memor
 		//Total PRG size is smaller than available memory range, map the entire PRG to all slots
 		//i.e same logic as NROM (mapper 0) when PRG is 16kb
 		//Needed by "Pyramid" (mapper 79)
-		#ifdef _DEBUG
-			MessageManager::DisplayMessage("Debug", "PrgSizeWarning");
-		#endif
 
 		for(slot = 0; slot < 0x8000 / _prgSize; slot++) {
 			uint16_t startAddr = 0x8000 + slot * _prgSize;
@@ -671,12 +629,8 @@ void BaseMapper::SetConsole(shared_ptr<Console> console)
 
 uint8_t* BaseMapper::GetNametable(uint8_t nametableIndex)
 {
-	if(nametableIndex >= BaseMapper::NametableCount) {
-		#ifdef _DEBUG
-		MessageManager::Log("Invalid nametable index");
-		#endif
+	if(nametableIndex >= BaseMapper::NametableCount)
 		return _nametableRam;
-	}
 	_nametableCount = std::max<uint8_t>(_nametableCount, nametableIndex + 1);
 
 	return _nametableRam + (nametableIndex * BaseMapper::NametableSize);
@@ -684,12 +638,8 @@ uint8_t* BaseMapper::GetNametable(uint8_t nametableIndex)
 
 void BaseMapper::SetNametable(uint8_t index, uint8_t nametableIndex)
 {
-	if(nametableIndex >= BaseMapper::NametableCount) {
-		#ifdef _DEBUG
-		MessageManager::Log("Invalid nametable index");
-		#endif
+	if(nametableIndex >= BaseMapper::NametableCount)
 		return;
-	}
 	_nametableCount = std::max<uint8_t>(_nametableCount, nametableIndex + 1);
 
 	SetPpuMemoryMapping(0x2000 + index * 0x400, 0x2000 + (index + 1) * 0x400 - 1, nametableIndex, ChrMemoryType::NametableRam);
@@ -749,13 +699,10 @@ MirroringType BaseMapper::GetMirroringType()
 	
 uint8_t BaseMapper::ReadRAM(uint16_t addr)
 {
-	if(_allowRegisterRead && _isReadRegisterAddr[addr]) {
+	if(_allowRegisterRead && _isReadRegisterAddr[addr])
 		return ReadRegister(addr);
-	} else if(_prgMemoryAccess[addr >> 8] & MemoryAccessType::Read) {
+	else if(_prgMemoryAccess[addr >> 8] & MemoryAccessType::Read)
 		return _prgPages[addr >> 8][(uint8_t)addr];
-	} else {
-		//assert(false);
-	}
 	return _console->GetMemoryManager()->GetOpenBus();
 }
 
@@ -1231,27 +1178,6 @@ void BaseMapper::RestorePrgChrBackup(vector<uint8_t> &backupData)
 	if(!_onlyChrRam) {
 		memcpy(_chrRom, backupData.data() + _prgSize, _chrRomSize);
 	}
-}
-
-void BaseMapper::RevertPrgChrChanges()
-{
-	memcpy(_prgRom, _originalPrgRom.data(), _originalPrgRom.size());
-	if(_chrRom) {
-		memcpy(_chrRom, _originalChrRom.data(), _originalChrRom.size());
-	}
-}
-
-bool BaseMapper::HasPrgChrChanges()
-{
-	if(memcmp(_prgRom, _originalPrgRom.data(), _originalPrgRom.size()) != 0) {
-		return true;
-	}
-	if(_chrRom) {
-		if(memcmp(_chrRom, _originalChrRom.data(), _originalChrRom.size()) != 0) {
-			return true;
-		}
-	}
-	return false;
 }
 
 void BaseMapper::CopyPrgChrRom(shared_ptr<BaseMapper> mapper)

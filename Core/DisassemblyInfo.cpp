@@ -203,16 +203,11 @@ int32_t DisassemblyInfo::GetMemoryValue(State& cpuState, MemoryManager* memoryMa
 
 uint16_t DisassemblyInfo::GetJumpDestination(uint16_t pc, MemoryManager* memoryManager)
 {
-	if(_opMode == AddrMode::Rel || _opMode == AddrMode::Abs) {
+	if(_opMode == AddrMode::Rel || _opMode == AddrMode::Abs)
 		return GetOpAddr(pc);
-	} else if(_opMode == AddrMode::Ind) {
+	else if(_opMode == AddrMode::Ind)
 		return GetIndirectJumpDestination(memoryManager);
-	}
-#ifdef _DEBUG
-	throw std::runtime_error("Invalid jump operation");
-#else
 	return 0;
-#endif
 }
 
 uint16_t DisassemblyInfo::GetIndirectJumpDestination(MemoryManager* memoryManager)

@@ -45,21 +45,15 @@ protected:
 public:
 	ScriptingContext(Debugger* debugger);
 	virtual ~ScriptingContext() {}
-	virtual bool LoadScript(string scriptName, string scriptContent, Debugger* debugger) = 0;
 
 	void Log(string message);
 
 	Debugger* GetDebugger();
 	string GetScriptName();
 
-	void RequestSaveState(int slot);
-	bool RequestLoadState(int slot);
 	void SaveState();
 	bool LoadState();
 	bool LoadState(string stateData);
-	string GetSavestateData(int slot);
-	void ClearSavestateData(int slot);
-	bool ProcessSavestate();
 
 	void CallMemoryCallback(uint16_t addr, uint8_t &value, CallbackType type);
 	int CallEventCallback(EventType type);
