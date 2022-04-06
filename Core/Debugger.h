@@ -18,7 +18,6 @@ class Disassembler;
 class LabelManager;
 class MemoryDumper;
 class MemoryAccessCounter;
-class CodeRunner;
 class BaseMapper;
 class TraceLogger;
 class CodeDataLogger;
@@ -38,7 +37,6 @@ private:
 	shared_ptr<CodeDataLogger> _codeDataLogger;
 	shared_ptr<MemoryAccessCounter> _memoryAccessCounter;
 	shared_ptr<LabelManager> _labelManager;
-	unique_ptr<CodeRunner> _codeRunner;
 
 	shared_ptr<Console> _console;
 	shared_ptr<CPU> _cpu;
@@ -106,8 +104,6 @@ public:
 	void GetPpuAbsoluteAddressAndType(uint32_t relativeAddr, PpuAddressTypeInfo* info);
 
 	shared_ptr<MemoryDumper> GetMemoryDumper();
-
-	void StopCodeRunner();
 
 	void GetNesHeader(uint8_t* header);
 };

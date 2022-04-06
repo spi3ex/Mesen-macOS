@@ -13,7 +13,6 @@
 #include "MemoryDumper.h"
 #include "MemoryAccessCounter.h"
 #include "Assembler.h"
-#include "CodeRunner.h"
 #include "DisassemblyInfo.h"
 #include "PPU.h"
 #include "MemoryManager.h"
@@ -296,15 +295,6 @@ void Debugger::GetAbsoluteAddressAndType(uint32_t relativeAddr, AddressTypeInfo*
 void Debugger::GetPpuAbsoluteAddressAndType(uint32_t relativeAddr, PpuAddressTypeInfo* info)
 {
 	return _mapper->GetPpuAbsoluteAddressAndType(relativeAddr, info);
-}
-
-void Debugger::StopCodeRunner()
-{
-	_memoryManager->UnregisterIODevice(_codeRunner.get());
-	_memoryManager->RegisterIODevice(_ppu.get());
-	
-	//Break debugger when code has finished executing
-	SetNextStatement(_returnToAddress);
 }
 
 void Debugger::GetNesHeader(uint8_t* header)
