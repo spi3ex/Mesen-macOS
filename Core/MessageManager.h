@@ -9,7 +9,6 @@ class MessageManager
 {
 private:
 	static IMessageManager* _messageManager;
-	static std::unordered_map<string, string> _enResources;
 
 	static std::list<string> _log;
 	
