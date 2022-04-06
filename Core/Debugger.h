@@ -6,6 +6,7 @@
 using std::atomic;
 using std::unordered_set;
 
+#include "Cpu.h"
 #include "DebuggerTypes.h"
 
 class CPU;
@@ -13,11 +14,7 @@ class APU;
 class PPU;
 class MemoryManager;
 class Console;
-class Assembler;
-class Disassembler;
 class LabelManager;
-class MemoryDumper;
-class MemoryAccessCounter;
 class BaseMapper;
 class TraceLogger;
 class CodeDataLogger;
@@ -29,14 +26,6 @@ enum EvalResultType : int32_t;
 class Debugger
 {
 private:
-	static string _disassemblerOutput;
-
-	shared_ptr<Disassembler> _disassembler;
-	shared_ptr<MemoryDumper> _memoryDumper;
-	shared_ptr<CodeDataLogger> _codeDataLogger;
-	shared_ptr<MemoryAccessCounter> _memoryAccessCounter;
-	shared_ptr<LabelManager> _labelManager;
-
 	shared_ptr<Console> _console;
 	shared_ptr<CPU> _cpu;
 	shared_ptr<PPU> _ppu;
@@ -76,19 +65,11 @@ public:
 	void SetFlags(uint32_t flags);
 	bool CheckFlag(DebuggerFlags flag);
 	
-	shared_ptr<LabelManager> GetLabelManager();
-
 	void GetApuState(ApuState *state);
 	void GetState(DebugState *state, bool includeMapperInfo = true);
 	void SetState(DebugState state);
 
-	bool IsMarkedAsCode(uint16_t relativeAddress);
-	shared_ptr<CodeDataLogger> GetCodeDataLogger();
-
 	void SetNextStatement(uint16_t addr);
-
-	void GenerateCodeOutput();
-	const char* GetCode(uint32_t &length);
 
 	int32_t GetRelativeAddress(uint32_t addr, AddressType type);
 	int32_t GetRelativePpuAddress(uint32_t addr, PpuAddressType type);
@@ -97,8 +78,6 @@ public:
 	
 	void GetAbsoluteAddressAndType(uint32_t relativeAddr, AddressTypeInfo* info);
 	void GetPpuAbsoluteAddressAndType(uint32_t relativeAddr, PpuAddressTypeInfo* info);
-
-	shared_ptr<MemoryDumper> GetMemoryDumper();
 
 	void GetNesHeader(uint8_t* header);
 };
