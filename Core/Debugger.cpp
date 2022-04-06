@@ -22,7 +22,6 @@
 #include "StandardController.h"
 #include "CodeDataLogger.h"
 #include "DummyCpu.h"
-#include "EventManager.h"
 
 string Debugger::_disassemblerOutput = "";
 
@@ -45,7 +44,6 @@ Debugger::Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<
 	SetPpu(ppu);
 
 	_memoryAccessCounter.reset(new MemoryAccessCounter(this));
-	_eventManager.reset(new EventManager(this, cpu.get(), ppu.get(), _console->GetSettings()));
 
 	_opCodeCycle = 0;
 
@@ -327,11 +325,6 @@ shared_ptr<MemoryAccessCounter> Debugger::GetMemoryAccessCounter()
 	return _memoryAccessCounter;
 }
 
-shared_ptr<EventManager> Debugger::GetEventManager()
-{
-	return _eventManager;
-}
-
 void Debugger::GetAbsoluteAddressAndType(uint32_t relativeAddr, AddressTypeInfo* info)
 {
 	return _mapper->GetAbsoluteAddressAndType(relativeAddr, info);
@@ -429,12 +422,11 @@ void Debugger::ProcessEvent(EventType type)
 				_ppu->DebugUpdateFrameBuffer(CheckFlag(DebuggerFlags::PpuShowPreviousFrame));
 			}
 
-			_eventManager->ClearFrameEvents();
 			break;
 
-		case EventType::Nmi: _eventManager->AddDebugEvent(DebugEventType::Nmi); break;
-		case EventType::Irq: _eventManager->AddDebugEvent(DebugEventType::Irq); break;
-		case EventType::SpriteZeroHit: _eventManager->AddDebugEvent(DebugEventType::SpriteZeroHit); break;
+		case EventType::Nmi: break;
+		case EventType::Irq: break;
+		case EventType::SpriteZeroHit: break;
 		case EventType::Reset: break;
 
 		case EventType::BusConflict: 

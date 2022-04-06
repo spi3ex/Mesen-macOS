@@ -166,12 +166,6 @@ enum class VideoFilterType
 	HdPack = 999
 };
 
-enum class VideoResizeFilter
-{
-	NearestNeighbor = 0,
-	Bilinear = 1
-};
-
 enum class VideoAspectRatio
 {
 	NoStretching = 0,
@@ -422,8 +416,6 @@ struct AudioFilterSettings
 class EmulationSettings
 {
 private:
-	static const vector<uint32_t> _speedValues;
-	
 	static uint16_t _versionMajor;
 	static uint8_t _versionMinor;
 	static uint8_t _versionRevision;
@@ -460,8 +452,6 @@ private:
 		/* 2C05-05 */   { 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,15,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,15,62,63 },
 	};
 
-	string _pauseScreenMessage;
-
 	uint64_t _flags = 0;
 	
 	bool _audioSettingsChanged = false;
@@ -477,8 +467,6 @@ private:
 	NesModel _model = NesModel::Auto;
 	PpuModel _ppuModel = PpuModel::Ppu2C02;
 
-	uint32_t _turboSpeed = 300;
-
 	bool _disableOverclocking = false;
 	uint32_t _extraScanlinesBeforeNmi = 0;
 	uint32_t _extraScanlinesAfterNmi = 0;
@@ -488,7 +476,6 @@ private:
 	double _videoScale = 1;
 	VideoAspectRatio _aspectRatio = VideoAspectRatio::NoStretching;
 	double _customAspectRatio = 1.0;
-	VideoResizeFilter _resizeFilter = VideoResizeFilter::NearestNeighbor;
 	PictureSettings _pictureSettings;
 	NtscFilterSettings _ntscFilterSettings;
 	bool _backgroundEnabled = true;
@@ -569,11 +556,6 @@ public:
 	bool CheckFlag(EmulationFlags flag)
 	{
 		return (_flags & flag) == flag;
-	}
-
-	bool NeedsPause()
-	{
-		return CheckFlag(EmulationFlags::Paused);
 	}
 
 	bool InputEnabled()
@@ -766,14 +748,11 @@ public:
 	bool NeedAudioSettingsUpdate()
 	{
 		bool value = _audioSettingsChanged;
-		if(value) {
+		if(value)
 			_audioSettingsChanged = false;
-		}
 		return value;
 	}
 
-	uint32_t GetEmulationSpeed(bool ignoreTurbo = false);
-	
 	void DisableOverclocking(bool disabled)
 	{
 		if(_disableOverclocking != disabled) {
@@ -837,16 +816,6 @@ public:
 	VideoFilterType GetVideoFilterType()
 	{
 		return _videoFilterType;
-	}
-
-	void SetVideoResizeFilter(VideoResizeFilter videoResizeFilter)
-	{
-		_resizeFilter = videoResizeFilter;
-	}
-
-	VideoResizeFilter GetVideoResizeFilter()
-	{
-		return _resizeFilter;
 	}
 
 	void SetVideoAspectRatio(VideoAspectRatio aspectRatio, double customRatio)
@@ -976,9 +945,8 @@ public:
 		if(_needControllerUpdate) {
 			_needControllerUpdate = false;
 			return true;
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 	void SetMouseSensitivity(MouseDevice device, double sensitivity)

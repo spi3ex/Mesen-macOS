@@ -7,18 +7,6 @@ uint16_t EmulationSettings::_versionMajor = 0;
 uint8_t EmulationSettings::_versionMinor = 9;
 uint8_t EmulationSettings::_versionRevision = 9;
 
-const vector<uint32_t> EmulationSettings::_speedValues = { { 1, 3, 6, 12, 25, 50, 75, 100, 150, 200, 250, 300, 350, 400, 450, 500, 750, 1000, 2000, 4000 } };
-
-uint32_t EmulationSettings::GetEmulationSpeed(bool ignoreTurbo)
-{
-	if(ignoreTurbo) { }
-	else if(CheckFlag(EmulationFlags::ForceMaxSpeed))
-		return 0;
-	else if(CheckFlag(EmulationFlags::Turbo))
-		return _turboSpeed;
-	return 100;
-}
-
 double EmulationSettings::GetAspectRatio(shared_ptr<Console> console)
 {
 	switch(_aspectRatio) {

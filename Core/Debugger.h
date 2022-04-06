@@ -27,7 +27,6 @@ class PerformanceTracker;
 class CodeDataLogger;
 class ExpressionEvaluator;
 class DummyCpu;
-class EventManager;
 struct ExpressionData;
 
 enum EvalResultType : int32_t;
@@ -45,7 +44,6 @@ private:
 	shared_ptr<MemoryAccessCounter> _memoryAccessCounter;
 	shared_ptr<LabelManager> _labelManager;
 	shared_ptr<PerformanceTracker> _performanceTracker;
-	shared_ptr<EventManager> _eventManager;
 	unique_ptr<CodeRunner> _codeRunner;
 
 	shared_ptr<Console> _console;
@@ -129,7 +127,6 @@ public:
 	shared_ptr<MemoryDumper> GetMemoryDumper();
 	shared_ptr<MemoryAccessCounter> GetMemoryAccessCounter();
 	shared_ptr<PerformanceTracker> GetPerformanceTracker();
-	shared_ptr<EventManager> GetEventManager();
 
 	void StopCodeRunner();
 

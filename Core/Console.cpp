@@ -35,7 +35,6 @@
 #include "CheatManager.h"
 #include "VideoDecoder.h"
 #include "VideoRenderer.h"
-#include "EventManager.h"
 
 Console::Console(shared_ptr<Console> master, EmulationSettings* initialSettings)
 {
