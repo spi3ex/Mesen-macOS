@@ -26,11 +26,6 @@ Debugger* ScriptingContext::GetDebugger()
 	return _debugger;
 }
 
-string ScriptingContext::GetScriptName()
-{
-	return _scriptName;
-}
-
 void ScriptingContext::CallMemoryCallback(uint16_t addr, uint8_t &value, CallbackType type)
 {
 	_inExecOpEvent = type == CallbackType::CpuExec;

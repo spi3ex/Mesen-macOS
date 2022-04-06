@@ -49,7 +49,6 @@ public:
 	void Log(string message);
 
 	Debugger* GetDebugger();
-	string GetScriptName();
 
 	void SaveState();
 	bool LoadState();
