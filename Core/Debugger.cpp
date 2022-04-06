@@ -9,7 +9,6 @@
 #include "APU.h"
 #include "SoundMixer.h"
 #include "CodeDataLogger.h"
-#include "ExpressionEvaluator.h"
 #include "LabelManager.h"
 #include "MemoryDumper.h"
 #include "MemoryAccessCounter.h"

@@ -22,7 +22,6 @@ class CodeRunner;
 class BaseMapper;
 class TraceLogger;
 class CodeDataLogger;
-class ExpressionEvaluator;
 class DummyCpu;
 struct ExpressionData;
 
