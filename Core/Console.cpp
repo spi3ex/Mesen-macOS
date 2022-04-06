@@ -498,11 +498,6 @@ void Console::ResetComponents(bool softReset)
 	_controlManager->Reset(softReset);
 }
 
-void Console::Stop(int stopCode)
-{
-	_stop = true;
-}
-
 void Console::RunSingleFrame()
 {
 	//Used by Libretro

@@ -71,9 +71,6 @@ private:
 	string _romFilepath;
 	string _patchFilename;
 
-	bool _stop = false;
-	bool _running = false;
-
 	bool _disableOcNextFrame = false;
 
 	bool _initialized = false;
@@ -120,8 +117,6 @@ public:
 
 	void SaveBatteries();
 
-	void Stop(int stopCode = 0);
-		
 	void RunSingleFrame();
 	void RunSlaveCpu();
 	bool UpdateHdPackMode();

@@ -1171,7 +1171,6 @@ extern "C" {
 
 	RETRO_API void retro_unload_game()
 	{
-		_console->Stop();
 	}
 
 	RETRO_API unsigned retro_get_region()
