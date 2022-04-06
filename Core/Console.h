@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 #include "VirtualFile.h"
+#include "../Libretro/libretro.h"
 
 class BaseMapper;
 class APU;
@@ -81,7 +82,7 @@ public:
 	Console(shared_ptr<Console> master = nullptr, EmulationSettings* initialSettings = nullptr);
 	~Console();
 
-	void Init();
+	void Init(retro_environment_t retroEnv);
 	void Release(bool forShutdown);
 
 	shared_ptr<BatteryManager> GetBatteryManager();

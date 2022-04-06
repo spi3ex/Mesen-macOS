@@ -58,11 +58,11 @@ Console::~Console()
 {
 }
 
-void Console::Init()
+void Console::Init(retro_environment_t retroEnv)
 {
 	_batteryManager.reset(new BatteryManager());
 	
-	_videoRenderer.reset(new VideoRenderer());
+	_videoRenderer.reset(new VideoRenderer(shared_from_this(), retroEnv));
 	_videoDecoder.reset(new VideoDecoder(shared_from_this()));
 
 	_saveStateManager.reset(new SaveStateManager(shared_from_this()));
@@ -262,8 +262,9 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 
 			RomInfo romInfo = _mapper->GetRomInfo();
 			if(!_master && romInfo.VsType == VsSystemType::VsDualSystem) {
+				extern retro_environment_t env_cb;
 				_slave.reset(new Console(shared_from_this()));
-				_slave->Init();
+				_slave->Init(env_cb);
 				_slave->Initialize(romFile, patchFile);
 			}
 

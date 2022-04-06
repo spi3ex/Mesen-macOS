@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include "IRenderingDevice.h"
 #include "VideoDecoder.h"
 #include "EmulationSettings.h"
 #include "DefaultVideoFilter.h"

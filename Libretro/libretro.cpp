@@ -42,7 +42,7 @@
 #define DEVICE_FOURPLAYERADAPTER  RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_NONE, 2)
 
 static retro_log_printf_t logCallback = nullptr;
-static retro_environment_t retroEnv = nullptr;
+retro_environment_t env_cb = nullptr;
 static unsigned _inputDevices[5] = { DEVICE_AUTO, DEVICE_AUTO, DEVICE_AUTO, DEVICE_AUTO, DEVICE_AUTO };
 static bool _hdPacksEnabled = false;
 static string _mesenVersion = "";
@@ -54,7 +54,6 @@ static int32_t _audioSampleRate = 48000;
 #include "MesenDB.inc"
 
 static std::shared_ptr<Console> _console;
-static std::unique_ptr<LibretroRenderer> _renderer;
 static std::unique_ptr<LibretroKeyManager> _keyManager;
 static std::unique_ptr<LibretroMessageManager> _messageManager;
 
@@ -110,18 +109,16 @@ extern "C" {
 	RETRO_API void retro_init()
 	{
 		struct retro_log_callback log;
-		if(retroEnv(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log)) {
+		if(env_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log))
 			logCallback = log.log;
-		} else {
+		else
 			logCallback = nullptr;
-		}
 
 		_console.reset(new Console());
-		_console->Init();
+		_console->Init(env_cb);
 
-		_renderer.reset(new LibretroRenderer(_console, retroEnv));
 		_keyManager.reset(new LibretroKeyManager(_console));
-		_messageManager.reset(new LibretroMessageManager(logCallback, retroEnv));
+		_messageManager.reset(new LibretroMessageManager(logCallback, env_cb));
 
 		std::stringstream databaseData;
 		databaseData.write((const char*)MesenDatabase, sizeof(MesenDatabase));
@@ -134,7 +131,6 @@ extern "C" {
 
 	RETRO_API void retro_deinit()
 	{
-		_renderer.reset();
 		_keyManager.reset();
 		_messageManager.reset();
 
@@ -145,7 +141,7 @@ extern "C" {
 
 	RETRO_API void retro_set_environment(retro_environment_t env)
 	{
-		retroEnv = env;
+		env_cb = env;
 
 		static constexpr struct retro_variable vars[] = {
 			{ MesenNtscFilter, "NTSC filter; Disabled|Composite (Blargg)|S-Video (Blargg)|RGB (Blargg)|Monochrome (Blargg)|Bisqwit 2x|Bisqwit 4x|Bisqwit 8x" },
@@ -246,14 +242,14 @@ extern "C" {
 			{ NULL, false, false }
 		};
 
-		retroEnv(RETRO_ENVIRONMENT_SET_VARIABLES, (void*)vars);
-		retroEnv(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
-		retroEnv(RETRO_ENVIRONMENT_SET_CONTENT_INFO_OVERRIDE, (void*)content_overrides);
+		env_cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void*)vars);
+		env_cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
+		env_cb(RETRO_ENVIRONMENT_SET_CONTENT_INFO_OVERRIDE, (void*)content_overrides);
 	}
 
 	RETRO_API void retro_set_video_refresh(retro_video_refresh_t sendFrame)
 	{
-		_renderer->SetVideoCallback(sendFrame);
+		_console->GetVideoRenderer()->SetVideoCallback(sendFrame);
 	}
 
 	RETRO_API void retro_set_audio_sample(retro_audio_sample_t sendAudioSample)
@@ -284,9 +280,8 @@ extern "C" {
 	{
 		var.key = key;
 		var.value = nullptr;
-		if(retroEnv(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value != nullptr) {
+		if(env_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value != nullptr)
 			return true;
-		}
 		return false;
 	}
 
@@ -566,7 +561,7 @@ extern "C" {
 				if(_saveStateSize != -1) {
 					struct retro_system_av_info system_av_info;
 					retro_get_system_av_info(&system_av_info);
-					retroEnv(RETRO_ENVIRONMENT_SET_SYSTEM_AV_INFO, &system_av_info);
+					env_cb(RETRO_ENVIRONMENT_SET_SYSTEM_AV_INFO, &system_av_info);
 				}
 			}
 		}
@@ -663,26 +658,26 @@ extern "C" {
 		_console->GetSettings()->SetControllerKeys(3, getKeyBindings(3));
 
 		retro_system_av_info avInfo = {};
-		_renderer->GetSystemAudioVideoInfo(avInfo);
-		retroEnv(RETRO_ENVIRONMENT_SET_GEOMETRY, &avInfo);
+		_console->GetVideoRenderer()->GetSystemAudioVideoInfo(avInfo);
+		env_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &avInfo);
 	}
 
 	RETRO_API void retro_run()
 	{
 		if(_console->GetSettings()->CheckFlag(EmulationFlags::ForceMaxSpeed)) {
 			//Skip frames to speed up emulation while still outputting at 50/60 fps (needed for FDS fast forward while loading)
-			_renderer->SetSkipMode(true);
+			_console->GetVideoRenderer()->SetSkipMode(true);
 			_console->GetSoundMixer()->SetSkipMode(true);
 			for(int i = 0; i < 9; i++) {
 				//Attempt to speed up to 1000% speed
 				_console->RunSingleFrame();
 			}
-			_renderer->SetSkipMode(false);
+			_console->GetVideoRenderer()->SetSkipMode(false);
 			_console->GetSoundMixer()->SetSkipMode(false);
 		}
 
 		bool updated = false;
-		if(retroEnv(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated) {
+		if(env_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated) {
 			update_settings();
 
 			bool hdPacksEnabled = _console->GetSettings()->CheckFlag(EmulationFlags::UseHdPacks);
@@ -698,8 +693,8 @@ extern "C" {
 		if(updated) {
 			//Update geometry after running the frame, in case the console's region changed (affects "auto" aspect ratio)
 			retro_system_av_info avInfo = {};
-			_renderer->GetSystemAudioVideoInfo(avInfo);
-			retroEnv(RETRO_ENVIRONMENT_SET_GEOMETRY, &avInfo);
+			_console->GetVideoRenderer()->GetSystemAudioVideoInfo(avInfo);
+			env_cb(RETRO_ENVIRONMENT_SET_GEOMETRY, &avInfo);
 		}
 
 		_console->GetSoundMixer()->UploadAudioSamples();
@@ -967,7 +962,7 @@ extern "C" {
 		retro_input_descriptor end = { 0 };
 		desc.push_back(end);
 
-		retroEnv(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc.data());
+		env_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc.data());
 	}
 
 	void update_core_controllers()
@@ -1054,7 +1049,7 @@ extern "C" {
 		memoryMap.descriptors = descriptors;
 		memoryMap.num_descriptors = count;
 
-		retroEnv(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &memoryMap);
+		env_cb(RETRO_ENVIRONMENT_SET_MEMORY_MAPS, &memoryMap);
 	}
 
 	RETRO_API void retro_set_controller_port_device(unsigned port, unsigned device)
@@ -1068,18 +1063,17 @@ extern "C" {
 
 	RETRO_API bool retro_load_game(const struct retro_game_info *game)
 	{
-		char *systemFolder;
-		if(!retroEnv(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &systemFolder) || !systemFolder) {
-			return false;
-		}
-
 		char *saveFolder;
-		if(!retroEnv(RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY, &saveFolder)) {
+		char *systemFolder;
+		if(!env_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &systemFolder) || !systemFolder)
+			return false;
+
+		if(!env_cb(RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY, &saveFolder)) {
 			logMessage(RETRO_LOG_ERROR, "Could not find save directory.\n");
 		}
 
 		enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
-		if(!retroEnv(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt)) {
+		if(!env_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt)) {
 			logMessage(RETRO_LOG_ERROR, "XRGB8888 is not supported.\n");
 			return false;
 		}
@@ -1105,7 +1099,7 @@ extern "C" {
 		const void *gameData = NULL;
 		size_t gameSize = 0;
 		string gamePath("");
-		if (retroEnv(RETRO_ENVIRONMENT_GET_GAME_INFO_EXT, &gameExt)) {
+		if (env_cb(RETRO_ENVIRONMENT_GET_GAME_INFO_EXT, &gameExt)) {
 			gameData = gameExt->data;
 			gameSize = gameExt->size;
 			if (gameExt->file_in_archive) {
@@ -1210,11 +1204,10 @@ extern "C" {
 			vscale = hdData->Scale;
 		}
 
-		if(hscale <= 2) {
-			_renderer->GetSystemAudioVideoInfo(*info, NES_NTSC_OUT_WIDTH(256), 240 * vscale);
-		} else {
-			_renderer->GetSystemAudioVideoInfo(*info, 256 * hscale, 240 * vscale);
-		}
+		if(hscale <= 2)
+			_console->GetVideoRenderer()->GetSystemAudioVideoInfo(*info, NES_NTSC_OUT_WIDTH(256), 240 * vscale);
+		else
+			_console->GetVideoRenderer()->GetSystemAudioVideoInfo(*info, 256 * hscale, 240 * vscale);
 	}
 
 	RETRO_API void *retro_get_memory_data(unsigned id)
