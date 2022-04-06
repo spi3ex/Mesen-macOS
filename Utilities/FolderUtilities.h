@@ -9,7 +9,6 @@ private:
 	static string _homeFolder;
 	static string _saveFolderOverride;
 	static string _saveStateFolderOverride;
-	static string _screenshotFolderOverride;
 	static vector<string> _gameFolders;
 
 public:

@@ -8,7 +8,6 @@
 string FolderUtilities::_homeFolder = "";
 string FolderUtilities::_saveFolderOverride = "";
 string FolderUtilities::_saveStateFolderOverride = "";
-string FolderUtilities::_screenshotFolderOverride = "";
 vector<string> FolderUtilities::_gameFolders = vector<string>();
 
 void FolderUtilities::SetHomeFolder(string homeFolder)
@@ -53,7 +52,6 @@ void FolderUtilities::SetFolderOverrides(string saveFolder, string saveStateFold
 {
 	_saveFolderOverride = saveFolder;
 	_saveStateFolderOverride = saveStateFolder;
-	_screenshotFolderOverride = screenshotFolder;
 }
 
 string FolderUtilities::GetSaveFolder()
