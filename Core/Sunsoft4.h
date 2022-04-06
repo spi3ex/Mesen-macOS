@@ -63,7 +63,6 @@ protected:
 
 	void UpdateState()
 	{
-		MemoryAccessType access = _prgRamEnabled ? MemoryAccessType::ReadWrite : MemoryAccessType::NoAccess;
 		SetCpuMemoryMapping(0x6000, 0x7FFF, 0, HasBattery() ? PrgMemoryType::SaveRam : PrgMemoryType::WorkRam);
 		
 		if(_usingExternalRom) { 

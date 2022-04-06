@@ -481,7 +481,6 @@ private:
 	bool _backgroundEnabled = true;
 	bool _spritesEnabled = true;
 	uint32_t _screenRotation = 0;
-	uint32_t _exclusiveRefreshRate = 60;
 
 	ConsoleType _consoleType = ConsoleType::Nes;
 	ExpansionPortDevice _expansionDevice = ExpansionPortDevice::None;
