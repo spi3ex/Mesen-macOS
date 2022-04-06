@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "RomData.h"
-#include "MessageManager.h"
 #include "../Utilities/CRC32.h"
 #include "../Utilities/FolderUtilities.h"
 #include "../Utilities/StringUtilities.h"
@@ -53,9 +52,6 @@ void GameDatabase::LoadGameDb(vector<string> data)
 			_gameDatabase[gameInfo.Crc] = gameInfo;
 		}
 	}
-
-	MessageManager::Log();
-	MessageManager::Log("[DB] Initialized - " + std::to_string(_gameDatabase.size()) + " games in DB");
 }
 
 void GameDatabase::LoadGameDb(std::istream &db)
@@ -219,23 +215,14 @@ void GameDatabase::SetGameInfo(uint32_t romCrc, RomData &romData, bool updateRom
 
 	auto result = _gameDatabase.find(romCrc);
 	bool foundInDatabase = result != _gameDatabase.end();
-	if(foundInDatabase) {
+	if(foundInDatabase)
+	{
 		info = result->second;
 		if(!forHeaderlessRom && info.Board == "UNK") {
 			//Boards marked as UNK should only be used for headerless roms (since their data is unverified)
 			romData.Info.DatabaseInfo = {};
 			return;
 		}
-
-		MessageManager::Log("[DB] Game found in database");
-
-		if(info.MapperID < UnifBoards::UnknownBoard) {
-			MessageManager::Log("[DB] Mapper: " + std::to_string(info.MapperID) + "  Sub: " + std::to_string(GetSubMapper(info)));
-		} else if(info.MapperID == UnifBoards::UnknownBoard) {
-			MessageManager::DisplayMessage("Error", "UnsupportedMapper", "UNIF: " + info.Board);
-		}
-
-		MessageManager::Log("[DB] System : " + info.System);
 
 		if(GetGameSystem(info.System) == GameSystem::VsSystem) {
 			string type = "VS-UniSystem";
@@ -248,52 +235,12 @@ void GameDatabase::SetGameInfo(uint32_t romCrc, RomData &romData, bool updateRom
 				case VsSystemType::TkoBoxingProtection: type = "VS-UniSystem (TKO Boxing)"; break;
 				case VsSystemType::VsDualSystem: type = "VS-DualSystem"; break;
 			}
-			MessageManager::Log("[DB] VS System Type: " + type);
 		}
-		if(!info.Board.empty()) {
-			MessageManager::Log("[DB] Board: " + info.Board);
-		}
-		if(!info.Chip.empty()) {
-			MessageManager::Log("[DB] Chip: " + info.Chip);
-		}
-
-		switch(GetBusConflictType(info.BusConflicts)) {
-			case BusConflictType::Default: break;
-			case BusConflictType::Yes: MessageManager::Log("[DB] Bus conflicts: Yes"); break;
-			case BusConflictType::No: MessageManager::Log("[DB] Bus conflicts: No"); break;
-		}
-
-		if(!info.Mirroring.empty()) {
-			string msg = "[DB] Mirroring: ";
-			switch(info.Mirroring[0]) {
-				case 'h': msg += "Horizontal"; break;
-				case 'v': msg += "Vertical"; break;
-				case '4': msg += "4 Screens"; break;
-				case '0': msg += "Screen A only"; break;
-				case '1': msg += "Screen B only"; break;
-			}
-			MessageManager::Log(msg);
-		}
-		MessageManager::Log("[DB] PRG ROM: " + std::to_string(info.PrgRomSize / 1024) + " KB");
-		MessageManager::Log("[DB] CHR ROM: " + std::to_string(info.ChrRomSize / 1024) + " KB");
-		if(info.ChrRamSize > 0) {
-			MessageManager::Log("[DB] CHR RAM: " + std::to_string(info.ChrRamSize / 1024) + " KB");
-		}
-		if(info.WorkRamSize > 0) {
-			MessageManager::Log("[DB] Work RAM: " + std::to_string(info.WorkRamSize / 1024) + " KB");
-		}
-		if(info.SaveRamSize > 0) {
-			MessageManager::Log("[DB] Save RAM: " + std::to_string(info.SaveRamSize / 1024) + " KB");
-		}
-		MessageManager::Log("[DB] Battery: " + string(info.HasBattery ? "Yes" : "No"));
 
 		if(updateRomData) {
-			MessageManager::Log("[DB] Database info will be used instead of file header.");
 			romData.Info.IsInDatabase = true;
 			UpdateRomData(info, romData);
 		}
-	} else {
-		MessageManager::Log("[DB] Game not found in database");
 	}
 
 	romData.Info.DatabaseInfo = info;

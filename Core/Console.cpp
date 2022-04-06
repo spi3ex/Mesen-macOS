@@ -10,7 +10,6 @@
 #include "VsControlManager.h"
 #include "MapperFactory.h"
 #include "Debugger.h"
-#include "MessageManager.h"
 #include "EmulationSettings.h"
 #include "../Utilities/FolderUtilities.h"
 #include "VirtualFile.h"
@@ -225,13 +224,8 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 
 		shared_ptr<HdPackData> originalHdPackData = _hdData;
 		LoadHdPack(romFile, patchFile);
-		if(patchFile.IsValid()) {
-			if(romFile.ApplyPatch(patchFile)) {
-				MessageManager::DisplayMessage("Patch", "ApplyingPatch", patchFile.GetFileName());
-			} else {
-				//Patch failed
-			}
-		}
+		if(patchFile.IsValid())
+			romFile.ApplyPatch(patchFile);
 
 		_batteryManager->Initialize(FolderUtilities::GetFilename(romFile.GetFileName(), false));
 

@@ -5,7 +5,6 @@
 #include "../Utilities/CRC32.h"
 #include "../Utilities/sha1.h"
 #include "RomData.h"
-#include "MessageManager.h"
 #include "MapperFactory.h"
 #include "GameDatabase.h"
 #include "EmulationSettings.h"

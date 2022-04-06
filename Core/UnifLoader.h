@@ -7,7 +7,6 @@
 #include "RomData.h"
 #include "GameDatabase.h"
 #include "UnifBoards.h"
-#include "MessageManager.h"
 #include "EmulationSettings.h"
 #include "BaseLoader.h"
 
@@ -211,12 +210,8 @@ public:
 				GameDatabase::SetGameInfo(romData.Info.Hash.PrgChrCrc32, romData, GameDatabase::IsEnabled(), false);
 			}
 
-			if(romData.Info.MapperID == UnifBoards::UnknownBoard) {
-				if(!_checkOnly) {
-					MessageManager::DisplayMessage("Error", "UnsupportedMapper", "UNIF: " + _mapperName);
-				}
+			if(romData.Info.MapperID == UnifBoards::UnknownBoard)
 				romData.Error = true;
-			}
 		}
 	}
 };

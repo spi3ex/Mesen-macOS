@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "BaseVideoFilter.h"
-#include "MessageManager.h"
 #include "../Utilities/FolderUtilities.h"
 #include "StandardController.h"
 #include "ScaleFilter.h"

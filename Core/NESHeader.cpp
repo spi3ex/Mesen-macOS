@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "NESHeader.h"
 #include "RomData.h"
-#include "MessageManager.h"
 
 uint16_t NESHeader::GetMapperID()
 {
@@ -54,7 +53,6 @@ GameSystem NESHeader::GetGameSystem()
 					case 1: return GameSystem::VsSystem;
 					case 2: return GameSystem::Playchoice;
 					default:
-						MessageManager::Log("[iNes] Unsupported console type detected (using NES NTSC instead)");
 						return GameSystem::NesNtsc;
 
 				}
@@ -83,18 +81,13 @@ RomHeaderVersion NESHeader::GetRomHeaderVersion()
 
 uint32_t NESHeader::GetSizeValue(uint32_t exponent, uint32_t multiplier)
 {
-	if(exponent > 60) {
-		//Restrict max size to avoid overflow in a 64-bit value
+	//Restrict max size to avoid overflow in a 64-bit value
+	if(exponent > 60)
 		exponent = 60;
-		MessageManager::Log("[iNes] Unsupported size value.");
-	}
 
 	multiplier = multiplier * 2 + 1;
 	
 	uint64_t size = multiplier * (uint64_t)1 << exponent;
-	if(size >= ((uint64_t)1 << 32)) {
-		MessageManager::Log("[iNes] Unsupported size value.");
-	}
 	return (uint32_t)size;
 }
 
@@ -188,25 +181,20 @@ MirroringType NESHeader::GetMirroringType()
 
 GameInputType NESHeader::GetInputType()
 {
-	if(GetRomHeaderVersion() == RomHeaderVersion::Nes2_0) {
-		if(Byte15 < (uint8_t)GameInputType::LastEntry) {
+	if(GetRomHeaderVersion() == RomHeaderVersion::Nes2_0)
+	{
+		if(Byte15 < (uint8_t)GameInputType::LastEntry)
 			return (GameInputType)Byte15;
-		}
-
-		MessageManager::Log("[iNes] Unknown controller type.");
-		return GameInputType::Unspecified;
-	} else {
-		return GameInputType::Unspecified;
 	}
+	return GameInputType::Unspecified;
 }
 
 VsSystemType NESHeader::GetVsSystemType()
 {
-	if(GetRomHeaderVersion() == RomHeaderVersion::Nes2_0) {
-		if((Byte13 >> 4) <= 0x06) {
+	if(GetRomHeaderVersion() == RomHeaderVersion::Nes2_0)
+	{
+		if((Byte13 >> 4) <= 0x06)
 			return (VsSystemType)(Byte13 >> 4);
-		}
-		MessageManager::Log("[iNes] Unknown VS System Type specified.");
 	}
 	return VsSystemType::Default;
 }
@@ -217,7 +205,6 @@ PpuModel NESHeader::GetVsSystemPpuModel()
 		switch(Byte13 & 0x0F) {
 			case 0: return PpuModel::Ppu2C03;
 			case 1:
-				MessageManager::Log("[iNes] Unsupported VS System Palette specified (2C03G).");
 				return PpuModel::Ppu2C03;
 
 			case 2: return PpuModel::Ppu2C04A;
@@ -233,7 +220,6 @@ PpuModel NESHeader::GetVsSystemPpuModel()
 			case 12: return PpuModel::Ppu2C05E;
 
 			default:
-				MessageManager::Log("[iNes] Unknown VS System Palette specified.");
 				break;
 		}
 	}

@@ -9,7 +9,6 @@
 #include "Debugger.h"
 #include "MemoryManager.h"
 #include "BatteryManager.h"
-#include "MessageManager.h"
 #include "EmulationSettings.h"
 
 void BaseMapper::WriteRegister(uint16_t addr, uint8_t value) { }
@@ -538,10 +537,6 @@ void BaseMapper::Initialize(RomData &romData)
 		case BusConflictType::Yes: _hasBusConflicts = true; break;
 		case BusConflictType::No: _hasBusConflicts = false; break;
 	}	
-
-	if(_hasBusConflicts) {
-		MessageManager::Log("[iNes] Bus conflicts enabled");
-	}
 
 	_saveRam = new uint8_t[_saveRamSize];
 	_workRam = new uint8_t[_workRamSize];
