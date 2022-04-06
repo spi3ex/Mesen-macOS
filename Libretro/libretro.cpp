@@ -126,10 +126,14 @@ extern "C" {
 		_console->GetSettings()->SetFlags(EmulationFlags::FdsAutoLoadDisk);
 		_console->GetSettings()->SetFlags(EmulationFlags::AutoConfigureInput);
 		_console->GetSettings()->SetSampleRate(_audioSampleRate);
+
+		if (env_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL))
+			_keyManager->SetSupportsInputBitmasks(true);
 	}
 
 	RETRO_API void retro_deinit()
 	{
+		_keyManager->SetSupportsInputBitmasks(false);
 		_keyManager.reset();
 		_messageManager.reset();
 
