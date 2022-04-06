@@ -30,8 +30,6 @@ private:
 
 	uint32_t _frameCount = 0;
 
-	ScreenSize _previousScreenSize = {};
-	double _previousScale = 0;
 	FrameInfo _lastFrameInfo;
 
 	VideoFilterType _videoFilterType = VideoFilterType::None;

@@ -111,8 +111,6 @@ void VideoDecoder::DecodeFrame(bool synchronous)
 
 	ScreenSize screenSize;
 	GetScreenSize(screenSize, true);
-	_previousScale      = _console->GetSettings()->GetVideoScale();
-	_previousScreenSize = screenSize;
 	
 	_lastFrameInfo = frameInfo;
 
