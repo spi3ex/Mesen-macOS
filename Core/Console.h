@@ -88,7 +88,6 @@ public:
 	shared_ptr<SaveStateManager> GetSaveStateManager();
 	shared_ptr<VideoDecoder> GetVideoDecoder();
 	shared_ptr<VideoRenderer> GetVideoRenderer();
-	shared_ptr<DebugHud> GetDebugHud();
 	shared_ptr<SoundMixer> GetSoundMixer();
 	EmulationSettings* GetSettings();
 	
