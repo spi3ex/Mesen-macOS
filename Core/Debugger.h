@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 
-#include "Cpu.h"
+#include "CPU.h"
 #include "DebuggerTypes.h"
 
 class CPU;
