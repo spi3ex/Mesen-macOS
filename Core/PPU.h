@@ -175,7 +175,6 @@ class PPU : public IMemoryHandler, public Snapshotable
 		static constexpr int32_t ScreenWidth = 256;
 		static constexpr int32_t ScreenHeight = 240;
 		static constexpr int32_t PixelCount = 256*240;
-		static constexpr int32_t OutputBufferSize = 256*240*2;
 		static constexpr int32_t OamDecayCycleCount = 3000;
 
 		PPU(shared_ptr<Console> console);
@@ -183,9 +182,7 @@ class PPU : public IMemoryHandler, public Snapshotable
 
 		void Reset();
 
-		void DebugSendFrame();
 		uint16_t* GetScreenBuffer(bool previousBuffer);
-		void DebugCopyOutputBuffer(uint16_t *target);
 		void DebugUpdateFrameBuffer(bool toGrayscale);
 		void GetState(PPUDebugState &state);
 		void SetState(PPUDebugState &state);

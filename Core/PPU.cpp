@@ -1128,19 +1128,9 @@ void PPU::WriteSpriteRam(uint8_t addr, uint8_t value)
 	}
 }
 
-void PPU::DebugSendFrame()
-{
-	_console->GetVideoDecoder()->UpdateFrame(_currentOutputBuffer);
-}
-
 uint16_t* PPU::GetScreenBuffer(bool previousBuffer)
 {
 	return previousBuffer ? ((_currentOutputBuffer == _outputBuffers[0]) ? _outputBuffers[1] : _outputBuffers[0]) : _currentOutputBuffer;
-}
-
-void PPU::DebugCopyOutputBuffer(uint16_t *target)
-{
-	memcpy(target, _currentOutputBuffer, PPU::PixelCount * sizeof(uint16_t));
 }
 
 void PPU::SendFrame()
