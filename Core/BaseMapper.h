@@ -16,7 +16,6 @@ class BaseMapper : public IMemoryHandler, public Snapshotable, public IBattery
 {
 private:
 	MirroringType _mirroringType;
-	string _batteryFilename;
 
 	uint16_t InternalGetPrgPageSize();
 	uint16_t InternalGetSaveRamPageSize();

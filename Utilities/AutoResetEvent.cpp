@@ -8,8 +8,6 @@ AutoResetEvent::AutoResetEvent()
 
 AutoResetEvent::~AutoResetEvent()
 {
-	//Can't signal here, seems to cause process crashes when this occurs while the
-	//application is exiting.
 }
 
 void AutoResetEvent::Wait(int timeoutDelay)

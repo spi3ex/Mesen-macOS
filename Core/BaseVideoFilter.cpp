@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "BaseVideoFilter.h"
-#include "../Utilities/FolderUtilities.h"
 #include "StandardController.h"
 #include "ScaleFilter.h"
 #include "RotateFilter.h"

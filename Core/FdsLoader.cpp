@@ -3,7 +3,6 @@
 #include <algorithm>
 #include "../Utilities/FolderUtilities.h"
 #include "../Utilities/CRC32.h"
-#include "../Utilities/sha1.h"
 #include "RomData.h"
 #include "MapperFactory.h"
 #include "GameDatabase.h"

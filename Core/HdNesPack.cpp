@@ -1,13 +1,9 @@
 #include "stdafx.h"
 #include <algorithm>
-#include <unordered_map>
 #include "HdNesPack.h"
 #include "Console.h"
-#include "MessageManager.h"
 #include "EmulationSettings.h"
 #include "HdPackLoader.h"
-#include "../Utilities/FolderUtilities.h"
-#include "../Utilities/PNGHelper.h"
 
 HdNesPack::HdNesPack(shared_ptr<HdPackData> hdData, EmulationSettings* settings)
 {

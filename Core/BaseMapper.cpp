@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include <random>
 #include <assert.h>
-#include "../Utilities/FolderUtilities.h"
 #include "../Utilities/IpsPatcher.h"
 #include "BaseMapper.h"
 #include "Console.h"
@@ -390,11 +389,6 @@ uint32_t BaseMapper::GetCHRPageCount()
 	return pageSize ? (_chrRomSize / pageSize) : 0;
 }
 
-string BaseMapper::GetBatteryFilename()
-{
-	return FolderUtilities::CombinePath(FolderUtilities::GetSaveFolder(), FolderUtilities::GetFilename(_romInfo.RomName, false) + ".sav");
-}
-
 void BaseMapper::InitializeChrRam(int32_t chrRamSize)
 {
 	uint32_t defaultRamSize = GetChrRamSize() ? GetChrRamSize() : 0x2000;
@@ -498,8 +492,6 @@ void BaseMapper::Initialize(RomData &romData)
 {
 	_romInfo = romData.Info;
 
-	_batteryFilename = GetBatteryFilename();
-	
 	if(romData.SaveRamSize == -1 || ForceSaveRamSize()) {
 		_saveRamSize = GetSaveRamSize();
 	} else {
