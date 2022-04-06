@@ -18,7 +18,6 @@
 #include "DisassemblyInfo.h"
 #include "PPU.h"
 #include "MemoryManager.h"
-#include "ScriptHost.h"
 #include "StandardController.h"
 #include "CodeDataLogger.h"
 #include "DummyCpu.h"

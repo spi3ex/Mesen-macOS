@@ -20,7 +20,6 @@ class MemoryDumper;
 class MemoryAccessCounter;
 class CodeRunner;
 class BaseMapper;
-class ScriptHost;
 class TraceLogger;
 class CodeDataLogger;
 class ExpressionEvaluator;
