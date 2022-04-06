@@ -88,7 +88,6 @@ void Console::Release(bool forShutdown)
 		_cheatManager.reset();
 
 		_soundMixer.reset();
-		_notificationManager.reset();
 	}
 
 	_hdPackBuilder.reset();

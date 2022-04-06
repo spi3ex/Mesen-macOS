@@ -20,7 +20,6 @@ class VideoRenderer;
 class DebugHud;
 class SoundMixer;
 class NotificationManager;
-class Debugger;
 class EmulationSettings;
 class BatteryManager;
 
@@ -59,7 +58,6 @@ private:
 	shared_ptr<SaveStateManager> _saveStateManager;
 	shared_ptr<CheatManager> _cheatManager;
 	shared_ptr<SoundMixer> _soundMixer;
-	shared_ptr<NotificationManager> _notificationManager;
 	shared_ptr<EmulationSettings> _settings;
 
 	shared_ptr<HdPackBuilder> _hdPackBuilder;
@@ -92,7 +90,6 @@ public:
 	shared_ptr<VideoRenderer> GetVideoRenderer();
 	shared_ptr<DebugHud> GetDebugHud();
 	shared_ptr<SoundMixer> GetSoundMixer();
-	shared_ptr<NotificationManager> GetNotificationManager();
 	EmulationSettings* GetSettings();
 	
 	bool IsDualSystem();
