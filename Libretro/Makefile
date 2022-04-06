@@ -88,8 +88,9 @@ else ifeq ($(platform), classic_armv7_a7)
 	TARGET := $(TARGET_NAME)_libretro.so
 	fpic := -fPIC -pthread
 	SHARED := -shared -Wl,--version-script=$(LIBRETRO_DIR)/link.T -Wl,--no-undefined
+	LTO ?= -flto=4
 	CFLAGS += -Ofast \
-	-flto=4 -fwhole-program -fuse-linker-plugin \
+	-fwhole-program -fuse-linker-plugin \
 	-fdata-sections -ffunction-sections -Wl,--gc-sections \
 	-fno-stack-protector -fno-ident -fomit-frame-pointer \
 	-falign-functions=1 -falign-jumps=1 -falign-loops=1 \
@@ -302,11 +303,14 @@ endif
 
 LDFLAGS += $(LIBM)
 
+LTO ?= -flto
+# Backwards compatibility (older versions took true or false rather than a compiler option)
 ifeq ($(LTO),true)
-   CFLAGS += -flto
-   CXXFLAGS += -flto
-   LD = g++
+   override LTO = -flto
+else ifeq ($(LTO),false)
+   override LTO = -fno-lto
 endif
+   LD = $(CXX)
 
 ifeq ($(DEBUG), 1)
   ifneq (,$(findstring msvc,$(platform)))
@@ -359,8 +363,9 @@ ifeq (,$(findstring windows_msvc2017,$(platform)))
   CXXFLAGS += -Wall
 endif
 
-CFLAGS   += -D LIBRETRO $(fpic)
-CXXFLAGS += -D LIBRETRO $(fpic) -std=c++11
+CFLAGS   += -D LIBRETRO $(fpic) $(LTO)
+CXXFLAGS += -D LIBRETRO $(fpic) -std=c++11 $(LTO)
+LDFLAGS  += $(LTO)
 
 all: $(TARGET)
 
