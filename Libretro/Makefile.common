@@ -118,9 +118,4 @@ SOURCES_CXX := $(LIBRETRO_DIR)/libretro.cpp \
                $(UTIL_DIR)/Scale2x/scale2x.cpp \
                $(UTIL_DIR)/Scale2x/scale3x.cpp \
                $(UTIL_DIR)/Scale2x/scalebit.cpp \
-               $(UTIL_DIR)/xBRZ/xbrz.cpp \
-
-
-#LUAOBJ=$(patsubst Lua/%.c,Lua/$(OBJFOLDER)/%.o,$(wildcard Lua/*.c))
-#COREOBJ=$(patsubst Core/%.cpp,Core/$(OBJFOLDER)/%.o,$(wildcard Core/*.cpp))
-#UTILOBJ=$(patsubst Utilities/%.cpp,Utilities/$(OBJFOLDER)/%.o,$(wildcard Utilities/*.cpp)) $(patsubst Utilities/HQX/%.cpp,Utilities/$(OBJFOLDER)/%.o,$(wildcard Utilities/HQX/*.cpp)) $(patsubst Utilities/xBRZ/%.cpp,Utilities/$(OBJFOLDER)/%.o,$(wildcard Utilities/xBRZ/*.cpp)) $(patsubst Utilities/KreedSaiEagle/%.cpp,Utilities/$(OBJFOLDER)/%.o,$(wildcard Utilities/KreedSaiEagle/*.cpp)) $(patsubst Utilities/Scale2x/%.cpp,Utilities/$(OBJFOLDER)/%.o,$(wildcard Utilities/Scale2x/*.cpp))
+               $(UTIL_DIR)/xBRZ/xbrz.cpp
