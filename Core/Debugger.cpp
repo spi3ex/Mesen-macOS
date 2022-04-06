@@ -55,9 +55,7 @@ Debugger::Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<
 	
 	memset(_inputOverride, 0, sizeof(_inputOverride));
 
-	if(!LoadCdlFile(FolderUtilities::CombinePath(FolderUtilities::GetDebuggerFolder(), FolderUtilities::GetFilename(_romName, false) + ".cdl"))) {
-		_disassembler->Reset();
-	}
+	_disassembler->Reset();
 
 	_released = false;
 }
@@ -65,8 +63,6 @@ Debugger::Debugger(shared_ptr<Console> console, shared_ptr<CPU> cpu, shared_ptr<
 Debugger::~Debugger()
 {
 	if(!_released) {
-		_codeDataLogger->SaveCdlFile(FolderUtilities::CombinePath(FolderUtilities::GetDebuggerFolder(), FolderUtilities::GetFilename(_romName, false) + ".cdl"));
-
 		_released = true;
 	}
 }
@@ -94,50 +90,6 @@ void Debugger::SetFlags(uint32_t flags)
 bool Debugger::CheckFlag(DebuggerFlags flag)
 {
 	return (_flags & (uint32_t)flag) == (uint32_t)flag;
-}
-
-bool Debugger::LoadCdlFile(string cdlFilepath)
-{
-	if(_codeDataLogger->LoadCdlFile(cdlFilepath)) {
-		UpdateCdlCache();
-		return true;
-	}
-	return false;
-}
-
-void Debugger::SetCdlData(uint8_t* cdlData, uint32_t length)
-{
-	_codeDataLogger->SetCdlData(cdlData, length);
-	UpdateCdlCache();
-}
-
-void Debugger::ResetCdl()
-{
-	_codeDataLogger->Reset();
-	UpdateCdlCache();
-}
-
-void Debugger::UpdateCdlCache()
-{
-
-	_disassembler->Reset();
-	for(int i = 0, len = _mapper->GetMemorySize(DebugMemoryType::PrgRom); i < len; i++) {
-		if(_codeDataLogger->IsCode(i)) {
-			AddressTypeInfo info = { i, AddressType::PrgRom };
-			i = _disassembler->BuildCache(info, 0, false, false) - 1;
-		}
-	}
-
-	_functionEntryPoints.clear();
-	for(int i = 0, len = _mapper->GetMemorySize(DebugMemoryType::PrgRom); i < len; i++) {
-		if(_codeDataLogger->IsSubEntryPoint(i)) {
-			_functionEntryPoints.emplace(i);
-
-			//After resetting the cache, set the entry point flags in the disassembly cache
-			AddressTypeInfo info = { i, AddressType::PrgRom };
-			_disassembler->BuildCache(info, 0, true, false);
-		}
-	}
 }
 
 bool Debugger::IsMarkedAsCode(uint16_t relativeAddress)

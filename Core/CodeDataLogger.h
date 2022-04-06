@@ -69,9 +69,6 @@ public:
 
 	void Reset();
 
-	bool LoadCdlFile(string cdlFilepath);
-	bool SaveCdlFile(string cdlFilepath);
-
 	void SetFlag(int32_t absoluteAddr, CdlPrgFlags flag);
 	void SetFlag(int32_t chrAbsoluteAddr, CdlChrFlags flag);
 
@@ -83,6 +80,4 @@ public:
 	bool IsData(uint32_t absoluteAddr);
 	bool IsRead(uint32_t absoluteAddr);
 	bool IsDrawn(uint32_t absoluteAddr);
-
-	void SetCdlData(uint8_t *cdlData, uint32_t length);
 };

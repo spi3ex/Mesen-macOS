@@ -27,28 +27,6 @@ void CodeDataLogger::Reset()
 	memset(_cdlData, 0, _prgSize + _chrSize);
 }
 
-bool CodeDataLogger::LoadCdlFile(string cdlFilepath)
-{
-	ifstream cdlFile(cdlFilepath, ios::in | ios::binary);
-	if(cdlFile) {
-		cdlFile.seekg(0, std::ios::end);
-		size_t fileSize = (size_t)cdlFile.tellg();
-		cdlFile.seekg(0, std::ios::beg);
-
-		if(fileSize == _prgSize + _chrSize) {
-			Reset();
-
-			cdlFile.read((char*)_cdlData, _prgSize + _chrSize);
-			cdlFile.close();
-
-			CalculateStats();
-			
-			return true;
-		}
-	}
-	return false;
-}
-
 void CodeDataLogger::CalculateStats()
 {
 	_codeSize = 0;
@@ -75,17 +53,6 @@ void CodeDataLogger::CalculateStats()
 			}
 		}
 	}
-}
-
-bool CodeDataLogger::SaveCdlFile(string cdlFilepath)
-{
-	ofstream cdlFile(cdlFilepath, ios::out | ios::binary);
-	if(cdlFile) {
-		cdlFile.write((char*)_cdlData, _prgSize+_chrSize);
-		cdlFile.close();
-		return true;
-	}
-	return false;
 }
 
 void CodeDataLogger::SetFlag(int32_t absoluteAddr, CdlPrgFlags flag)
@@ -174,12 +141,4 @@ bool CodeDataLogger::IsRead(uint32_t absoluteAddr)
 bool CodeDataLogger::IsDrawn(uint32_t absoluteAddr)
 {
 	return (_cdlData[absoluteAddr + _prgSize] & (uint8_t)CdlChrFlags::Drawn) == (uint8_t)CdlChrFlags::Drawn;
-}
-
-void CodeDataLogger::SetCdlData(uint8_t *cdlData, uint32_t length)
-{
-	if(length <= _prgSize + _chrSize) {
-		memcpy(_cdlData, cdlData, length);
-		CalculateStats();
-	}
 }

@@ -25,7 +25,6 @@ class DummyCpu;
 struct ExpressionData;
 
 enum EvalResultType : int32_t;
-enum class CdlStripFlag;
 
 class Debugger
 {
@@ -83,10 +82,6 @@ public:
 	void GetState(DebugState *state, bool includeMapperInfo = true);
 	void SetState(DebugState state);
 
-	bool LoadCdlFile(string cdlFilepath);
-	void SetCdlData(uint8_t* cdlData, uint32_t length);
-	void ResetCdl();
-	void UpdateCdlCache();
 	bool IsMarkedAsCode(uint16_t relativeAddress);
 	shared_ptr<CodeDataLogger> GetCodeDataLogger();
 

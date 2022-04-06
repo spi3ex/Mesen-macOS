@@ -92,7 +92,6 @@ public:
 	void GatherChrPaletteInfo();
 
 	bool HasUndoHistory();
-	void PerformUndo();
 
 	uint32_t GetMemorySize(DebugMemoryType type);
 	uint32_t GetMemoryState(DebugMemoryType type, uint8_t *buffer);

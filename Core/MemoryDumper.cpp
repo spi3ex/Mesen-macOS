@@ -57,15 +57,6 @@ bool MemoryDumper::HasUndoHistory()
 	return _undoHistory.size() > 0;
 }
 
-void MemoryDumper::PerformUndo()
-{
-	if(!_undoHistory.empty()) {
-		_mapper->RestorePrgChrBackup(_undoHistory.back());
-		_undoHistory.pop_back();
-		_debugger->UpdateCdlCache();
-	}
-}
-
 void MemoryDumper::AddUndoHistory(vector<uint8_t> &originalRomData)
 {
 	vector<uint8_t> newData = _mapper->GetPrgChrCopy();

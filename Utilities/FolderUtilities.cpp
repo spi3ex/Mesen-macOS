@@ -75,13 +75,6 @@ string FolderUtilities::GetHdPackFolder()
 	return folder;
 }
 
-string FolderUtilities::GetDebuggerFolder()
-{
-	string folder = CombinePath(GetHomeFolder(), "Debugger");
-	CreateFolder(folder);
-	return folder;
-}
-
 string FolderUtilities::GetSaveStateFolder()
 {
 	string folder;
@@ -90,25 +83,6 @@ string FolderUtilities::GetSaveStateFolder()
 	} else {
 		folder = _saveStateFolderOverride;
 	}
-	CreateFolder(folder);
-	return folder;
-}
-
-string FolderUtilities::GetScreenshotFolder()
-{
-	string folder;
-	if(_screenshotFolderOverride.empty()) {
-		folder = CombinePath(GetHomeFolder(), "Screenshots");
-	} else {
-		folder = _screenshotFolderOverride;
-	}
-	CreateFolder(folder);
-	return folder;
-}
-
-string FolderUtilities::GetRecentGamesFolder()
-{
-	string folder = CombinePath(GetHomeFolder(), "RecentGames");
 	CreateFolder(folder);
 	return folder;
 }
