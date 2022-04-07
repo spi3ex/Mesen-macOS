@@ -61,7 +61,6 @@ enum EmulationFlags : uint64_t
 	Rewind =  0x1000000000,
 	Turbo = 0x2000000000,
 	InBackground = 0x4000000000,
-	NsfPlayerEnabled = 0x8000000000,
 	
 	DisplayMovieIcons = 0x10000000000,
 	HidePauseOverlay = 0x20000000000,
@@ -74,9 +73,6 @@ enum EmulationFlags : uint64_t
 	EnablePpu2000ScrollGlitch = 0x200000000000,
 
 	ConfirmExitResetPower = 0x400000000000,
-
-	NsfRepeat = 0x800000000000,
-	NsfShuffle = 0x1000000000000,
 
 	IntegerFpsMode = 0x2000000000000,
 
@@ -1005,28 +1001,6 @@ public:
 	bool HasArkanoidPaddle()
 	{
 		return _controllerTypes[0] == ControllerType::ArkanoidController || _controllerTypes[1] == ControllerType::ArkanoidController || (_consoleType == ConsoleType::Famicom && _expansionDevice == ExpansionPortDevice::ArkanoidController);
-	}
-
-	void SetNsfConfig(int32_t autoDetectSilence, int32_t moveToNextTrackTime, bool disableApuIrqs)
-	{
-		_nsfAutoDetectSilenceDelay = autoDetectSilence;
-		_nsfMoveToNextTrackTime = moveToNextTrackTime;
-		_nsfDisableApuIrqs = disableApuIrqs;
-	}
-
-	int32_t GetNsfAutoDetectSilenceDelay()
-	{
-		return _nsfAutoDetectSilenceDelay;
-	}
-
-	int32_t GetNsfMoveToNextTrackTime()
-	{
-		return _nsfMoveToNextTrackTime;
-	}
-
-	bool GetNsfDisableApuIrqs()
-	{
-		return _nsfDisableApuIrqs;
 	}
 
 	void SetRamPowerOnState(RamPowerOnState state)
