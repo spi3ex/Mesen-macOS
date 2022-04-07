@@ -29,18 +29,6 @@ public:
 	void SetPpu(shared_ptr<PPU> ppu);
 	Console* GetConsole();
 
-	void SetFlags(uint32_t flags);
-	bool CheckFlag(DebuggerFlags flag);
-	
-	void GetApuState(ApuState *state);
 	void GetState(DebugState *state, bool includeMapperInfo = true);
 	void SetState(DebugState state);
-
-	int32_t GetRelativeAddress(uint32_t addr, AddressType type);
-	int32_t GetRelativePpuAddress(uint32_t addr, PpuAddressType type);
-	int32_t GetAbsoluteAddress(uint32_t addr);	
-	int32_t GetAbsoluteChrAddress(uint32_t addr);
-	
-	void GetAbsoluteAddressAndType(uint32_t relativeAddr, AddressTypeInfo* info);
-	void GetPpuAbsoluteAddressAndType(uint32_t relativeAddr, PpuAddressTypeInfo* info);
 };
