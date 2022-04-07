@@ -42,7 +42,7 @@ public:
 	VideoDecoder(shared_ptr<Console> console);
 	~VideoDecoder();
 
-	void DecodeFrame(bool synchronous = false);
+	void DecodeFrame();
 
 	uint32_t GetFrameCount();
 

@@ -86,7 +86,7 @@ void VideoDecoder::UpdateVideoFilter()
 	}
 }
 
-void VideoDecoder::DecodeFrame(bool synchronous)
+void VideoDecoder::DecodeFrame()
 {
 	UpdateVideoFilter();
 
@@ -126,7 +126,7 @@ void VideoDecoder::UpdateFrameSync(void *ppuOutputBuffer, HdScreenInfo *hdScreen
 	_frameNumber = _console->GetFrameCount();
 	_hdScreenInfo = hdScreenInfo;
 	_ppuOutputBuffer = (uint16_t*)ppuOutputBuffer;
-	DecodeFrame(true);
+	DecodeFrame();
 	_frameCount++;
 }
 
