@@ -2,7 +2,6 @@
 #include <string>
 #include <sstream>
 #include <algorithm>
-#include "LibretroRenderer.h"
 #include "LibretroKeyManager.h"
 #include "LibretroMessageManager.h"
 #include "libretro.h"
