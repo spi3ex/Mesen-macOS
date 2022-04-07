@@ -12,7 +12,6 @@ class NoiseChannel;
 class DeltaModulationChannel;
 class ApuFrameCounter;
 class SoundMixer;
-class Debugger;
 enum class FrameType;
 enum class NesModel;
 

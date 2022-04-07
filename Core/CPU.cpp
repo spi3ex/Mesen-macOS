@@ -5,7 +5,6 @@
 #include "PPU.h"
 #include "APU.h"
 #include "DeltaModulationChannel.h"
-#include "Debugger.h"
 #include "NsfMapper.h"
 #include "Console.h"
 

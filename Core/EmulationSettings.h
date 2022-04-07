@@ -80,7 +80,6 @@ enum EmulationFlags : uint64_t
 
 	IntegerFpsMode = 0x2000000000000,
 
-	DebuggerWindowEnabled = 0x4000000000000,
 	BreakOnCrash = 0x8000000000000,
 	
 	AllowMismatchingSaveState = 0x10000000000000,

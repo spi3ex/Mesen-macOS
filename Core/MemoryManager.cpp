@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "MemoryManager.h"
 #include "BaseMapper.h"
-#include "Debugger.h"
 #include "CheatManager.h"
 #include "Console.h"
 

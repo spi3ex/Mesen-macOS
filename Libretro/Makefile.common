@@ -32,7 +32,6 @@ SOURCES_CXX := $(LIBRETRO_DIR)/libretro.cpp \
                $(CORE_DIR)/ControlManager.cpp \
                $(CORE_DIR)/CPU.cpp \
                $(CORE_DIR)/CrossFeedFilter.cpp \
-               $(CORE_DIR)/Debugger.cpp \
                $(CORE_DIR)/DefaultVideoFilter.cpp \
                $(CORE_DIR)/RawVideoFilter.cpp \
                $(CORE_DIR)/DeltaModulationChannel.cpp \

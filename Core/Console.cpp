@@ -9,7 +9,6 @@
 #include "ControlManager.h"
 #include "VsControlManager.h"
 #include "MapperFactory.h"
-#include "Debugger.h"
 #include "EmulationSettings.h"
 #include "../Utilities/FolderUtilities.h"
 #include "VirtualFile.h"

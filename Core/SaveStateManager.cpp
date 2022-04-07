@@ -3,7 +3,6 @@
 #include "Console.h"
 #include "EmulationSettings.h"
 #include "VideoDecoder.h"
-#include "Debugger.h"
 #include "RomData.h"
 #include "DefaultVideoFilter.h"
 #include "PPU.h"

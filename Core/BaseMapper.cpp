@@ -5,7 +5,6 @@
 #include "BaseMapper.h"
 #include "Console.h"
 #include "CheatManager.h"
-#include "Debugger.h"
 #include "MemoryManager.h"
 #include "BatteryManager.h"
 #include "EmulationSettings.h"

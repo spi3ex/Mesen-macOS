@@ -4,7 +4,6 @@
 #include "Snapshotable.h"
 #include "IMemoryHandler.h"
 #include "DebuggerTypes.h"
-#include "Debugger.h"
 #include "Types.h"
 #include "IBattery.h"
 #include "RomData.h"
