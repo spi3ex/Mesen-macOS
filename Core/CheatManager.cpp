@@ -141,9 +141,8 @@ void CheatManager::ClearCodes()
 
 void CheatManager::ApplyCodes(uint16_t addr, uint8_t &value)
 {
-	if(!_hasCode) {
+	if(!_hasCode)
 		return;
-	}
 
 	if(_relativeCheatCodes[addr] != nullptr) {
 		for(uint32_t i = 0, len = i < _relativeCheatCodes[addr]->size(); i < len; i++) {
@@ -163,44 +162,5 @@ void CheatManager::ApplyCodes(uint16_t addr, uint8_t &value)
 				}
 			}
 		}
-	}
-}
-
-vector<CodeInfo> CheatManager::GetCheats()
-{
-	//Used by NetPlay
-	vector<CodeInfo> cheats;
-	for(unique_ptr<vector<CodeInfo>> &codes : _relativeCheatCodes) {
-		if(codes) {
-			std::copy(codes.get()->begin(), codes.get()->end(), std::back_inserter(cheats));
-		}
-	}
-	std::copy(_absoluteCheatCodes.begin(), _absoluteCheatCodes.end(), std::back_inserter(cheats));
-	return cheats;
-}
-
-void CheatManager::SetCheats(CheatInfo cheats[], uint32_t length)
-{
-	ClearCodes();
-
-	for(uint32_t i = 0; i < length; i++) {
-		CheatInfo &cheat = cheats[i];
-		switch(cheat.Type) {
-			case CheatType::Custom: AddCustomCode(cheat.Address, cheat.Value, cheat.UseCompareValue ? cheat.CompareValue : -1, cheat.IsRelativeAddress); break;
-			case CheatType::GameGenie: AddGameGenieCode(cheat.GameGenieCode);	break;
-			case CheatType::ProActionRocky: AddProActionRockyCode(cheat.ProActionRockyCode); break;
-		}
-	}
-}
-
-void CheatManager::SetCheats(vector<CodeInfo> &cheats)
-{
-	//Used by NetPlay
-	ClearCodes();
-
-	if(cheats.size() > 0)
-	{
-		for(CodeInfo &cheat : cheats)
-			AddCode(cheat);
 	}
 }

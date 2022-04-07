@@ -53,9 +53,5 @@ public:
 	void AddCustomCode(uint32_t address, uint8_t value, int32_t compareValue = -1, bool isRelativeAddress = true);
 	void ClearCodes();
 
-	vector<CodeInfo> GetCheats();
-	void SetCheats(vector<CodeInfo> &cheats);
-	void SetCheats(CheatInfo cheats[], uint32_t length);
-
 	void ApplyCodes(uint16_t addr, uint8_t &value);
 };
