@@ -9,8 +9,6 @@
 #include "RomLoader.h"
 #include "iNesLoader.h"
 #include "FdsLoader.h"
-#include "NsfLoader.h"
-#include "NsfeLoader.h"
 #include "UnifLoader.h"
 #include "StudyBoxLoader.h"
 
@@ -41,12 +39,6 @@ bool RomLoader::LoadFile(VirtualFile &romFile)
 		loader.LoadRom(_romData, fileData, nullptr);
 	} else if(memcmp(fileData.data(), "FDS\x1a", 4) == 0 || memcmp(fileData.data(), "\x1*NINTENDO-HVC*", 15) == 0) {
 		FdsLoader loader(_checkOnly);
-		loader.LoadRom(_romData, fileData);
-	} else if(memcmp(fileData.data(), "NESM\x1a", 5) == 0) {
-		NsfLoader loader(_checkOnly);
-		loader.LoadRom(_romData, fileData);
-	} else if(memcmp(fileData.data(), "NSFE", 4) == 0) {
-		NsfeLoader loader(_checkOnly);
 		loader.LoadRom(_romData, fileData);
 	} else if(memcmp(fileData.data(), "UNIF", 4) == 0) {
 		UnifLoader loader(_checkOnly);

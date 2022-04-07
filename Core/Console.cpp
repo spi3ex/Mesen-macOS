@@ -14,7 +14,6 @@
 #include "VirtualFile.h"
 #include "HdBuilderPpu.h"
 #include "HdPpu.h"
-#include "NsfPpu.h"
 #include "SoundMixer.h"
 #include "NsfMapper.h"
 #include "SaveStateManager.h"
@@ -305,9 +304,6 @@ bool Console::Initialize(VirtualFile &romFile, VirtualFile &patchFile, bool forP
 			
 			if(_hdData && (!_hdData->Tiles.empty() || !_hdData->Backgrounds.empty())) {
 				_ppu.reset(new HdPpu(shared_from_this(), _hdData.get()));
-			} else if(std::dynamic_pointer_cast<NsfMapper>(_mapper)) {
-				//Disable most of the PPU for NSFs
-				_ppu.reset(new NsfPpu(shared_from_this()));
 			} else {
 				_ppu.reset(new PPU(shared_from_this()));
 			}
@@ -720,9 +716,6 @@ bool Console::UpdateHdPackMode()
 		_ppu.reset();
 		if(_hdData && (!_hdData->Tiles.empty() || !_hdData->Backgrounds.empty())) {
 			_ppu.reset(new HdPpu(shared_from_this(), _hdData.get()));
-		} else if(std::dynamic_pointer_cast<NsfMapper>(_mapper)) {
-			//Disable most of the PPU for NSFs
-			_ppu.reset(new NsfPpu(shared_from_this()));
 		} else {
 			_ppu.reset(new PPU(shared_from_this()));
 		}
