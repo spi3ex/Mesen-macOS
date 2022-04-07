@@ -205,7 +205,7 @@
 #include "NovelDiamond.h"
 #include "NROM.h"
 #include "NsfCart31.h"
-#include "NsfMapper.h"
+#include "FdsAudio.h"
 #include "NtdecTc112.h"
 #include "OekaKids.h"
 #include "Racermate.h"
@@ -648,7 +648,6 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 		case UnifBoards::UnlPuzzle: return new UnlPuzzle();
 
 		case MapperFactory::StudyBoxMapperID: return new StudyBox();
-		case MapperFactory::NsfMapperID: return new NsfMapper();
 		case MapperFactory::FdsMapperID: return new FDS();
 	}
 

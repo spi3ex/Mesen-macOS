@@ -130,8 +130,6 @@ public:
 	ConsoleFeatures GetAvailableFeatures();
 	void InputBarcode(uint64_t barcode, uint32_t digitCount);
 
-	bool IsNsf();
-		
 	void Reset(bool softReset = true);
 	void PowerCycle();
 	void ReloadRom(bool forPowerCycle = false);

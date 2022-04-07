@@ -15,7 +15,6 @@
 #include "HdBuilderPpu.h"
 #include "HdPpu.h"
 #include "SoundMixer.h"
-#include "NsfMapper.h"
 #include "SaveStateManager.h"
 #include "HdPackBuilder.h"
 #include "HdAudioDevice.h"
@@ -479,9 +478,8 @@ void Console::ResetComponents(bool softReset)
 	}
 
 	_memoryManager->Reset(softReset);
-	if(!_settings->CheckFlag(EmulationFlags::DisablePpuReset) || !softReset || IsNsf()) {
+	if(!_settings->CheckFlag(EmulationFlags::DisablePpuReset) || !softReset)
 		_ppu->Reset();
-	}
 	_apu->Reset(softReset);
 	_cpu->Reset(softReset, _model);
 	_controlManager->Reset(softReset);
@@ -499,7 +497,7 @@ void Console::RunSingleFrame()
 			RunSlaveCpu();
 	}
 
-	_settings->DisableOverclocking(_disableOcNextFrame || IsNsf());
+	_settings->DisableOverclocking(_disableOcNextFrame);
 	_disableOcNextFrame = false;
 
 	_systemActionManager->ProcessSystemActions();
@@ -783,11 +781,6 @@ void Console::InputBarcode(uint64_t barcode, uint32_t digitCount)
 			barcodeReader->InputBarcode(barcode, digitCount);
 		}
 	}
-}
-
-bool Console::IsNsf()
-{
-	return std::dynamic_pointer_cast<NsfMapper>(_mapper) != nullptr;
 }
 
 uint8_t* Console::GetRamBuffer(uint16_t address)
