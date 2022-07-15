@@ -487,10 +487,6 @@ private:
 	std::unordered_map<int, double> _mouseSensitivity;
 	int32_t _inputPollScanline = 241;
 
-	int32_t _nsfAutoDetectSilenceDelay = 3000;
-	int32_t _nsfMoveToNextTrackTime = 120;
-	bool _nsfDisableApuIrqs = true;
-
 	bool _keyboardModeEnabled = false;
 
 	RamPowerOnState _ramPowerOnState = RamPowerOnState::AllZeros;
