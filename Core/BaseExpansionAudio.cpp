@@ -3,7 +3,7 @@
 #include "Console.h"
 #include "APU.h"
 
-BaseExpansionAudio::BaseExpansionAudio(shared_ptr<Console> console)
+BaseExpansionAudio::BaseExpansionAudio(std::shared_ptr<Console> console)
 {
 	_console = console;
 }

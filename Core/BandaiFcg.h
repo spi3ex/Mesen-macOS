@@ -17,10 +17,10 @@ private:
 	uint8_t _prgPage;
 	uint8_t _prgBankSelect;
 	uint8_t _chrRegs[8];
-	shared_ptr<DatachBarcodeReader> _barcodeReader;
+	std::shared_ptr<DatachBarcodeReader> _barcodeReader;
 
-	shared_ptr<BaseEeprom24C0X> _standardEeprom;
-	shared_ptr<BaseEeprom24C0X> _extraEeprom;
+	std::shared_ptr<BaseEeprom24C0X> _standardEeprom;
+	std::shared_ptr<BaseEeprom24C0X> _extraEeprom;
 
 protected:
 	uint16_t GetPRGPageSize() override { return 0x4000; }

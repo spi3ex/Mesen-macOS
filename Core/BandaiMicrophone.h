@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "BaseControlDevice.h"
 #include "Console.h"
 
@@ -29,7 +30,7 @@ protected:
 	}
 
 public:
-	BandaiMicrophone(shared_ptr<Console> console, KeyMappingSet keyMappings) : BaseControlDevice(console, BaseControlDevice::MapperInputPort, keyMappings)
+	BandaiMicrophone(std::shared_ptr<Console> console, KeyMappingSet keyMappings) : BaseControlDevice(console, BaseControlDevice::MapperInputPort, keyMappings)
 	{
 	}
 

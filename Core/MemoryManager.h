@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
+#include <memory>
 #include "IMemoryHandler.h"
 #include "Snapshotable.h"
 #include "OpenBusHandler.h"
@@ -15,8 +16,8 @@ class MemoryManager : public Snapshotable
 		static constexpr int RAMSize = 0x10000;
 		static constexpr int VRAMSize = 0x4000;
 		
-		shared_ptr<Console> _console;
-		shared_ptr<BaseMapper> _mapper;
+		std::shared_ptr<Console> _console;
+		std::shared_ptr<BaseMapper> _mapper;
 
 		uint8_t *_internalRAM;
 
@@ -33,10 +34,10 @@ class MemoryManager : public Snapshotable
 	public:
 		static const int InternalRAMSize = 0x800;
 
-		MemoryManager(shared_ptr<Console> console);
+		MemoryManager(std::shared_ptr<Console> console);
 		~MemoryManager();
 
-		void SetMapper(shared_ptr<BaseMapper> mapper);
+		void SetMapper(std::shared_ptr<BaseMapper> mapper);
 		
 		void Reset(bool softReset);
 		void RegisterIODevice(IMemoryHandler *handler);

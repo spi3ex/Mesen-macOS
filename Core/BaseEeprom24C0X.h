@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "Snapshotable.h"
 
 class BaseEeprom24C0X : public Snapshotable
@@ -16,7 +17,7 @@ protected:
 		ChipAddress = 6
 	};
 
-	shared_ptr<Console> _console;
+	std::shared_ptr<Console> _console;
 
 	Mode _mode = Mode::Idle;
 	Mode _nextMode = Mode::Idle;

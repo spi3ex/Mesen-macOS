@@ -12,14 +12,14 @@
 class VideoRenderer
 {
 private:
-	shared_ptr<Console> _console;
+	std::shared_ptr<Console> _console;
 	retro_video_refresh_t _sendFrame = nullptr;
 	retro_environment_t _retroEnv = nullptr;
 	bool _skipMode = false;
 	int32_t _previousHeight = -1;
 	int32_t _previousWidth = -1;
 public:
-	VideoRenderer(shared_ptr<Console> console, retro_environment_t retroEnv)
+	VideoRenderer(std::shared_ptr<Console> console, retro_environment_t retroEnv)
 	{
 		_console = console;
 		_retroEnv = retroEnv;

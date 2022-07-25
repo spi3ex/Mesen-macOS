@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "PPU.h"
 
 struct HdScreenInfo;
@@ -20,7 +21,7 @@ protected:
 	void DrawPixel() override;
 
 public:
-	HdPpu(shared_ptr<Console> console, HdPackData* hdData);
+	HdPpu(std::shared_ptr<Console> console, HdPackData* hdData);
 	virtual ~HdPpu();
 
 	void SendFrame() override;

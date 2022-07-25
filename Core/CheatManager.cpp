@@ -4,7 +4,7 @@
 #include "Console.h"
 #include "BaseMapper.h"
 
-CheatManager::CheatManager(shared_ptr<Console> console)
+CheatManager::CheatManager(std::shared_ptr<Console> console)
 {
 	_console = console;
 

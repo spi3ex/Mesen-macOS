@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "BaseControlDevice.h"
 
 class SnesController : public BaseControlDevice
@@ -76,7 +77,7 @@ protected:
 	}
 
 public:
-	SnesController(shared_ptr<Console> console, uint8_t port, KeyMappingSet keyMappings) : BaseControlDevice(console, port, keyMappings)
+	SnesController(std::shared_ptr<Console> console, uint8_t port, KeyMappingSet keyMappings) : BaseControlDevice(console, port, keyMappings)
 	{
 	}
 

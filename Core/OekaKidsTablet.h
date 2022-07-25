@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "BaseControlDevice.h"
 #include "Console.h"
 #include "EmulationSettings.h"
@@ -37,7 +38,7 @@ protected:
 	}
 
 public:
-	OekaKidsTablet(shared_ptr<Console> console) : BaseControlDevice(console, BaseControlDevice::ExpDevicePort)
+	OekaKidsTablet(std::shared_ptr<Console> console) : BaseControlDevice(console, BaseControlDevice::ExpDevicePort)
 	{
 	}
 

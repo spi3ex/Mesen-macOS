@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
+#include <memory>
 
 class Console;
 
@@ -34,10 +35,10 @@ struct CheatInfo
 class CheatManager
 {
 private:
-	shared_ptr<Console> _console;
+	std::shared_ptr<Console> _console;
 
 	bool _hasCode = false;
-	vector<unique_ptr<vector<CodeInfo>>> _relativeCheatCodes;
+	vector<std::unique_ptr<vector<CodeInfo>>> _relativeCheatCodes;
 	vector<CodeInfo> _absoluteCheatCodes;
 
 	uint32_t DecodeValue(uint32_t code, uint32_t* bitIndexes, uint32_t bitCount);
@@ -46,7 +47,7 @@ private:
 	void AddCode(CodeInfo &code);
 	
 public:
-	CheatManager(shared_ptr<Console> console);
+	CheatManager(std::shared_ptr<Console> console);
 
 	void AddGameGenieCode(string code);
 	void AddProActionRockyCode(uint32_t code);

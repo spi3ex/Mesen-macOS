@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "BaseControlDevice.h"
 #include "IKeyManager.h"
 #include "KeyManager.h"
@@ -36,7 +37,7 @@ protected:
 	}
 
 public:
-	SnesMouse(shared_ptr<Console> console, uint8_t port) : BaseControlDevice(console, port)
+	SnesMouse(std::shared_ptr<Console> console, uint8_t port) : BaseControlDevice(console, port)
 	{
 	}
 

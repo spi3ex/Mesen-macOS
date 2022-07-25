@@ -256,19 +256,3 @@ MouseMovement BaseControlDevice::GetMovement()
 	SetCoordinates({ 0, 0 });
 	return { pos.X, pos.Y };
 }
-
-void BaseControlDevice::SwapButtons(shared_ptr<BaseControlDevice> state1, uint8_t button1, shared_ptr<BaseControlDevice> state2, uint8_t button2)
-{
-	bool pressed1 = state1->IsPressed(button1);
-	bool pressed2 = state2->IsPressed(button2);
-
-	state1->ClearBit(button1);
-	state2->ClearBit(button2);
-
-	if(pressed1) {
-		state2->SetBit(button2);
-	}
-	if(pressed2) {
-		state1->SetBit(button1);
-	}
-}

@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "BaseControlDevice.h"
 #include "KeyManager.h"
 #include "IKeyManager.h"
@@ -38,7 +39,7 @@ protected:
 	}
 
 public:
-	Zapper(shared_ptr<Console> console, uint8_t port) : BaseControlDevice(console, port)
+	Zapper(std::shared_ptr<Console> console, uint8_t port) : BaseControlDevice(console, port)
 	{
 	}
 
@@ -55,7 +56,7 @@ public:
 	{
 	}
 
-	static bool StaticIsLightFound(MousePosition pos, shared_ptr<Console> console)
+	static bool StaticIsLightFound(MousePosition pos, std::shared_ptr<Console> console)
 	{
 		PPU* ppu = console ? console->GetPpu() : nullptr;
 		if(!ppu) {

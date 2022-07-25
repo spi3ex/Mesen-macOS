@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
+#include <memory>
 #include "IMemoryHandler.h"
 #include "Snapshotable.h"
 
@@ -23,25 +24,24 @@ private:
 	//Static so that power cycle does not reset its value
 	uint32_t _pollCounter;
 
-	shared_ptr<BaseControlDevice> _mapperControlDevice;
+	std::shared_ptr<BaseControlDevice> _mapperControlDevice;
 
 	uint32_t _lagCounter = 0;
 	bool _isLagging = false;
 
 protected:
-	shared_ptr<Console> _console;
-	vector<shared_ptr<BaseControlDevice>> _controlDevices;
-	shared_ptr<BaseControlDevice> _systemActionManager;
+	std::shared_ptr<Console> _console;
+	vector<std::shared_ptr<BaseControlDevice>> _controlDevices;
+	std::shared_ptr<BaseControlDevice> _systemActionManager;
 
-	void RegisterControlDevice(shared_ptr<BaseControlDevice> controlDevice);
+	void RegisterControlDevice(std::shared_ptr<BaseControlDevice> controlDevice);
 
 	virtual void StreamState(bool saving) override;
 	virtual ControllerType GetControllerType(uint8_t port);
-	virtual void RemapControllerButtons();
 	virtual uint8_t GetOpenBusMask(uint8_t port);
 
 public:
-	ControlManager(shared_ptr<Console> console, shared_ptr<BaseControlDevice> systemActionManager, shared_ptr<BaseControlDevice> mapperControlDevice);
+	ControlManager(std::shared_ptr<Console> console, std::shared_ptr<BaseControlDevice> systemActionManager, std::shared_ptr<BaseControlDevice> mapperControlDevice);
 	virtual ~ControlManager();
 
 	virtual void UpdateControlDevices();
@@ -60,12 +60,12 @@ public:
 	void RegisterInputRecorder(IInputRecorder* recorder);
 	void UnregisterInputRecorder(IInputRecorder* recorder);
 
-	shared_ptr<BaseControlDevice> GetControlDevice(uint8_t port);
-	vector<shared_ptr<BaseControlDevice>> GetControlDevices();
+	std::shared_ptr<BaseControlDevice> GetControlDevice(uint8_t port);
+	vector<std::shared_ptr<BaseControlDevice>> GetControlDevices();
 	bool HasKeyboard();
 	
-	static shared_ptr<BaseControlDevice> CreateControllerDevice(ControllerType type, uint8_t port, shared_ptr<Console> console);
-	static shared_ptr<BaseControlDevice> CreateExpansionDevice(ExpansionPortDevice type, shared_ptr<Console> console);
+	static std::shared_ptr<BaseControlDevice> CreateControllerDevice(ControllerType type, uint8_t port, std::shared_ptr<Console> console);
+	static std::shared_ptr<BaseControlDevice> CreateExpansionDevice(ExpansionPortDevice type, std::shared_ptr<Console> console);
 
 	virtual void GetMemoryRanges(MemoryRanges &ranges) override
 	{

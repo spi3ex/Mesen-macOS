@@ -3,14 +3,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
-#include <memory>
 
 #include <iostream>
-#include <iomanip>
-#include <fstream>
 #include <string>
 #include <cctype>
-#include <memory>
 #include <vector>
 #include <algorithm>
 #include <sstream>
@@ -32,9 +28,6 @@
 #endif
 
 using std::vector;
-using std::shared_ptr;
-using std::unique_ptr;
-using std::weak_ptr;
 using std::ios;
 using std::istream;
 using std::ostream;

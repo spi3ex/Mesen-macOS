@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "BaseControlDevice.h"
 #include "ControlManager.h"
 #include "PPU.h"
@@ -50,7 +51,7 @@ protected:
 	}
 
 public:
-	ArkanoidController(shared_ptr<Console> console, uint8_t port) : BaseControlDevice(console, port)
+	ArkanoidController(std::shared_ptr<Console> console, uint8_t port) : BaseControlDevice(console, port)
 	{
 	}
 

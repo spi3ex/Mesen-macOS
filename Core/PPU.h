@@ -29,7 +29,7 @@ enum PPURegisters
 class PPU : public IMemoryHandler, public Snapshotable
 {
 	protected:
-		shared_ptr<Console> _console;
+		std::shared_ptr<Console> _console;
 		EmulationSettings* _settings;
 
 		PPUState _state;
@@ -177,7 +177,7 @@ class PPU : public IMemoryHandler, public Snapshotable
 		static constexpr int32_t PixelCount = 256*240;
 		static constexpr int32_t OamDecayCycleCount = 3000;
 
-		PPU(shared_ptr<Console> console);
+		PPU(std::shared_ptr<Console> console);
 		virtual ~PPU();
 
 		void Reset();

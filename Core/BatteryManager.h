@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 
 class IBatteryProvider
 {
@@ -28,8 +29,8 @@ public:
 
 	void SetSaveEnabled(bool enabled);
 	
-	void SetBatteryProvider(shared_ptr<IBatteryProvider> provider);
-	void SetBatteryRecorder(shared_ptr<IBatteryRecorder> recorder);
+	void SetBatteryProvider(std::shared_ptr<IBatteryProvider> provider);
+	void SetBatteryRecorder(std::shared_ptr<IBatteryRecorder> recorder);
 	
 	void SaveBattery(string extension, uint8_t* data, uint32_t length);
 	

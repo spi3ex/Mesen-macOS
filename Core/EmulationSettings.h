@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <memory>
 #include "stdafx.h"
 #include "KeyManager.h"
 
@@ -862,7 +863,7 @@ public:
 		return _ntscFilterSettings;
 	}
 
-	double GetAspectRatio(shared_ptr<Console> console);
+	double GetAspectRatio(std::shared_ptr<Console> console);
 	bool GetStaticAspectRatio()
 	{
 		if(_aspectRatio == VideoAspectRatio::StandardS || _aspectRatio == VideoAspectRatio::WidescreenS)

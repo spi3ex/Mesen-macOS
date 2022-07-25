@@ -6,6 +6,7 @@
 #endif
 
 #include "stdafx.h"
+#include <memory>
 #include "Snapshotable.h"
 #include "Types.h"
 
@@ -53,7 +54,7 @@ private:
 	uint8_t _irqMask;
 
 	State _state;
-	shared_ptr<Console> _console;
+	std::shared_ptr<Console> _console;
 	MemoryManager* _memoryManager;
 
 	bool _prevRunIrq = false;
@@ -785,7 +786,7 @@ protected:
 	void StreamState(bool saving) override;
 
 public:
-	CPU(shared_ptr<Console> console);
+	CPU(std::shared_ptr<Console> console);
 	
 	uint64_t GetCycleCount() { return _cycleCount; }
 	void SetMasterClockDivider(NesModel region);

@@ -657,7 +657,7 @@ BaseMapper* MapperFactory::GetMapperFromID(RomData &romData)
 	return nullptr;
 }
 
-shared_ptr<BaseMapper> MapperFactory::InitializeFromFile(shared_ptr<Console> console, VirtualFile &romFile, RomData &romData)
+std::shared_ptr<BaseMapper> MapperFactory::InitializeFromFile(std::shared_ptr<Console> console, VirtualFile &romFile, RomData &romData)
 {
 	RomLoader loader;
 
@@ -671,7 +671,7 @@ shared_ptr<BaseMapper> MapperFactory::InitializeFromFile(shared_ptr<Console> con
 			}
 		}
 
-		shared_ptr<BaseMapper> mapper(GetMapperFromID(romData));
+		std::shared_ptr<BaseMapper> mapper(GetMapperFromID(romData));
 		if(mapper)
 			return mapper;
 	}

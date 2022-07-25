@@ -52,43 +52,6 @@ uint8_t VsControlManager::GetPrgChrSelectBit()
 	return _prgChrSelectBit;
 }
 
-void VsControlManager::RemapControllerButtons()
-{
-	shared_ptr<StandardController> controllers[2];
-	controllers[0] = std::dynamic_pointer_cast<StandardController>(GetControlDevice(0));
-	controllers[1] = std::dynamic_pointer_cast<StandardController>(GetControlDevice(1));
-
-	if(!controllers[0] || !controllers[1]) {
-		return;
-	}
-
-	GameInputType inputType = _console->GetRomInfo().InputType;
-	if(inputType == GameInputType::VsSystemSwapped) {
-		//Swap controllers 1 & 2
-		ControlDeviceState port1State = controllers[0]->GetRawState();
-		ControlDeviceState port2State = controllers[1]->GetRawState();
-		controllers[0]->SetRawState(port2State);
-		controllers[1]->SetRawState(port1State);
-
-		//But don't swap the start/select buttons
-		BaseControlDevice::SwapButtons(controllers[0], StandardController::Buttons::Start, controllers[1], StandardController::Buttons::Start);
-		BaseControlDevice::SwapButtons(controllers[0], StandardController::Buttons::Select, controllers[1], StandardController::Buttons::Select);
-	} else if(inputType == GameInputType::VsSystemSwapAB) {
-		//Swap buttons P1 A & P2 B (Pinball (Japan))
-		BaseControlDevice::SwapButtons(controllers[0], StandardController::Buttons::B, controllers[1], StandardController::Buttons::A);
-	}
-
-	//Swap Start/Select for all configurations (makes it more intuitive)
-	BaseControlDevice::SwapButtons(controllers[0], StandardController::Buttons::Start, controllers[0], StandardController::Buttons::Select);
-	BaseControlDevice::SwapButtons(controllers[1], StandardController::Buttons::Start, controllers[1], StandardController::Buttons::Select);
-
-	if(_vsSystemType == VsSystemType::RaidOnBungelingBayProtection || _vsSystemType == VsSystemType::IceClimberProtection) {
-		//Bit 3 of the input status must always be on
-		controllers[0]->SetBit(StandardController::Buttons::Start);
-		controllers[1]->SetBit(StandardController::Buttons::Start);
-	}
-}
-
 uint8_t VsControlManager::GetOpenBusMask(uint8_t port)
 {
 	return 0x00;
@@ -100,7 +63,7 @@ uint8_t VsControlManager::ReadRAM(uint16_t addr)
 
 	if(!_console->IsMaster()) {
 		//Copy the insert coin 3/4 + service button "2" bits from the main console to this one
-		shared_ptr<Console> masterConsole = _console->GetDualConsole();
+		std::shared_ptr<Console> masterConsole = _console->GetDualConsole();
 		_systemActionManager->SetBitValue(VsSystemActionManager::VsButtons::InsertCoin1, masterConsole->GetSystemActionManager()->IsPressed(VsSystemActionManager::VsButtons::InsertCoin3));
 		_systemActionManager->SetBitValue(VsSystemActionManager::VsButtons::InsertCoin2, masterConsole->GetSystemActionManager()->IsPressed(VsSystemActionManager::VsButtons::InsertCoin4));
 		_systemActionManager->SetBitValue(VsSystemActionManager::VsButtons::ServiceButton, masterConsole->GetSystemActionManager()->IsPressed(VsSystemActionManager::VsButtons::ServiceButton2));
@@ -177,7 +140,7 @@ void VsControlManager::WriteRAM(uint16_t addr, uint8_t value)
 
 void VsControlManager::UpdateSlaveMasterBit(uint8_t slaveMasterBit)
 {
-	shared_ptr<Console> dualConsole = _console->GetDualConsole();
+	std::shared_ptr<Console> dualConsole = _console->GetDualConsole();
 	if(dualConsole) {
 		VsSystem* mapper = dynamic_cast<VsSystem*>(_console->GetMapper());
 		
@@ -204,7 +167,7 @@ void VsControlManager::UpdateControlDevices()
 		//Force 4x standard controllers
 		//P3 & P4 will be sent to the slave CPU - see SetInput() below.
 		for(int i = 0; i < 4; i++) {
-			shared_ptr<BaseControlDevice> device = CreateControllerDevice(ControllerType::StandardController, i, _console);
+			std::shared_ptr<BaseControlDevice> device = CreateControllerDevice(ControllerType::StandardController, i, _console);
 			if(device) {
 				RegisterControlDevice(device);
 			}
@@ -219,7 +182,7 @@ bool VsControlManager::SetInput(BaseControlDevice* device)
 	uint8_t port = device->GetPort();
 	ControlManager* masterControlManager = _console->GetDualConsole()->GetControlManager();
 	if(masterControlManager && port <= 1) {
-		shared_ptr<BaseControlDevice> controlDevice = masterControlManager->GetControlDevice(port + 2);
+		std::shared_ptr<BaseControlDevice> controlDevice = masterControlManager->GetControlDevice(port + 2);
 		if(controlDevice) {
 			ControlDeviceState state = controlDevice->GetRawState();
 			device->SetRawState(state);

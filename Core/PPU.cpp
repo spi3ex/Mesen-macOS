@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <memory>
 #include "PPU.h"
 #include "CPU.h"
 #include "APU.h"
@@ -9,7 +10,7 @@
 #include "MemoryManager.h"
 #include "Console.h"
 
-PPU::PPU(shared_ptr<Console> console)
+PPU::PPU(std::shared_ptr<Console> console)
 {
 	_console = console;
 	_masterClock = 0;

@@ -7,7 +7,7 @@ uint16_t EmulationSettings::_versionMajor = 0;
 uint8_t EmulationSettings::_versionMinor = 9;
 uint8_t EmulationSettings::_versionRevision = 9;
 
-double EmulationSettings::GetAspectRatio(shared_ptr<Console> console)
+double EmulationSettings::GetAspectRatio(std::shared_ptr<Console> console)
 {
 	switch(_aspectRatio) {
 		case VideoAspectRatio::NoStretching: return 0.0;

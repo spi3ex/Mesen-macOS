@@ -229,22 +229,15 @@ uint8_t ControlManager::GetOpenBusMask(uint8_t port)
 	}
 }
 
-void ControlManager::RemapControllerButtons()
-{
-	//Used by VS System games
-}
-
 void ControlManager::UpdateInputState()
 {
-	if(_isLagging) {
+	if(_isLagging)
 		_lagCounter++;
-	} else {
+	else
 		_isLagging = true;
-	}
 
 	KeyManager::RefreshKeyState();
 
-	//string log = "";
 	for(shared_ptr<BaseControlDevice> &device : _controlDevices) {
 		device->ClearState();
 
@@ -257,16 +250,11 @@ void ControlManager::UpdateInputState()
 			}
 		}
 
-		if(!inputSet) {
+		if(!inputSet)
 			device->SetStateFromInput();
-		}
 
 		device->OnAfterSetState();
-		//log += "|" + device->GetTextState();
 	}
-
-	//Used by VS System games
-	RemapControllerButtons();
 
 	_pollCounter++;
 }

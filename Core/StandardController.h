@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "BaseControlDevice.h"
 #include "Console.h"
 
@@ -81,7 +82,7 @@ protected:
 public:
 	enum Buttons { Up = 0, Down, Left, Right, Start, Select, B, A, Microphone };
 
-	StandardController(shared_ptr<Console> console, uint8_t port, KeyMappingSet keyMappings) : BaseControlDevice(console, port, keyMappings)
+	StandardController(std::shared_ptr<Console> console, uint8_t port, KeyMappingSet keyMappings) : BaseControlDevice(console, port, keyMappings)
 	{
 		_turboSpeed = keyMappings.TurboSpeed;
 		_microphoneEnabled = port == 1 && _console->GetSettings()->GetConsoleType() == ConsoleType::Famicom;

@@ -51,8 +51,8 @@ private:
 protected:
 	RomInfo _romInfo;
 
-	shared_ptr<BaseControlDevice> _mapperControlDevice;
-	shared_ptr<Console> _console;
+	std::shared_ptr<BaseControlDevice> _mapperControlDevice;
+	std::shared_ptr<Console> _console;
 
 	uint8_t* _prgRom = nullptr;
 	uint8_t* _chrRom = nullptr;
@@ -168,9 +168,9 @@ public:
 	
 	virtual void SaveBattery() override;
 
-	void SetConsole(shared_ptr<Console> console);
+	void SetConsole(std::shared_ptr<Console> console);
 
-	shared_ptr<BaseControlDevice> GetMapperControlDevice();
+	std::shared_ptr<BaseControlDevice> GetMapperControlDevice();
 	RomInfo GetRomInfo();
 	uint32_t GetMapperDipSwitchCount();
 
@@ -232,5 +232,5 @@ public:
 
 	vector<uint8_t> GetPrgChrCopy();
 	void RestorePrgChrBackup(vector<uint8_t>& backupData);
-	void CopyPrgChrRom(shared_ptr<BaseMapper> mapper);
+	void CopyPrgChrRom(std::shared_ptr<BaseMapper> mapper);
 };

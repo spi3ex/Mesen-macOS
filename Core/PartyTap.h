@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "BaseControlDevice.h"
 
 class PartyTap : public BaseControlDevice
@@ -33,7 +34,7 @@ protected:
 	}
 
 public:
-	PartyTap(shared_ptr<Console> console, KeyMappingSet keyMappings) : BaseControlDevice(console, BaseControlDevice::ExpDevicePort, keyMappings)
+	PartyTap(std::shared_ptr<Console> console, KeyMappingSet keyMappings) : BaseControlDevice(console, BaseControlDevice::ExpDevicePort, keyMappings)
 	{
 	}
 

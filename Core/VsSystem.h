@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "BaseMapper.h"
 #include "VsControlManager.h"
 
@@ -94,7 +95,7 @@ protected:
 public:
 	void UpdateMemoryAccess(uint8_t slaveMasterBit)
 	{
-		shared_ptr<Console> dualConsole = _console->GetDualConsole();
+		std::shared_ptr<Console> dualConsole = _console->GetDualConsole();
 		if(_console->IsMaster() && dualConsole) {
 			VsSystem* otherMapper = dynamic_cast<VsSystem*>(dualConsole->GetMapper());
 

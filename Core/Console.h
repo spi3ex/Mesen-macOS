@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
+#include <memory>
 #include "VirtualFile.h"
 #include "../Libretro/libretro.h"
 
@@ -40,30 +41,30 @@ enum class RamPowerOnState;
 class Console : public std::enable_shared_from_this<Console>
 {
 private:
-	shared_ptr<CPU> _cpu;
-	shared_ptr<PPU> _ppu;
-	shared_ptr<APU> _apu;
-	shared_ptr<BaseMapper> _mapper;
-	shared_ptr<ControlManager> _controlManager;
-	shared_ptr<MemoryManager> _memoryManager;
+	std::shared_ptr<CPU> _cpu;
+	std::shared_ptr<PPU> _ppu;
+	std::shared_ptr<APU> _apu;
+	std::shared_ptr<BaseMapper> _mapper;
+	std::shared_ptr<ControlManager> _controlManager;
+	std::shared_ptr<MemoryManager> _memoryManager;
 	
 	//Used by VS-DualSystem
-	shared_ptr<Console> _master;
-	shared_ptr<Console> _slave;
+	std::shared_ptr<Console> _master;
+	std::shared_ptr<Console> _slave;
 	
-	shared_ptr<BatteryManager> _batteryManager;
-	shared_ptr<SystemActionManager> _systemActionManager;
+	std::shared_ptr<BatteryManager> _batteryManager;
+	std::shared_ptr<SystemActionManager> _systemActionManager;
 
-	shared_ptr<VideoDecoder> _videoDecoder;
-	shared_ptr<VideoRenderer> _videoRenderer;
-	shared_ptr<SaveStateManager> _saveStateManager;
-	shared_ptr<CheatManager> _cheatManager;
-	shared_ptr<SoundMixer> _soundMixer;
-	shared_ptr<EmulationSettings> _settings;
+	std::shared_ptr<VideoDecoder> _videoDecoder;
+	std::shared_ptr<VideoRenderer> _videoRenderer;
+	std::shared_ptr<SaveStateManager> _saveStateManager;
+	std::shared_ptr<CheatManager> _cheatManager;
+	std::shared_ptr<SoundMixer> _soundMixer;
+	std::shared_ptr<EmulationSettings> _settings;
 
-	shared_ptr<HdPackBuilder> _hdPackBuilder;
-	shared_ptr<HdPackData> _hdData;
-	unique_ptr<HdAudioDevice> _hdAudioDevice;
+	std::shared_ptr<HdPackBuilder> _hdPackBuilder;
+	std::shared_ptr<HdPackData> _hdData;
+	std::unique_ptr<HdAudioDevice> _hdAudioDevice;
 
 	NesModel _model;
 
@@ -79,21 +80,21 @@ private:
 	void UpdateNesModel(bool sendNotification);
 
 public:
-	Console(shared_ptr<Console> master = nullptr, EmulationSettings* initialSettings = nullptr);
+	Console(std::shared_ptr<Console> master = nullptr, EmulationSettings* initialSettings = nullptr);
 	~Console();
 
 	void Init(retro_environment_t retroEnv);
 	void Release(bool forShutdown);
 
-	shared_ptr<BatteryManager> GetBatteryManager();
-	shared_ptr<SaveStateManager> GetSaveStateManager();
-	shared_ptr<VideoDecoder> GetVideoDecoder();
-	shared_ptr<VideoRenderer> GetVideoRenderer();
-	shared_ptr<SoundMixer> GetSoundMixer();
+	std::shared_ptr<BatteryManager> GetBatteryManager();
+	std::shared_ptr<SaveStateManager> GetSaveStateManager();
+	std::shared_ptr<VideoDecoder> GetVideoDecoder();
+	std::shared_ptr<VideoRenderer> GetVideoRenderer();
+	std::shared_ptr<SoundMixer> GetSoundMixer();
 	EmulationSettings* GetSettings();
 	
 	bool IsDualSystem();
-	shared_ptr<Console> GetDualConsole();
+	std::shared_ptr<Console> GetDualConsole();
 	bool IsMaster();
 
 	void ProcessCpuClock();
@@ -118,10 +119,10 @@ public:
 	void RunSlaveCpu();
 	bool UpdateHdPackMode();
 
-	shared_ptr<SystemActionManager> GetSystemActionManager();
+	std::shared_ptr<SystemActionManager> GetSystemActionManager();
 
 	template<typename T>
-	shared_ptr<T> GetSystemActionManager()
+	std::shared_ptr<T> GetSystemActionManager()
 	{
 		return std::dynamic_pointer_cast<T>(_systemActionManager);
 	}
@@ -151,7 +152,7 @@ public:
 	void InitializeRam(void* data, uint32_t length);
 	static void InitializeRam(RamPowerOnState powerOnState, void* data, uint32_t length);
 
-	shared_ptr<HdPackData> GetHdData();
+	std::shared_ptr<HdPackData> GetHdData();
 	bool IsHdPpu();
 
 	void StartRecordingHdPack(string saveFolder, ScaleFilterType filterType, uint32_t scale, uint32_t flags, uint32_t chrRamBankSize);

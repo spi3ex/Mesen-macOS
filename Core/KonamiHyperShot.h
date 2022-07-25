@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "BaseControlDevice.h"
 #include "Console.h"
 
@@ -54,7 +55,7 @@ protected:
 	}
 
 public:
-	KonamiHyperShot(shared_ptr<Console> console, KeyMappingSet p1, KeyMappingSet p2) : BaseControlDevice(console, BaseControlDevice::ExpDevicePort, p1)
+	KonamiHyperShot(std::shared_ptr<Console> console, KeyMappingSet p1, KeyMappingSet p2) : BaseControlDevice(console, BaseControlDevice::ExpDevicePort, p1)
 	{
 		_p1TurboSpeed = p1.TurboSpeed;
 		_p2TurboSpeed = p2.TurboSpeed;

@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "SystemActionManager.h"
 #include "FDS.h"
 
@@ -30,7 +31,7 @@ protected:
 public:
 	enum FdsButtons { EjectDiskButton = 2, InsertDisk1 };
 
-	FdsSystemActionManager(shared_ptr<Console> console, shared_ptr<BaseMapper> mapper) : SystemActionManager(console)
+	FdsSystemActionManager(std::shared_ptr<Console> console, std::shared_ptr<BaseMapper> mapper) : SystemActionManager(console)
 	{
 		_mapper = std::dynamic_pointer_cast<FDS>(mapper);
 		_sideCount = std::dynamic_pointer_cast<FDS>(mapper)->GetSideCount();
@@ -64,14 +65,12 @@ public:
 		}
 
 		if(needEject || diskToInsert >= 0) {
-			shared_ptr<FDS> mapper = _mapper.lock();
-			if(needEject) {
+			std::shared_ptr<FDS> mapper = _mapper.lock();
+			if(needEject)
 				mapper->EjectDisk();
-			}
 
-			if(diskToInsert >= 0) {
+			if(diskToInsert >= 0)
 				mapper->InsertDisk(diskToInsert);
-			}
 		}
 	}
 	
@@ -82,7 +81,7 @@ public:
 
 	void InsertDisk(uint8_t diskNumber)
 	{
-		shared_ptr<FDS> mapper = _mapper.lock();
+		std::shared_ptr<FDS> mapper = _mapper.lock();
 		if(mapper) {
 			if(mapper->IsDiskInserted()) {
 				//Eject disk on next frame, then insert new disk 2 seconds later
@@ -100,7 +99,7 @@ public:
 	void SwitchDiskSide()
 	{
 		if(!IsAutoInsertDiskEnabled()) {
-			shared_ptr<FDS> mapper = _mapper.lock();
+			std::shared_ptr<FDS> mapper = _mapper.lock();
 			if(mapper && mapper->IsDiskInserted()) {
 				InsertDisk((mapper->GetCurrentDisk() ^ 0x01) % mapper->GetSideCount());
 			}
@@ -110,7 +109,7 @@ public:
 	void InsertNextDisk()
 	{
 		if(!IsAutoInsertDiskEnabled()) {
-			shared_ptr<FDS> mapper = _mapper.lock();
+			std::shared_ptr<FDS> mapper = _mapper.lock();
 			if(mapper) {
 				InsertDisk(((mapper->GetCurrentDisk() & 0xFE) + 2) % mapper->GetSideCount());
 			}
@@ -119,7 +118,7 @@ public:
 
 	uint32_t GetSideCount()
 	{
-		shared_ptr<FDS> mapper = _mapper.lock();
+		std::shared_ptr<FDS> mapper = _mapper.lock();
 		if(mapper) {
 			return mapper->GetSideCount();
 		} else {
@@ -129,7 +128,7 @@ public:
 
 	bool IsAutoInsertDiskEnabled()
 	{
-		shared_ptr<FDS> mapper = _mapper.lock();
+		std::shared_ptr<FDS> mapper = _mapper.lock();
 		if(mapper) {
 			return mapper->IsAutoInsertDiskEnabled();
 		} else {

@@ -21,7 +21,7 @@ struct ScreenSize
 class VideoDecoder
 {
 private:
-	shared_ptr<Console> _console;
+	std::shared_ptr<Console> _console;
 	EmulationSettings* _settings;
 	uint16_t *_ppuOutputBuffer = nullptr;
 	HdScreenInfo *_hdScreenInfo = nullptr;
@@ -33,13 +33,13 @@ private:
 	FrameInfo _lastFrameInfo;
 
 	VideoFilterType _videoFilterType = VideoFilterType::None;
-	unique_ptr<BaseVideoFilter> _videoFilter;
-	shared_ptr<ScaleFilter> _scaleFilter;
-	shared_ptr<RotateFilter> _rotateFilter;
+	std::unique_ptr<BaseVideoFilter> _videoFilter;
+	std::shared_ptr<ScaleFilter> _scaleFilter;
+	std::shared_ptr<RotateFilter> _rotateFilter;
 
 	void UpdateVideoFilter();
 public:
-	VideoDecoder(shared_ptr<Console> console);
+	VideoDecoder(std::shared_ptr<Console> console);
 	~VideoDecoder();
 
 	void DecodeFrame();

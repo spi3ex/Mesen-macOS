@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "BaseEeprom24C0X.h"
 #include "BatteryManager.h"
 
@@ -24,7 +25,7 @@ private:
 	}
 
 public:
-	Eeprom24C02(shared_ptr<Console> console)
+	Eeprom24C02(std::shared_ptr<Console> console)
 	{
 		_console = console;
 		_console->InitializeRam(_romData, 256);

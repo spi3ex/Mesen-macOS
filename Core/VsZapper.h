@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "Zapper.h"
 
 class VsZapper : public Zapper
@@ -20,7 +21,7 @@ protected:
 	}
 
 public:
-	VsZapper(shared_ptr<Console> console, uint8_t port) : Zapper(console, port)
+	VsZapper(std::shared_ptr<Console> console, uint8_t port) : Zapper(console, port)
 	{
 	}
 

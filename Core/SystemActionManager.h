@@ -67,7 +67,7 @@ public:
 
 	void ProcessSystemActions()
 	{
-		shared_ptr<Console> console = _console;
+		std::shared_ptr<Console> console = _console;
 		if(console) {
 			if(IsPressed(SystemActionManager::Buttons::ResetButton)) {
 				_needReset = false;

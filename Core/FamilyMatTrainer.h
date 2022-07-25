@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "PowerPad.h"
 
 class FamilyMatTrainer : public PowerPad
@@ -15,7 +16,7 @@ protected:
 	}
 
 public:
-	FamilyMatTrainer(shared_ptr<Console> console, KeyMappingSet keyMappings) : PowerPad(console, BaseControlDevice::ExpDevicePort, keyMappings)
+	FamilyMatTrainer(std::shared_ptr<Console> console, KeyMappingSet keyMappings) : PowerPad(console, BaseControlDevice::ExpDevicePort, keyMappings)
 	{
 	}
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "stdafx.h"
 #include <assert.h>
+#include <memory>
 #include "BaseMapper.h"
 #include "CPU.h"
 #include "EmulationSettings.h"
@@ -15,7 +16,7 @@ private:
 	static constexpr uint32_t NoDiskInserted = 0xFF;
 	bool _disableAutoInsertDisk;
 
-	unique_ptr<FdsAudio> _audio;
+	std::unique_ptr<FdsAudio> _audio;
 	EmulationSettings* _settings = nullptr;
 
 	//Write registers

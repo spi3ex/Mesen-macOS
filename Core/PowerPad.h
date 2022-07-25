@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "BaseControlDevice.h"
 
 class PowerPad : public BaseControlDevice
@@ -52,7 +53,7 @@ protected:
 	}
 
 public:
-	PowerPad(shared_ptr<Console> console, uint8_t port, KeyMappingSet keyMappings) : BaseControlDevice(console, port, keyMappings)
+	PowerPad(std::shared_ptr<Console> console, uint8_t port, KeyMappingSet keyMappings) : BaseControlDevice(console, port, keyMappings)
 	{
 		_useSideA = keyMappings.PowerpadUseSideA;
 	}

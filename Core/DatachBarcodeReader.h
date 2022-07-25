@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "BaseControlDevice.h"
 #include "IBarcodeReader.h"
 #include "CPU.h"
@@ -28,7 +29,7 @@ protected:
 	}
 
 public:
-	DatachBarcodeReader(shared_ptr<Console> console) : BaseControlDevice(console, BaseControlDevice::MapperInputPort)
+	DatachBarcodeReader(std::shared_ptr<Console> console) : BaseControlDevice(console, BaseControlDevice::MapperInputPort)
 	{
 	}
 

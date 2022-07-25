@@ -1,10 +1,11 @@
 #include "stdafx.h"
+#include <memory>
 #include "MemoryManager.h"
 #include "BaseMapper.h"
 #include "CheatManager.h"
 #include "Console.h"
 
-MemoryManager::MemoryManager(shared_ptr<Console> console)
+MemoryManager::MemoryManager(std::shared_ptr<Console> console)
 {
 	_console = console;
 	_internalRAM = new uint8_t[InternalRAMSize];
@@ -29,7 +30,7 @@ MemoryManager::~MemoryManager()
 	delete[] _ramWriteHandlers;
 }
 
-void MemoryManager::SetMapper(shared_ptr<BaseMapper> mapper)
+void MemoryManager::SetMapper(std::shared_ptr<BaseMapper> mapper)
 {
 	_mapper = mapper;
 }

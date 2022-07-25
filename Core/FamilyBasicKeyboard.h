@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "BaseControlDevice.h"
 
 class FamilyBasicKeyboard : public BaseControlDevice
@@ -83,7 +84,7 @@ protected:
 	}
 
 public:
-	FamilyBasicKeyboard(shared_ptr<Console> console, KeyMappingSet keyMappings) : BaseControlDevice(console, BaseControlDevice::ExpDevicePort, keyMappings)
+	FamilyBasicKeyboard(std::shared_ptr<Console> console, KeyMappingSet keyMappings) : BaseControlDevice(console, BaseControlDevice::ExpDevicePort, keyMappings)
 	{
 	}
 

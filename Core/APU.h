@@ -26,14 +26,14 @@ class APU : public Snapshotable, public IMemoryHandler
 		uint32_t _previousCycle;
 		uint32_t _currentCycle;
 
-		unique_ptr<SquareChannel> _squareChannel[2];
-		unique_ptr<TriangleChannel> _triangleChannel;
-		unique_ptr<NoiseChannel> _noiseChannel;
-		unique_ptr<DeltaModulationChannel> _deltaModulationChannel;
-		unique_ptr<ApuFrameCounter> _frameCounter;
+		std::unique_ptr<SquareChannel> _squareChannel[2];
+		std::unique_ptr<TriangleChannel> _triangleChannel;
+		std::unique_ptr<NoiseChannel> _noiseChannel;
+		std::unique_ptr<DeltaModulationChannel> _deltaModulationChannel;
+		std::unique_ptr<ApuFrameCounter> _frameCounter;
 
-		shared_ptr<Console> _console;
-		shared_ptr<SoundMixer> _mixer;
+		std::shared_ptr<Console> _console;
+		std::shared_ptr<SoundMixer> _mixer;
 		EmulationSettings* _settings;
 
 		NesModel _nesModel;
@@ -48,7 +48,7 @@ class APU : public Snapshotable, public IMemoryHandler
 		void StreamState(bool saving) override;
 
 	public:
-		APU(shared_ptr<Console> console);
+		APU(std::shared_ptr<Console> console);
 		~APU();
 
 		void Reset(bool softReset);

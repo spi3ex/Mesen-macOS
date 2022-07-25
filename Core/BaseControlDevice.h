@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 #include "EmulationSettings.h"
 #include "Snapshotable.h"
 #include "ControlManager.h"
@@ -13,7 +14,7 @@ private:
 	ControlDeviceState _state;
 
 protected:
-	shared_ptr<Console> _console;
+	std::shared_ptr<Console> _console;
 	vector<KeyMapping> _keyMappings;
 	bool _strobe;
 	uint8_t _port;
@@ -50,7 +51,7 @@ public:
 	static constexpr uint8_t ExpDevicePort2 = 7;
 	static constexpr uint8_t PortCount = ExpDevicePort2 + 1;
 
-	BaseControlDevice(shared_ptr<Console> console, uint8_t port, KeyMappingSet keyMappingSet = KeyMappingSet());
+	BaseControlDevice(std::shared_ptr<Console> console, uint8_t port, KeyMappingSet keyMappingSet = KeyMappingSet());
 	virtual ~BaseControlDevice();
 
 	uint8_t GetPort();
@@ -77,6 +78,4 @@ public:
 
 	virtual uint8_t ReadRAM(uint16_t addr) = 0;
 	virtual void WriteRAM(uint16_t addr, uint8_t value) = 0;
-	
-	void static SwapButtons(shared_ptr<BaseControlDevice> state1, uint8_t button1, shared_ptr<BaseControlDevice> state2, uint8_t button2);
 };

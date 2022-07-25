@@ -1,16 +1,17 @@
 #pragma once
 #include "stdafx.h"
+#include <memory>
 
 class Console;
 
 class SaveStateManager
 {
 private:
-	shared_ptr<Console> _console;
+	std::shared_ptr<Console> _console;
 public:
 	static constexpr uint32_t FileFormatVersion = 13;
 
-	SaveStateManager(shared_ptr<Console> console);
+	SaveStateManager(std::shared_ptr<Console> console);
 
 	void GetSaveStateHeader(ostream & stream);
 
