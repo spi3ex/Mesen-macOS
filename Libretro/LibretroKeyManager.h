@@ -11,13 +11,21 @@ class LibretroKeyManager : public IKeyManager
 private:
 	std::shared_ptr<Console> _console;
 	retro_input_state_t _getInputState = nullptr;
+	int16_t _joypadButtons[5] = { };
 	retro_input_poll_t _pollInput = nullptr;
 	bool _mouseButtons[3] = { false, false, false };
+	bool _supportsInputBitmasks = false;
 	bool _wasPushed[16] = { };
 
 	bool ProcessAction(uint32_t button)
 	{
-		if(_getInputState(0, RETRO_DEVICE_JOYPAD, 0, button)) {
+		bool buttonPressed = false;
+		if (_supportsInputBitmasks)
+			buttonPressed = (_joypadButtons[0] & (1 << button)) != 0;
+		else
+			buttonPressed = _getInputState(0, RETRO_DEVICE_JOYPAD, 0, button) != 0;
+
+		if(buttonPressed) {
 			if(!_wasPushed[button]) {
 				//Newly pressed, process action
 				_wasPushed[button] = true;
@@ -51,6 +59,11 @@ public:
 		_pollInput = pollInput;
 	}
 
+	void SetSupportsInputBitmasks(bool supportsInputBitmasks)
+	{
+		_supportsInputBitmasks = supportsInputBitmasks;
+	}
+
 	// Inherited via IKeyManager
 	virtual void RefreshState() override
 	{
@@ -70,6 +83,10 @@ public:
 			int16_t dx = _getInputState(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_X);
 			int16_t dy = _getInputState(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_Y);
 			KeyManager::SetMouseMovement(dx, dy);
+
+			if (_supportsInputBitmasks)
+				for (int16_t port = 0; port < 5; port++)
+					_joypadButtons[port] = _getInputState(port, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_MASK);
 			
 			_mouseButtons[(int)MouseButton::LeftButton] = _getInputState(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_LEFT) != 0;
 			_mouseButtons[(int)MouseButton::RightButton] = _getInputState(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_RIGHT) != 0;
@@ -97,7 +114,12 @@ public:
 	virtual bool IsKeyPressed(uint32_t keyCode) override
 	{
 		if(keyCode > 0 && _getInputState)
-			return _getInputState(keyCode >> 8, RETRO_DEVICE_JOYPAD, 0, (keyCode - 1) & 0xFF) != 0;
+		{
+			if (_supportsInputBitmasks)
+				return (_joypadButtons[keyCode >> 8] & (1 << ((keyCode - 1) & 0xFF))) != 0;
+			else
+				return _getInputState(keyCode >> 8, RETRO_DEVICE_JOYPAD, 0, (keyCode - 1) & 0xFF) != 0;
+		}
 		return false;
 	}
 
