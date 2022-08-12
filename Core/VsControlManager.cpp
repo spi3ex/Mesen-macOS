@@ -52,6 +52,43 @@ uint8_t VsControlManager::GetPrgChrSelectBit()
 	return _prgChrSelectBit;
 }
 
+void VsControlManager::RemapControllerButtons()
+{
+	std::shared_ptr<StandardController> controllers[2];
+	controllers[0] = std::dynamic_pointer_cast<StandardController>(GetControlDevice(0));
+	controllers[1] = std::dynamic_pointer_cast<StandardController>(GetControlDevice(1));
+
+	if(!controllers[0] || !controllers[1]) {
+		return;
+	}
+
+	GameInputType inputType = _console->GetRomInfo().InputType;
+	if(inputType == GameInputType::VsSystemSwapped) {
+		//Swap controllers 1 & 2
+		ControlDeviceState port1State = controllers[0]->GetRawState();
+		ControlDeviceState port2State = controllers[1]->GetRawState();
+		controllers[0]->SetRawState(port2State);
+		controllers[1]->SetRawState(port1State);
+
+		//But don't swap the start/select buttons
+		BaseControlDevice::SwapButtons(controllers[0], StandardController::Buttons::Start, controllers[1], StandardController::Buttons::Start);
+		BaseControlDevice::SwapButtons(controllers[0], StandardController::Buttons::Select, controllers[1], StandardController::Buttons::Select);
+	} else if(inputType == GameInputType::VsSystemSwapAB) {
+		//Swap buttons P1 A & P2 B (Pinball (Japan))
+		BaseControlDevice::SwapButtons(controllers[0], StandardController::Buttons::B, controllers[1], StandardController::Buttons::A);
+	}
+
+	//Swap Start/Select for all configurations (makes it more intuitive)
+	BaseControlDevice::SwapButtons(controllers[0], StandardController::Buttons::Start, controllers[0], StandardController::Buttons::Select);
+	BaseControlDevice::SwapButtons(controllers[1], StandardController::Buttons::Start, controllers[1], StandardController::Buttons::Select);
+
+	if(_vsSystemType == VsSystemType::RaidOnBungelingBayProtection || _vsSystemType == VsSystemType::IceClimberProtection) {
+		//Bit 3 of the input status must always be on
+		controllers[0]->SetBit(StandardController::Buttons::Start);
+		controllers[1]->SetBit(StandardController::Buttons::Start);
+	}
+}
+
 uint8_t VsControlManager::GetOpenBusMask(uint8_t port)
 {
 	return 0x00;

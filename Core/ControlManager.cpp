@@ -229,6 +229,11 @@ uint8_t ControlManager::GetOpenBusMask(uint8_t port)
 	}
 }
 
+void ControlManager::RemapControllerButtons()
+{
+	//Used by VS System games
+}
+
 void ControlManager::UpdateInputState()
 {
 	if(_isLagging)
@@ -255,6 +260,9 @@ void ControlManager::UpdateInputState()
 
 		device->OnAfterSetState();
 	}
+
+	//Used by VS System games
+	RemapControllerButtons();
 
 	_pollCounter++;
 }

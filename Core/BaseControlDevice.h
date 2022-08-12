@@ -78,4 +78,6 @@ public:
 
 	virtual uint8_t ReadRAM(uint16_t addr) = 0;
 	virtual void WriteRAM(uint16_t addr, uint8_t value) = 0;
+
+	void static SwapButtons(std::shared_ptr<BaseControlDevice> state1, uint8_t button1, std::shared_ptr<BaseControlDevice> state2, uint8_t button2);
 };

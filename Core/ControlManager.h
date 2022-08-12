@@ -38,6 +38,7 @@ protected:
 
 	virtual void StreamState(bool saving) override;
 	virtual ControllerType GetControllerType(uint8_t port);
+	virtual void RemapControllerButtons();
 	virtual uint8_t GetOpenBusMask(uint8_t port);
 
 public:
