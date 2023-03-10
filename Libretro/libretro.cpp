@@ -113,10 +113,6 @@ extern "C" {
 		else
 			logCallback = nullptr;
 
-		_console.reset(new Console());
-		_console->Init(env_cb);
-
-		_keyManager.reset(new LibretroKeyManager(_console));
 		_messageManager.reset(new LibretroMessageManager(logCallback, env_cb));
 
 		std::stringstream databaseData;
@@ -145,6 +141,11 @@ extern "C" {
 	RETRO_API void retro_set_environment(retro_environment_t env)
 	{
 		env_cb = env;
+
+		_console.reset(new Console());
+		_console->Init(env_cb);
+
+		_keyManager.reset(new LibretroKeyManager(_console));
 
 		static constexpr struct retro_variable vars[] = {
 			{ MesenNtscFilter, "NTSC filter; Disabled|Composite (Blargg)|S-Video (Blargg)|RGB (Blargg)|Monochrome (Blargg)|Bisqwit 2x|Bisqwit 4x|Bisqwit 8x" },
