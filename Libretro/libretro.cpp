@@ -113,6 +113,10 @@ extern "C" {
 		else
 			logCallback = nullptr;
 
+		_console.reset(new Console());
+		_console->Init(env_cb);
+
+		_keyManager.reset(new LibretroKeyManager(_console));
 		_messageManager.reset(new LibretroMessageManager(logCallback, env_cb));
 
 		std::stringstream databaseData;
@@ -141,11 +145,6 @@ extern "C" {
 	RETRO_API void retro_set_environment(retro_environment_t env)
 	{
 		env_cb = env;
-
-		_console.reset(new Console());
-		_console->Init(env_cb);
-
-		_keyManager.reset(new LibretroKeyManager(_console));
 
 		static constexpr struct retro_variable vars[] = {
 			{ MesenNtscFilter, "NTSC filter; Disabled|Composite (Blargg)|S-Video (Blargg)|RGB (Blargg)|Monochrome (Blargg)|Bisqwit 2x|Bisqwit 4x|Bisqwit 8x" },
@@ -210,7 +209,7 @@ extern "C" {
 			{ "Standard Controller", DEVICE_GAMEPAD },
 			{ NULL, 0 },
 		};
-
+		
 		static constexpr struct retro_controller_description pads5[] = {
 			{ "Auto",     RETRO_DEVICE_JOYPAD },
 			{ "Arkanoid", DEVICE_ARKANOID },
@@ -224,10 +223,10 @@ extern "C" {
 			{ "Konami Hypershot", DEVICE_KONAMIHYPERSHOT },
 			{ "Pachinko", DEVICE_PACHINKO },
 			{ "Partytap", DEVICE_PARTYTAP },
-			{ "Oeka Kids Tablet", DEVICE_OEKAKIDS },
+			{ "Oeka Kids Tablet", DEVICE_OEKAKIDS },			
 			{ NULL, 0 },
 		};
-
+		
 		static constexpr struct retro_controller_info ports[] = {
 			{ pads1, 7 },
 			{ pads2, 7 },
@@ -266,7 +265,7 @@ extern "C" {
 	}
 
 	RETRO_API void retro_set_input_poll(retro_input_poll_t pollInput)
-	{
+	{	
 		_keyManager->SetPollInput(pollInput);
 	}
 
@@ -371,7 +370,7 @@ extern "C" {
 				_console->GetSettings()->SetAudioFilterSettings(settings);
 			}
 		}
-
+		
 		if(readVariable(MesenNtscFilter, var)) {
 			string value = string(var.value);
 			if(value == "Disabled") {
@@ -502,7 +501,7 @@ extern "C" {
 				_console->GetSettings()->SetNesModel(NesModel::Dendy);
 			}
 		}
-
+		
 		if(readVariable(MesenRamState, var)) {
 			string value = string(var.value);
 			if(value == "All 0s (Default)") {
@@ -713,7 +712,7 @@ extern "C" {
 	{
 		std::stringstream ss;
 		_console->GetSaveStateManager()->SaveState(ss);
-
+		
 		string saveStateData = ss.str();
 		memset(data, 0, size);
 		memcpy(data, saveStateData.c_str(), std::min(size, saveStateData.size()));
@@ -1032,7 +1031,7 @@ extern "C" {
 
 		_console->GetSettings()->SetFlagState(EmulationFlags::HasFourScore, hasFourScore);
 	}
-
+	
 	void retro_set_memory_maps()
 	{
 		//Expose internal RAM and work/save RAM for retroachievements
@@ -1201,7 +1200,7 @@ extern "C" {
 			case VideoFilterType::BisqwitNtsc: hscale = 8; break;
 			default: hscale = 1; break;
 		}
-
+		
 		shared_ptr<HdPackData> hdData = _console->GetHdData();
 		if(hdData) {
 			hscale = hdData->Scale;
