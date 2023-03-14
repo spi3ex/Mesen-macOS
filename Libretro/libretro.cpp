@@ -154,8 +154,8 @@ extern "C" {
 			{ MesenRegion, "Region; Auto|NTSC|PAL|Dendy" },
 			{ MesenOverscanLeft, "Left Overscan; None|4px|8px|12px|16px" },
 			{ MesenOverscanRight, "Right Overscan; None|4px|8px|12px|16px" },
-			{ MesenOverscanTop, "Top Overscan; None|4px|8px|12px|16px" },
-			{ MesenOverscanBottom, "Bottom Overscan; None|4px|8px|12px|16px" },
+			{ MesenOverscanTop, "Top Overscan; None|4px|8px|12px|16px|20px|24px" },
+			{ MesenOverscanBottom, "Bottom Overscan; None|4px|8px|12px|16px|20px|24px" },
 			{ MesenAspectRatio, "Aspect Ratio; Auto|No Stretching|NTSC|PAL|4:3|4:3 (Preserved)|16:9|16:9 (Preserved)" },
 			{ MesenControllerTurboSpeed, "Controller Turbo Speed; Fast|Very Fast|Disabled|Slow|Normal" },
 			{ MesenShiftButtonsClockwise, u8"Shift A/B/X/Y clockwise; disabled|enabled" },
@@ -301,6 +301,10 @@ extern "C" {
 				return 12;
 			} else if(value == "16px") {
 				return 16;
+			} else if(value == "20px") {
+				return 20;
+			} else if(value == "24px") {
+				return 24;
 			}
 		}
 		return 0;
