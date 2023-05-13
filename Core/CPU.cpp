@@ -429,7 +429,7 @@ void CPU::StreamState(bool saving)
 
 	Stream(_state.PC, _state.SP, _state.PS, _state.A, _state.X, _state.Y, _cycleCount, _state.NMIFlag, 
 			_state.IRQFlag, _dmcDmaRunning, _spriteDmaTransfer,
-			extraScanlinesBeforeNmi, extraScanlinesBeforeNmi, dipSwitches,
+			extraScanlinesBeforeNmi, extraScanlinesAfterNmi, dipSwitches,
 			_needDummyRead, _needHalt, _startClockCount, _endClockCount, _ppuOffset, _masterClock,
 			_prevNeedNmi, _prevNmiFlag, _needNmi);
 
