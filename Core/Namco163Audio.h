@@ -3,6 +3,7 @@
 #include "Snapshotable.h"
 #include "APU.h"
 #include "BaseExpansionAudio.h"
+#include "Console.h"
 
 class Namco163Audio : public BaseExpansionAudio
 {
@@ -151,6 +152,14 @@ public:
 		_currentChannel = 7;
 		_lastOutput = 0;
 		_disableSound = false;
+	}
+
+	void InitializeInternalRam(bool hasBattery)
+	{
+		if (!hasBattery)
+		{
+			_console->InitializeRam(_internalRam, sizeof(_internalRam));
+		}
 	}
 
 	uint8_t* GetInternalRam()
