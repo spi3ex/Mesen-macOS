@@ -68,6 +68,9 @@ protected:
 	bool _hasChrBattery = false;
 	int16_t _vramOpenBusValue = -1;
 
+	uint8_t* _miscRom = nullptr;
+	uint32_t _miscRomSize = 0;
+
 	virtual void InitMapper() = 0;
 	virtual void InitMapper(RomData &romData);
 	virtual uint16_t GetPRGPageSize() = 0;
@@ -232,5 +235,7 @@ public:
 
 	vector<uint8_t> GetPrgChrCopy();
 	void RestorePrgChrBackup(vector<uint8_t>& backupData);
+	void RevertPrgChrChanges();
+	bool HasPrgChrChanges();
 	void CopyPrgChrRom(std::shared_ptr<BaseMapper> mapper);
 };

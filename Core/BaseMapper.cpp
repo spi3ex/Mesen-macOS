@@ -574,6 +574,12 @@ void BaseMapper::Initialize(RomData &romData)
 		}
 	}
 
+	if(romData.Info.MiscRoms) {
+		_miscRomSize = (uint32_t)romData.MiscRomsData.size();
+		_miscRom = new uint8_t[_miscRomSize];
+		memcpy(_miscRom, romData.MiscRomsData.data(), _miscRomSize);
+	}
+
 	SetupDefaultWorkRam();
 
 	SetMirroringType(romData.Info.Mirroring);
@@ -595,6 +601,7 @@ BaseMapper::~BaseMapper()
 	delete[] _saveRam;
 	delete[] _workRam;
 	delete[] _nametableRam;
+	delete[] _miscRom;
 }
 
 void BaseMapper::GetMemoryRanges(MemoryRanges &ranges)
@@ -1164,6 +1171,27 @@ void BaseMapper::RestorePrgChrBackup(vector<uint8_t> &backupData)
 	if(!_onlyChrRam) {
 		memcpy(_chrRom, backupData.data() + _prgSize, _chrRomSize);
 	}
+}
+
+void BaseMapper::RevertPrgChrChanges()
+{
+	memcpy(_prgRom, _originalPrgRom.data(), _originalPrgRom.size());
+	if(_chrRom) {
+		memcpy(_chrRom, _originalChrRom.data(), _originalChrRom.size());
+	}
+}
+
+bool BaseMapper::HasPrgChrChanges()
+{
+	if(memcmp(_prgRom, _originalPrgRom.data(), _originalPrgRom.size()) != 0) {
+		return true;
+	}
+	if(_chrRom) {
+		if(memcmp(_chrRom, _originalChrRom.data(), _originalChrRom.size()) != 0) {
+			return true;
+		}
+	}
+	return false;
 }
 
 void BaseMapper::CopyPrgChrRom(shared_ptr<BaseMapper> mapper)

@@ -45,6 +45,7 @@ struct RomInfo
 
 	uint32_t FilePrgOffset = 0;
 
+	string BoardName;
 	uint16_t MapperID = 0;
 	uint8_t SubMapperID = 0;
 	
@@ -56,6 +57,7 @@ struct RomInfo
 	bool HasChrRam = false;
 	bool HasBattery = false;
 	bool HasTrainer = false;
+	uint8_t MiscRoms = 0;
 	MirroringType Mirroring = MirroringType::Horizontal;
 	BusConflictType BusConflicts = BusConflictType::Default;
 
@@ -91,6 +93,7 @@ struct RomData
 	vector<uint8_t> PrgRom;
 	vector<uint8_t> ChrRom;
 	vector<uint8_t> TrainerData;
+	vector<uint8_t> MiscRomsData;
 	vector<vector<uint8_t>> FdsDiskData;
 	vector<vector<uint8_t>> FdsDiskHeaders;
 	StudyBoxData StudyBox;

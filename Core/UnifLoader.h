@@ -86,6 +86,7 @@ private:
 		if(fourCC.compare("MAPR") == 0) {
 			_mapperName = ReadString(data, chunkEnd);
 			if(_mapperName.size() > 0) {
+				romData.Info.BoardName = _mapperName;
 				romData.Info.MapperID = GetMapperID(_mapperName);
 				if(romData.Info.MapperID == UnifBoards::UnknownBoard) {
 					Log("[UNIF] Error: Unknown board");
@@ -186,6 +187,7 @@ public:
 			romData.Info.Hash.PrgChrCrc32 = CRC32::GetCRC(fullRom.data(), fullRom.size());
 			romData.Info.Hash.PrgChrMd5 = GetMd5Sum(fullRom.data(), fullRom.size());
 
+			Log("PRG CRC32: 0x" + HexUtilities::ToHex(romData.Info.Hash.PrgCrc32, true));
 			Log("PRG+CHR CRC32: 0x" + HexUtilities::ToHex(romData.Info.Hash.PrgChrCrc32));
 			Log("[UNIF] Board Name: " + _mapperName);
 			Log("[UNIF] PRG ROM: " + std::to_string(romData.PrgRom.size() / 1024) + " KB");
@@ -210,8 +212,9 @@ public:
 				GameDatabase::SetGameInfo(romData.Info.Hash.PrgChrCrc32, romData, GameDatabase::IsEnabled(), false);
 			}
 
-			if(romData.Info.MapperID == UnifBoards::UnknownBoard)
+			if(romData.Info.MapperID == UnifBoards::UnknownBoard) {
 				romData.Error = true;
+			}
 		}
 	}
 };

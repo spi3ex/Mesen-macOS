@@ -31,16 +31,15 @@ protected:
 
 	uint8_t _exRegs[3];
 
-	uint16_t RegisterStartAddress() override { return 0x5000; }
-	uint16_t RegisterEndAddress() override { return 0xFFFF; }
-
 	void InitMapper() override
 	{
 		_exRegs[0] = 0;
 		_exRegs[1] = 3;
-		_exRegs[2] = 0;
+		_exRegs[2] = 4;
 
 		MMC3::InitMapper();
+
+		AddRegisterRange(0x5000, 0x5FFF, MemoryOperation::Write);
 	}
 
 	void StreamState(bool saving) override
@@ -80,6 +79,7 @@ protected:
 		if(_exRegs[0] & 0x80) {
 			bank <<= 1;
 			if(_exRegs[0] & 0x20) {
+				bank &= 0xFC;
 				MMC3::SelectPRGPage(0, bank);
 				MMC3::SelectPRGPage(1, bank + 1);
 				MMC3::SelectPRGPage(2, bank + 2);
@@ -98,7 +98,7 @@ protected:
 	void WriteRegister(uint16_t addr, uint8_t value) override
 	{
 		if(addr < 0x8000) {
-			switch(addr) {
+			switch(addr & 0xF007) {
 				case 0x5000: _exRegs[0] = value; UpdateState(); break;
 				case 0x5001: _exRegs[1] = value; UpdateState(); break;
 				case 0x5007: _exRegs[2] = value; break;
