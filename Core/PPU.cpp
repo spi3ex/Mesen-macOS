@@ -304,7 +304,7 @@ uint8_t PPU::PeekRAM(uint16_t addr)
 			returnValue = _memoryReadBuffer;
 
 			if((_state.VideoRamAddr & 0x3FFF) >= 0x3F00 && !_settings->CheckFlag(EmulationFlags::DisablePaletteRead)) {
-				returnValue = ReadPaletteRAM(_state.VideoRamAddr) | (_openBus & 0xC0);
+				returnValue = (ReadPaletteRAM(_state.VideoRamAddr) & _paletteRamMask) | (_openBus & 0xC0);
 				openBusMask = 0xC0;
 			} else {
 				openBusMask = 0x00;
@@ -361,7 +361,8 @@ uint8_t PPU::ReadRAM(uint16_t addr)
 				_memoryReadBuffer = ReadVram(_ppuBusAddress & 0x3FFF, MemoryOperationType::Read);
 
 				if((_ppuBusAddress & 0x3FFF) >= 0x3F00 && !_settings->CheckFlag(EmulationFlags::DisablePaletteRead)) {
-					returnValue = ReadPaletteRAM(_ppuBusAddress) | (_openBus & 0xC0);
+					//Note: When grayscale is turned on, the read values also have the grayscale mask applied to them
+					returnValue = (ReadPaletteRAM(_ppuBusAddress) & _paletteRamMask) | (_openBus & 0xC0);
 					openBusMask = 0xC0;
 				} else {
 					openBusMask = 0x00;
