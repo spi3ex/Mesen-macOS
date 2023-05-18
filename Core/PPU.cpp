@@ -1400,7 +1400,7 @@ uint8_t* PPU::GetSpriteRam()
 uint32_t PPU::GetPixelBrightness(uint8_t x, uint8_t y)
 {
 	//Used by Zapper, gives a rough approximation of the brightness level of the specific pixel
-	uint16_t pixelData = _currentOutputBuffer[y << 8 | x];
+	uint16_t pixelData = (_currentOutputBuffer[y << 8 | x] & _paletteRamMask) | _intensifyColorBits;
 	uint32_t argbColor = _settings->GetRgbPalette()[pixelData & 0x3F];
 	return (argbColor & 0xFF) + ((argbColor >> 8) & 0xFF) + ((argbColor >> 16) & 0xFF);
 }
