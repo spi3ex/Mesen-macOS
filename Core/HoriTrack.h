@@ -5,6 +5,9 @@
 
 class HoriTrack : public StandardController
 {
+private:
+	uint32_t _horiTrackState = 0;
+
 protected:
 	bool HasCoordinates() override { return true; }
 	
@@ -14,6 +17,12 @@ protected:
 		SetPressedState(StandardController::Buttons::A, KeyManager::IsMouseButtonPressed(MouseButton::LeftButton));
 		SetPressedState(StandardController::Buttons::B, KeyManager::IsMouseButtonPressed(MouseButton::RightButton));
 		SetMovement(KeyManager::GetMouseMovement(_console->GetSettings()->GetMouseSensitivity(MouseDevice::HoriTrack)));
+	}
+
+	void StreamState(bool saving) override
+	{
+		BaseControlDevice::StreamState(saving);
+		Stream(_horiTrackState);
 	}
 
 public:
@@ -26,8 +35,8 @@ public:
 		uint8_t output = 0;
 		if(addr == 0x4016) {
 			StrobeProcessRead();
-			output = (_stateBuffer & 0x01) << 1;
-			_stateBuffer >>= 1;
+			output = (_horiTrackState & 0x01) << 1;
+			_horiTrackState >>= 1;
 		}
 		return output;
 	}
@@ -46,6 +55,6 @@ public:
 		uint8_t byte2 = 0x09;
 
 		StandardController::RefreshStateBuffer();
-		_stateBuffer = (_stateBuffer & 0xFF) | (byte1 << 8) | (byte2 << 16);
+		_horiTrackState = (_horiTrackState & 0xFF) | (byte1 << 8) | (byte2 << 16);
 	}
 };
