@@ -1433,7 +1433,7 @@ void PPU::StreamState(bool saving)
 		openBusDecayStamp, disablePpu2004Reads, disablePaletteRead, disableOamAddrBug, _overflowBugCounter, _updateVramAddr, _updateVramAddrDelay,
 		_needStateUpdate, _ppuBusAddress, _preventVblFlag, _masterClock);
 
-	for(int i = 0; i < 64; i++) {
+	for(int i = 0; i < _spriteCount; i++) {
 		Stream(_spriteTiles[i].SpriteX, _spriteTiles[i].LowByte, _spriteTiles[i].HighByte, _spriteTiles[i].PaletteOffset, _spriteTiles[i].HorizontalMirror, _spriteTiles[i].BackgroundPriority);
 	}
 
