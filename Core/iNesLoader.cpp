@@ -137,7 +137,7 @@ void iNesLoader::LoadRom(RomData& romData, vector<uint8_t>& romFile, NESHeader *
 		Log("[iNes] Misc ROMS: " + std::to_string((romData.MiscRomsData.size() / 1024)) + " KB");
 	}
 
-	if(!_checkOnly) {
+	if(!_checkOnly && !romData.Info.IsNes20Header) {
 		GameDatabase::SetGameInfo(romData.Info.Hash.PrgChrCrc32, romData, GameDatabase::IsEnabled(), preloadedHeader != nullptr);
 	}
 }
