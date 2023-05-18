@@ -368,9 +368,9 @@ uint8_t PPU::ReadRAM(uint16_t addr)
 					openBusMask = 0x00;
 				}
 
-				UpdateVideoRamAddr();
 				_ignoreVramRead = 6;
 				_needStateUpdate = true;
+				_needVideoRamIncrement = true;
 			}
 			break;
 
@@ -454,7 +454,8 @@ void PPU::WriteRAM(uint16_t addr, uint8_t value)
 					_console->GetMapper()->WriteVRAM(_ppuBusAddress & 0x3FFF, _ppuBusAddress & 0xFF);
 				}
 			}
-			UpdateVideoRamAddr();
+			_needStateUpdate = true;
+			_needVideoRamIncrement = true;
 			break;
 		case PPURegisters::SpriteDMA:
 			_console->GetCpu()->RunDMATransfer(value);
@@ -1382,6 +1383,14 @@ void PPU::UpdateState()
 			_needStateUpdate = true;
 		}
 	}
+
+	if(_needVideoRamIncrement) {
+		//Delay vram address increment by 1 ppu cycle after a read/write to 2007
+		//This allows the full_palette tests to properly display single-pixel glitches 
+		//that display the "wrong" color on the screen until the increment occurs (matches hardware)
+		_needVideoRamIncrement = false;
+		UpdateVideoRamAddr();
+	}
 }
 
 uint8_t* PPU::GetSpriteRam()
@@ -1432,7 +1441,7 @@ void PPU::StreamState(bool saving)
 		_secondaryOAMAddr, _sprite0Visible, _oamCopybuffer, _spriteInRange, _sprite0Added, _spriteAddrH, _spriteAddrL, _oamCopyDone, _nesModel,
 		_prevRenderingEnabled, _renderingEnabled, _openBus, _ignoreVramRead, paletteRam, spriteRam, secondarySpriteRam,
 		openBusDecayStamp, disablePpu2004Reads, disablePaletteRead, disableOamAddrBug, _overflowBugCounter, _updateVramAddr, _updateVramAddrDelay,
-		_needStateUpdate, _ppuBusAddress, _preventVblFlag, _masterClock);
+		_needStateUpdate, _ppuBusAddress, _preventVblFlag, _masterClock, _needVideoRamIncrement);
 
 	for(int i = 0; i < _spriteCount; i++) {
 		Stream(_spriteTiles[i].SpriteX, _spriteTiles[i].LowByte, _spriteTiles[i].HighByte, _spriteTiles[i].PaletteOffset, _spriteTiles[i].HorizontalMirror, _spriteTiles[i].BackgroundPriority);

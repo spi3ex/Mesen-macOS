@@ -56,6 +56,8 @@ class PPU : public IMemoryHandler, public Snapshotable
 		uint16_t _nmiScanline;
 		uint16_t _palSpriteEvalScanline;
 
+		bool _needVideoRamIncrement;
+
 		PPUControlFlags _flags;
 		PPUStatusFlags _statusFlags;
 
