@@ -112,7 +112,7 @@ void PPU::Reset()
 
 	_firstVisibleSpriteAddr = 0;
 	_lastVisibleSpriteAddr = 0;
-	
+
 	memset(_oamDecayCycles, 0, sizeof(_oamDecayCycles));
 	_enableOamDecay = _settings->CheckFlag(EmulationFlags::EnableOamDecay);
 
@@ -999,7 +999,7 @@ void PPU::ProcessScanline()
 		}
 	} else if(_cycle == 337 || _cycle == 339) {
 		if(IsRenderingEnabled()) {
-			ReadVram(GetNameTableAddr());
+			_nextTile.TileAddr = ReadVram(GetNameTableAddr());
 
 			if(_scanline == -1 && _cycle == 339 && (_frameCount & 0x01) && _nesModel == NesModel::NTSC && _settings->GetPpuModel() == PpuModel::Ppu2C02) {
 				//This behavior is NTSC-specific - PAL frames are always the same number of cycles
@@ -1270,12 +1270,20 @@ void PPU::Exec()
 		}
 
 		//Cycle = 0
-		if(_scanline == -1) {
-			_statusFlags.SpriteOverflow = false;
-			_statusFlags.Sprite0Hit = false;
-			
-			//Switch to alternate output buffer (VideoDecoder may still be decoding the last frame buffer)
-			_currentOutputBuffer = (_currentOutputBuffer == _outputBuffers[0]) ? _outputBuffers[1] : _outputBuffers[0];
+		if(_scanline < 240) {
+			if(_scanline == -1) {
+				_statusFlags.SpriteOverflow = false;
+				_statusFlags.Sprite0Hit = false;
+
+				//Switch to alternate output buffer (VideoDecoder may still be decoding the last frame buffer)
+				_currentOutputBuffer = (_currentOutputBuffer == _outputBuffers[0]) ? _outputBuffers[1] : _outputBuffers[0];
+			} else if(_prevRenderingEnabled) {
+				if(_scanline > 0 || (!(_frameCount & 0x01) || _nesModel != NesModel::NTSC || _settings->GetPpuModel() != PpuModel::Ppu2C02)) {
+					//Set bus address to the tile address calculated from the unused NT fetches at the end of the previous scanline
+					//This doesn't happen on scanline 0 if the last dot of the previous frame was skipped
+					SetBusAddress((_nextTile.TileAddr << 4) | (_state.VideoRamAddr >> 12) | _flags.BackgroundPatternAddr);
+				}
+			}
 		} else if(_scanline == 240) {
 			//At the start of vblank, the bus address is set back to VideoRamAddr.
 			//According to Visual NES, this occurs on scanline 240, cycle 1, but is done here on cycle for performance reasons
