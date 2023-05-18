@@ -6,6 +6,7 @@ class PachinkoController : public StandardController
 {
 private:
 	uint8_t _analogData = 0;
+	uint16_t _pachinkoState = 0;
 
 protected:
 	enum PachinkoButtons { Press = 8, Release = 9 };
@@ -20,6 +21,13 @@ protected:
 		}
 	}
 
+	void StreamState(bool saving) override
+	{
+		BaseControlDevice::StreamState(saving);
+		Stream(_pachinkoState);
+		Stream(_analogData);
+	}
+
 public:
 	PachinkoController(shared_ptr<Console> console, KeyMappingSet keyMappings) : StandardController(console, BaseControlDevice::ExpDevicePort, keyMappings)
 	{
@@ -30,15 +38,15 @@ public:
 		uint8_t output = 0;
 		if(addr == 0x4016) {
 			StrobeProcessRead();
-			output = (_stateBuffer & 0x01) << 1;
-			_stateBuffer >>= 1;
+			output = (_pachinkoState & 0x01) << 1;
+			_pachinkoState >>= 1;
 		}
 		return output;
 	}
 
 	void RefreshStateBuffer() override
 	{
-		if(_analogData < 63 && IsPressed(PachinkoController::PachinkoButtons::Press)) {
+		if(_analogData < 0x63 && IsPressed(PachinkoController::PachinkoButtons::Press)) {
 			_analogData++;
 		} else if(_analogData > 0 && IsPressed(PachinkoController::PachinkoButtons::Release)) {
 			_analogData--;
@@ -55,6 +63,6 @@ public:
 			((_analogData & 0x80) >> 7);
 
 		StandardController::RefreshStateBuffer();
-		_stateBuffer = (_stateBuffer & 0xFF) | (~analogData << 8);
+		_pachinkoState = (_pachinkoState & 0xFF) | (~analogData << 8);
 	}
 };

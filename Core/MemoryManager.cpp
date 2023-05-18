@@ -131,6 +131,7 @@ uint8_t MemoryManager::Read(uint16_t addr, MemoryOperationType operationType)
 void MemoryManager::Write(uint16_t addr, uint8_t value, MemoryOperationType operationType)
 {
 	_ramWriteHandlers[addr]->WriteRAM(addr, value);
+	_openBusHandler.SetOpenBus(value);
 }
 
 void MemoryManager::DebugWrite(uint16_t addr, uint8_t value, bool disableSideEffects)

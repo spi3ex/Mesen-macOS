@@ -4,7 +4,6 @@
 #include "BaseMapper.h"
 #include "CPU.h"
 #include "EmulationSettings.h"
-#include "A12Watcher.h"
 
 
 class MMC3 : public BaseMapper
@@ -28,7 +27,7 @@ class MMC3 : public BaseMapper
 		bool _wramEnabled;
 		bool _wramWriteProtected;
 
-		A12Watcher _a12Watcher;
+		uint64_t _a12LowClock = 0;
 
 		bool _forceMmc3RevAIrqs;
 
@@ -189,9 +188,8 @@ class MMC3 : public BaseMapper
 		{
 			BaseMapper::StreamState(saving);
 			ArrayInfo<uint8_t> registers = { _registers, 8 };
-			SnapshotInfo a12Watcher{ &_a12Watcher };
 			Stream(_state.Reg8000, _state.RegA000, _state.RegA001, _currentRegister, _chrMode, _prgMode,
-				_irqReloadValue, _irqCounter, _irqReload, _irqEnabled, a12Watcher,
+				_irqReloadValue, _irqCounter, _irqReload, _irqEnabled, _a12LowClock,
 				_wramEnabled, _wramWriteProtected, registers);
 		}
 
@@ -265,10 +263,22 @@ class MMC3 : public BaseMapper
 			_console->GetCpu()->SetIrqSource(IRQSource::External);
 		}
 
+		bool IsA12RisingEdge(uint16_t addr)
+		{
+			if(addr & 0x1000) {
+				bool isRisingEdge = _a12LowClock > 0 && (_console->GetCpu()->GetCycleCount() - _a12LowClock) >= 3;
+				_a12LowClock = 0;
+				return isRisingEdge;
+			} else if(_a12LowClock == 0) {
+				_a12LowClock = _console->GetCpu()->GetCycleCount();
+			}
+			return false;
+		}
+
 	public:
 		virtual void NotifyVRAMAddressChange(uint16_t addr) override
 		{
-			if(_a12Watcher.UpdateVramAddress(addr, _console->GetPpu()->GetFrameCycle()) == A12StateChange::Rise) {
+			if(IsA12RisingEdge(addr)) {
 				uint32_t count = _irqCounter;
 				if(_irqCounter == 0 || _irqReload) {
 					_irqCounter = _irqReloadValue;

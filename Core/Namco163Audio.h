@@ -59,7 +59,7 @@ private:
 		return _internalRam[baseAddr + SoundReg::WaveAddress];
 	}
 
-	uint8_t GetWaveLength(int channel)
+	uint16_t GetWaveLength(int channel)
 	{
 		uint8_t baseAddr = 0x40 + channel * 0x08;
 		return 256 - (_internalRam[baseAddr + SoundReg::WaveLength] & 0xFC);
@@ -80,16 +80,12 @@ private:
 	{
 		uint32_t phase = GetPhase(channel);
 		uint32_t freq = GetFrequency(channel);
-		uint8_t length = GetWaveLength(channel);
+		uint16_t length = GetWaveLength(channel);
 		uint8_t offset = GetWaveAddress(channel);
 		uint8_t volume = GetVolume(channel);
 
-		if(length == 0) {
-			phase = 0;
-		} else {
-			phase = (phase + freq) % (length << 16);
-		}
-		
+		phase = (phase + freq) % (length << 16);
+
 		uint8_t samplePosition = ((phase >> 16) + offset) & 0xFF;
 		int8_t sample;
 		if((samplePosition & 0x01)) {
@@ -144,7 +140,7 @@ protected:
 public:
 	Namco163Audio(shared_ptr<Console> console) : BaseExpansionAudio(console)
 	{
-		memset(_internalRam, 0, sizeof(_internalRam));
+		memset(_internalRam, 0, Namco163Audio::AudioRamSize);
 		memset(_channelOutput, 0, sizeof(_channelOutput));
 		_ramPosition = 0;
 		_autoIncrement = false;
@@ -156,8 +152,7 @@ public:
 
 	void InitializeInternalRam(bool hasBattery)
 	{
-		if (!hasBattery)
-		{
+		if (!hasBattery) {
 			_console->InitializeRam(_internalRam, sizeof(_internalRam));
 		}
 	}

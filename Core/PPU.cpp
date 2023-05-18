@@ -24,15 +24,27 @@ PPU::PPU(std::shared_ptr<Console> console)
 	memset(_outputBuffers[0], 0, 256 * 240 * sizeof(uint16_t));
 	memset(_outputBuffers[1], 0, 256 * 240 * sizeof(uint16_t));
 
-	uint8_t paletteRamBootValues[0x20] { 0x09, 0x01, 0x00, 0x01, 0x00, 0x02, 0x02, 0x0D, 0x08, 0x10, 0x08, 0x24, 0x00, 0x00, 0x04, 0x2C,
-		0x09, 0x01, 0x34, 0x03, 0x00, 0x04, 0x00, 0x14, 0x08, 0x3A, 0x00, 0x02, 0x00, 0x20, 0x2C, 0x08 };
-	memcpy(_paletteRAM, paletteRamBootValues, sizeof(_paletteRAM));
+	if(_console->GetSettings()->GetRamPowerOnState() == RamPowerOnState::Random) {
+		_console->InitializeRam(_paletteRAM, 0x20);
+		for(int i = 0; i < 0x20; i++) {
+			_paletteRAM[i] &= 0x3F;
+		}
+	} else {
+		//When not using random ram, use a static state at power on (matches blargg's old palette test rom)
+		constexpr uint8_t paletteRamBootValues[0x20] {
+			0x09, 0x01, 0x00, 0x01, 0x00, 0x02, 0x02, 0x0D, 0x08, 0x10, 0x08, 0x24, 0x00, 0x00, 0x04, 0x2C,
+			0x09, 0x01, 0x34, 0x03, 0x00, 0x04, 0x00, 0x14, 0x08, 0x3A, 0x00, 0x02, 0x00, 0x20, 0x2C, 0x08
+		};
+		memcpy(_paletteRAM, paletteRamBootValues, sizeof(_paletteRAM));
+	}
 
 	//This should (presumably) persist across resets
 	memset(_corruptOamRow, 0, sizeof(_corruptOamRow));
 
 	_console->InitializeRam(_spriteRAM, 0x100);
 	_console->InitializeRam(_secondarySpriteRAM, 0x20);
+
+	SetNesModel(NesModel::NTSC);
 
 	Reset();
 }
@@ -75,8 +87,6 @@ void PPU::Reset()
 	_spriteAddrH = 0;
 	_spriteAddrL = 0;
 	_oamCopyDone = false;
-	_renderingEnabled = false;
-	_prevRenderingEnabled = false;
 
 	memset(_hasSprite, 0, sizeof(_hasSprite));
 	memset(_spriteTiles, 0, sizeof(_spriteTiles));
@@ -99,6 +109,9 @@ void PPU::Reset()
 
 	_updateVramAddrDelay = 0;
 	_updateVramAddr = 0;
+
+	_firstVisibleSpriteAddr = 0;
+	_lastVisibleSpriteAddr = 0;
 
 	memset(_oamDecayCycles, 0, sizeof(_oamDecayCycles));
 	_enableOamDecay = _settings->CheckFlag(EmulationFlags::EnableOamDecay);
@@ -294,7 +307,7 @@ uint8_t PPU::PeekRAM(uint16_t addr)
 			returnValue = _memoryReadBuffer;
 
 			if((_state.VideoRamAddr & 0x3FFF) >= 0x3F00 && !_settings->CheckFlag(EmulationFlags::DisablePaletteRead)) {
-				returnValue = ReadPaletteRAM(_state.VideoRamAddr) | (_openBus & 0xC0);
+				returnValue = (ReadPaletteRAM(_state.VideoRamAddr) & _paletteRamMask) | (_openBus & 0xC0);
 				openBusMask = 0xC0;
 			} else {
 				openBusMask = 0x00;
@@ -351,15 +364,16 @@ uint8_t PPU::ReadRAM(uint16_t addr)
 				_memoryReadBuffer = ReadVram(_ppuBusAddress & 0x3FFF, MemoryOperationType::Read);
 
 				if((_ppuBusAddress & 0x3FFF) >= 0x3F00 && !_settings->CheckFlag(EmulationFlags::DisablePaletteRead)) {
-					returnValue = ReadPaletteRAM(_ppuBusAddress) | (_openBus & 0xC0);
+					//Note: When grayscale is turned on, the read values also have the grayscale mask applied to them
+					returnValue = (ReadPaletteRAM(_ppuBusAddress) & _paletteRamMask) | (_openBus & 0xC0);
 					openBusMask = 0xC0;
 				} else {
 					openBusMask = 0x00;
 				}
 
-				UpdateVideoRamAddr();
 				_ignoreVramRead = 6;
 				_needStateUpdate = true;
+				_needVideoRamIncrement = true;
 			}
 			break;
 
@@ -443,7 +457,8 @@ void PPU::WriteRAM(uint16_t addr, uint8_t value)
 					_console->GetMapper()->WriteVRAM(_ppuBusAddress & 0x3FFF, _ppuBusAddress & 0xFF);
 				}
 			}
-			UpdateVideoRamAddr();
+			_needStateUpdate = true;
+			_needVideoRamIncrement = true;
 			break;
 		case PPURegisters::SpriteDMA:
 			_console->GetCpu()->RunDMATransfer(value);
@@ -521,6 +536,13 @@ void PPU::SetControlRegister(uint8_t value)
 	}
 }
 
+void PPU::UpdateColorBitMasks()
+{
+	//"Bit 0 controls a greyscale mode, which causes the palette to use only the colors from the grey column: $00, $10, $20, $30. This is implemented as a bitwise AND with $30 on any value read from PPU $3F00-$3FFF"
+	_paletteRamMask = _flags.Grayscale ? 0x30 : 0x3F;
+	_intensifyColorBits = (_flags.IntensifyRed ? 0x40 : 0x00) | (_flags.IntensifyGreen ? 0x80 : 0x00) | (_flags.IntensifyBlue ? 0x100 : 0x00);
+}
+
 void PPU::UpdateMinimumDrawCycles()
 {
 	_minimumDrawBgCycle = _flags.BackgroundEnabled ? ((_flags.BackgroundMask || _settings->CheckFlag(EmulationFlags::ForceBackgroundFirstColumn)) ? 0 : 8) : 300;
@@ -538,27 +560,21 @@ void PPU::SetMaskRegister(uint8_t value)
 	_flags.SpritesEnabled = (_state.Mask & 0x10) == 0x10;
 	_flags.IntensifyBlue = (_state.Mask & 0x80) == 0x80;
 
+	if(_nesModel == NesModel::NTSC) {
+		_flags.IntensifyRed = (_state.Mask & 0x20) == 0x20;
+		_flags.IntensifyGreen = (_state.Mask & 0x40) == 0x40;
+	} else if(_nesModel == NesModel::PAL || _nesModel == NesModel::Dendy) {
+		//"Note that on the Dendy and PAL NES, the green and red bits swap meaning."
+		_flags.IntensifyRed = (_state.Mask & 0x40) == 0x40;
+		_flags.IntensifyGreen = (_state.Mask & 0x20) == 0x20;
+	}
+
 	if(_renderingEnabled != (_flags.BackgroundEnabled | _flags.SpritesEnabled)) {
 		_needStateUpdate = true;
 	}
 
 	UpdateMinimumDrawCycles();
-
 	UpdateGrayscaleAndIntensifyBits();
-
-	//"Bit 0 controls a greyscale mode, which causes the palette to use only the colors from the grey column: $00, $10, $20, $30. This is implemented as a bitwise AND with $30 on any value read from PPU $3F00-$3FFF"
-	_paletteRamMask = _flags.Grayscale ? 0x30 : 0x3F;
-
-	if(_nesModel == NesModel::NTSC) {
-		_flags.IntensifyRed = (_state.Mask & 0x20) == 0x20;
-		_flags.IntensifyGreen = (_state.Mask & 0x40) == 0x40;
-		_intensifyColorBits = (value & 0xE0) << 1;
-	} else if(_nesModel == NesModel::PAL || _nesModel == NesModel::Dendy) {
-		//"Note that on the Dendy and PAL NES, the green and red bits swap meaning."
-		_flags.IntensifyRed = (_state.Mask & 0x40) == 0x40;
-		_flags.IntensifyGreen = (_state.Mask & 0x20) == 0x20;
-		_intensifyColorBits = (_flags.IntensifyRed ? 0x40 : 0x00) | (_flags.IntensifyGreen ? 0x80 : 0x00) | (_flags.IntensifyBlue ? 0x100 : 0x00);
-	}
 }
 
 void PPU::UpdateStatusFlag()
@@ -774,7 +790,7 @@ void PPU::LoadExtraSprites()
 		}
 
 		if(loadExtraSprites) {
-			for(uint32_t i = (_lastVisibleSpriteAddr + 4) & 0xFF; i != _firstVisibleSpriteAddr; i = (i + 4) & 0xFF) {
+			for(uint32_t i = (_lastVisibleSpriteAddr + 4) & 0xFC; i != (uint32_t) _firstVisibleSpriteAddr; i = (i + 4) & 0xFC) {
 				uint8_t spriteY = _spriteRAM[i];
 				if(_scanline >= spriteY && _scanline < spriteY + (_flags.LargeSprites ? 16 : 8)) {
 					LoadSprite(spriteY, _spriteRAM[i + 1], _spriteRAM[i + 2], _spriteRAM[i + 3], true);
@@ -872,6 +888,7 @@ uint16_t PPU::GetCurrentBgColor()
 void PPU::UpdateGrayscaleAndIntensifyBits()
 {
 	if(_scanline < 0 || _scanline > _nmiScanline) {
+		UpdateColorBitMasks();
 		return;
 	}
 
@@ -888,6 +905,7 @@ void PPU::UpdateGrayscaleAndIntensifyBits()
 
 	if(_paletteRamMask == 0x3F && _intensifyColorBits == 0) {
 		//Nothing to do (most common case)
+		UpdateColorBitMasks();
 		_lastUpdatedPixel = pixelNumber;
 		return;
 	}
@@ -900,6 +918,8 @@ void PPU::UpdateGrayscaleAndIntensifyBits()
 			_lastUpdatedPixel++;
 		}
 	}
+
+	UpdateColorBitMasks();
 }
 
 void PPU::ProcessScanline()
@@ -979,7 +999,7 @@ void PPU::ProcessScanline()
 		}
 	} else if(_cycle == 337 || _cycle == 339) {
 		if(IsRenderingEnabled()) {
-			ReadVram(GetNameTableAddr());
+			_nextTile.TileAddr = ReadVram(GetNameTableAddr());
 
 			if(_scanline == -1 && _cycle == 339 && (_frameCount & 0x01) && _nesModel == NesModel::NTSC && _settings->GetPpuModel() == PpuModel::Ppu2C02) {
 				//This behavior is NTSC-specific - PAL frames are always the same number of cycles
@@ -1250,12 +1270,20 @@ void PPU::Exec()
 		}
 
 		//Cycle = 0
-		if(_scanline == -1) {
-			_statusFlags.SpriteOverflow = false;
-			_statusFlags.Sprite0Hit = false;
-			
-			//Switch to alternate output buffer (VideoDecoder may still be decoding the last frame buffer)
-			_currentOutputBuffer = (_currentOutputBuffer == _outputBuffers[0]) ? _outputBuffers[1] : _outputBuffers[0];
+		if(_scanline < 240) {
+			if(_scanline == -1) {
+				_statusFlags.SpriteOverflow = false;
+				_statusFlags.Sprite0Hit = false;
+
+				//Switch to alternate output buffer (VideoDecoder may still be decoding the last frame buffer)
+				_currentOutputBuffer = (_currentOutputBuffer == _outputBuffers[0]) ? _outputBuffers[1] : _outputBuffers[0];
+			} else if(_prevRenderingEnabled) {
+				if(_scanline > 0 || (!(_frameCount & 0x01) || _nesModel != NesModel::NTSC || _settings->GetPpuModel() != PpuModel::Ppu2C02)) {
+					//Set bus address to the tile address calculated from the unused NT fetches at the end of the previous scanline
+					//This doesn't happen on scanline 0 if the last dot of the previous frame was skipped
+					SetBusAddress((_nextTile.TileAddr << 4) | (_state.VideoRamAddr >> 12) | _flags.BackgroundPatternAddr);
+				}
+			}
 		} else if(_scanline == 240) {
 			//At the start of vblank, the bus address is set back to VideoRamAddr.
 			//According to Visual NES, this occurs on scanline 240, cycle 1, but is done here on cycle for performance reasons
@@ -1371,6 +1399,14 @@ void PPU::UpdateState()
 			_needStateUpdate = true;
 		}
 	}
+
+	if(_needVideoRamIncrement) {
+		//Delay vram address increment by 1 ppu cycle after a read/write to 2007
+		//This allows the full_palette tests to properly display single-pixel glitches 
+		//that display the "wrong" color on the screen until the increment occurs (matches hardware)
+		_needVideoRamIncrement = false;
+		UpdateVideoRamAddr();
+	}
 }
 
 uint8_t* PPU::GetSpriteRam()
@@ -1390,7 +1426,7 @@ uint8_t* PPU::GetSpriteRam()
 uint32_t PPU::GetPixelBrightness(uint8_t x, uint8_t y)
 {
 	//Used by Zapper, gives a rough approximation of the brightness level of the specific pixel
-	uint16_t pixelData = _currentOutputBuffer[y << 8 | x];
+	uint16_t pixelData = (_currentOutputBuffer[y << 8 | x] & _paletteRamMask) | _intensifyColorBits;
 	uint32_t argbColor = _settings->GetRgbPalette()[pixelData & 0x3F];
 	return (argbColor & 0xFF) + ((argbColor >> 8) & 0xFF) + ((argbColor >> 16) & 0xFF);
 }
@@ -1421,9 +1457,9 @@ void PPU::StreamState(bool saving)
 		_secondaryOAMAddr, _sprite0Visible, _oamCopybuffer, _spriteInRange, _sprite0Added, _spriteAddrH, _spriteAddrL, _oamCopyDone, _nesModel,
 		_prevRenderingEnabled, _renderingEnabled, _openBus, _ignoreVramRead, paletteRam, spriteRam, secondarySpriteRam,
 		openBusDecayStamp, disablePpu2004Reads, disablePaletteRead, disableOamAddrBug, _overflowBugCounter, _updateVramAddr, _updateVramAddrDelay,
-		_needStateUpdate, _ppuBusAddress, _preventVblFlag, _masterClock);
+		_needStateUpdate, _ppuBusAddress, _preventVblFlag, _masterClock, _needVideoRamIncrement);
 
-	for(int i = 0; i < 64; i++) {
+	for(int i = 0; i < _spriteCount; i++) {
 		Stream(_spriteTiles[i].SpriteX, _spriteTiles[i].LowByte, _spriteTiles[i].HighByte, _spriteTiles[i].PaletteOffset, _spriteTiles[i].HorizontalMirror, _spriteTiles[i].BackgroundPriority);
 	}
 

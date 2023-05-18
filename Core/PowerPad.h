@@ -18,7 +18,7 @@ protected:
 
 	void InternalSetStateFromInput() override
 	{
-		for(KeyMapping keyMapping : _keyMappings) {
+		for(KeyMapping& keyMapping : _keyMappings) {
 			for(int i = 0; i < 3; i++) {
 				for(int j = 0; j < 4; j++) {
 					if(_useSideA) {

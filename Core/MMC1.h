@@ -196,7 +196,8 @@ class MMC1 : public BaseMapper
 			uint64_t currentCycle = _console->GetCpu()->GetCycleCount();
 			
 			//Ignore write if within 2 cycles of another write (i.e the real write after a dummy write)
-			if(currentCycle - _lastWriteCycle >= 2) {
+			//If the reset bit is set, process the write even if another write just occurred (fixes bug in Shinsenden)
+			if((value & 0x80) || currentCycle - _lastWriteCycle >= 2) {
 				if(IsBufferFull(value)) {
 					switch((MMC1Registers)((addr & 0x6000) >> 13)) {
 						case MMC1Registers::Reg8000: _state.Reg8000 = _writeBuffer; break;

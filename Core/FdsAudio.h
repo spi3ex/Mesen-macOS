@@ -98,7 +98,12 @@ public:
 		uint8_t value = _console->GetMemoryManager()->GetOpenBus();
 		if(addr <= 0x407F) {
 			value &= 0xC0;
-			value |= _waveTable[addr & 0x3F];
+			if(_waveWriteEnabled) {
+				value |= _waveTable[addr & 0x3F];
+			} else {
+				//"When writing is disabled ($4089.7), reading anywhere in 4040-407F returns the value at the current wave position"
+				value |= _waveTable[_wavePosition];
+			}
 		} else if(addr == 0x4090) {
 			value &= 0xC0;
 			value |= _volume.GetGain();
@@ -124,8 +129,8 @@ public:
 					break;
 
 				case 0x4083:
-					_disableEnvelopes = (value & 0x40) == 0x40;
-					_haltWaveform = (value & 0x80) == 0x80;
+					_disableEnvelopes = (value & 0x40) != 0;
+					_haltWaveform = (value & 0x80) != 0;
 					if(_disableEnvelopes) {
 						_volume.ResetTimer();
 						_mod.ResetTimer();
@@ -133,11 +138,17 @@ public:
 					_volume.WriteReg(addr, value);
 					break;
 
-				case 0x4084:
-				case 0x4085:
 				case 0x4086:
 				case 0x4087:
 					_mod.WriteReg(addr, value);
+					break;
+
+				case 0x4084:
+				case 0x4085:
+					_mod.WriteReg(addr, value);
+
+					//Need to update mod output if gain/speed were changed
+					_mod.UpdateOutput(_volume.GetFrequency());
 					break;
 
 				case 0x4088:
