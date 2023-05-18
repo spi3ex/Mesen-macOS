@@ -44,6 +44,8 @@ PPU::PPU(std::shared_ptr<Console> console)
 	_console->InitializeRam(_spriteRAM, 0x100);
 	_console->InitializeRam(_secondarySpriteRAM, 0x20);
 
+	SetNesModel(NesModel::NTSC);
+
 	Reset();
 }
 
@@ -85,8 +87,6 @@ void PPU::Reset()
 	_spriteAddrH = 0;
 	_spriteAddrL = 0;
 	_oamCopyDone = false;
-	_renderingEnabled = false;
-	_prevRenderingEnabled = false;
 
 	memset(_hasSprite, 0, sizeof(_hasSprite));
 	memset(_spriteTiles, 0, sizeof(_spriteTiles));
@@ -110,6 +110,9 @@ void PPU::Reset()
 	_updateVramAddrDelay = 0;
 	_updateVramAddr = 0;
 
+	_firstVisibleSpriteAddr = 0;
+	_lastVisibleSpriteAddr = 0;
+	
 	memset(_oamDecayCycles, 0, sizeof(_oamDecayCycles));
 	_enableOamDecay = _settings->CheckFlag(EmulationFlags::EnableOamDecay);
 
