@@ -54,7 +54,7 @@ protected:
 
 	void InternalSetStateFromInput() override
 	{
-		for(KeyMapping keyMapping : _keyMappings) {
+		for(KeyMapping& keyMapping : _keyMappings) {
 			for(int i = 0; i < 99; i++) {
 				SetPressedState(i, keyMapping.SuborKeyboardButtons[i]);
 			}
@@ -77,7 +77,7 @@ protected:
 			//Corresponds to row 9, bit 4
 			result |= 0x01;
 		}
-		
+
 		return result;
 	}
 
