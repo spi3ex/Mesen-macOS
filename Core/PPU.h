@@ -152,6 +152,7 @@ class PPU : public IMemoryHandler, public Snapshotable
 		uint8_t GetPixelColor();
 		__forceinline virtual void DrawPixel();
 		void UpdateGrayscaleAndIntensifyBits();
+		void UpdateColorBitMasks();
 		virtual void SendFrame();
 
 		void UpdateState();

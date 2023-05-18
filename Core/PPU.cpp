@@ -533,6 +533,13 @@ void PPU::SetControlRegister(uint8_t value)
 	}
 }
 
+void PPU::UpdateColorBitMasks()
+{
+	//"Bit 0 controls a greyscale mode, which causes the palette to use only the colors from the grey column: $00, $10, $20, $30. This is implemented as a bitwise AND with $30 on any value read from PPU $3F00-$3FFF"
+	_paletteRamMask = _flags.Grayscale ? 0x30 : 0x3F;
+	_intensifyColorBits = (_flags.IntensifyRed ? 0x40 : 0x00) | (_flags.IntensifyGreen ? 0x80 : 0x00) | (_flags.IntensifyBlue ? 0x100 : 0x00);
+}
+
 void PPU::UpdateMinimumDrawCycles()
 {
 	_minimumDrawBgCycle = _flags.BackgroundEnabled ? ((_flags.BackgroundMask || _settings->CheckFlag(EmulationFlags::ForceBackgroundFirstColumn)) ? 0 : 8) : 300;
@@ -550,27 +557,21 @@ void PPU::SetMaskRegister(uint8_t value)
 	_flags.SpritesEnabled = (_state.Mask & 0x10) == 0x10;
 	_flags.IntensifyBlue = (_state.Mask & 0x80) == 0x80;
 
+	if(_nesModel == NesModel::NTSC) {
+		_flags.IntensifyRed = (_state.Mask & 0x20) == 0x20;
+		_flags.IntensifyGreen = (_state.Mask & 0x40) == 0x40;
+	} else if(_nesModel == NesModel::PAL || _nesModel == NesModel::Dendy) {
+		//"Note that on the Dendy and PAL NES, the green and red bits swap meaning."
+		_flags.IntensifyRed = (_state.Mask & 0x40) == 0x40;
+		_flags.IntensifyGreen = (_state.Mask & 0x20) == 0x20;
+	}
+
 	if(_renderingEnabled != (_flags.BackgroundEnabled | _flags.SpritesEnabled)) {
 		_needStateUpdate = true;
 	}
 
 	UpdateMinimumDrawCycles();
-
 	UpdateGrayscaleAndIntensifyBits();
-
-	//"Bit 0 controls a greyscale mode, which causes the palette to use only the colors from the grey column: $00, $10, $20, $30. This is implemented as a bitwise AND with $30 on any value read from PPU $3F00-$3FFF"
-	_paletteRamMask = _flags.Grayscale ? 0x30 : 0x3F;
-
-	if(_nesModel == NesModel::NTSC) {
-		_flags.IntensifyRed = (_state.Mask & 0x20) == 0x20;
-		_flags.IntensifyGreen = (_state.Mask & 0x40) == 0x40;
-		_intensifyColorBits = (value & 0xE0) << 1;
-	} else if(_nesModel == NesModel::PAL || _nesModel == NesModel::Dendy) {
-		//"Note that on the Dendy and PAL NES, the green and red bits swap meaning."
-		_flags.IntensifyRed = (_state.Mask & 0x40) == 0x40;
-		_flags.IntensifyGreen = (_state.Mask & 0x20) == 0x20;
-		_intensifyColorBits = (_flags.IntensifyRed ? 0x40 : 0x00) | (_flags.IntensifyGreen ? 0x80 : 0x00) | (_flags.IntensifyBlue ? 0x100 : 0x00);
-	}
 }
 
 void PPU::UpdateStatusFlag()
@@ -884,6 +885,7 @@ uint16_t PPU::GetCurrentBgColor()
 void PPU::UpdateGrayscaleAndIntensifyBits()
 {
 	if(_scanline < 0 || _scanline > _nmiScanline) {
+		UpdateColorBitMasks();
 		return;
 	}
 
@@ -900,6 +902,7 @@ void PPU::UpdateGrayscaleAndIntensifyBits()
 
 	if(_paletteRamMask == 0x3F && _intensifyColorBits == 0) {
 		//Nothing to do (most common case)
+		UpdateColorBitMasks();
 		_lastUpdatedPixel = pixelNumber;
 		return;
 	}
@@ -912,6 +915,8 @@ void PPU::UpdateGrayscaleAndIntensifyBits()
 			_lastUpdatedPixel++;
 		}
 	}
+
+	UpdateColorBitMasks();
 }
 
 void PPU::ProcessScanline()
