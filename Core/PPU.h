@@ -129,16 +129,17 @@ class PPU : public IMemoryHandler, public Snapshotable
 		uint16_t GetNameTableAddr();
 		uint16_t GetAttributeAddr();
 
+		void ProcessScanlineFirstCycle(); 
 		__forceinline void ProcessScanline();
 		__forceinline void ProcessSpriteEvaluation();
 
 		void BeginVBlank();
 		void TriggerNmi();
 
-		void LoadTileInfo();
-		void LoadSprite(uint8_t spriteY, uint8_t tileIndex, uint8_t attributes, uint8_t spriteX, bool extraSprite);
-		void LoadSpriteTileInfo();
-		void LoadExtraSprites();
+		__forceinline void LoadTileInfo();
+		__forceinline void LoadSprite(uint8_t spriteY, uint8_t tileIndex, uint8_t attributes, uint8_t spriteX, bool extraSprite);
+		__forceinline void LoadSpriteTileInfo();
+		__forceinline void LoadExtraSprites();
 		__forceinline void ShiftTileRegisters();
 
 		__forceinline uint8_t ReadSpriteRam(uint8_t addr);
