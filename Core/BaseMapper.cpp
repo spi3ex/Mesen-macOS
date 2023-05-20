@@ -322,6 +322,9 @@ void BaseMapper::SelectCHRPage(uint16_t slot, uint16_t page, ChrMemoryType memor
 	if(memoryType == ChrMemoryType::NametableRam) {
 		pageSize = BaseMapper::NametableSize;
 	} else {
+		if(memoryType == ChrMemoryType::Default) {
+			memoryType = _chrRomSize > 0 ? ChrMemoryType::ChrRom : ChrMemoryType::ChrRam;
+		}
 		pageSize = memoryType == ChrMemoryType::ChrRam ? InternalGetChrRamPageSize() : InternalGetChrPageSize();
 	}
 
@@ -1014,7 +1017,7 @@ int32_t BaseMapper::ToAbsoluteChrRomAddress(uint16_t addr)
 
 int32_t BaseMapper::FromAbsoluteChrAddress(uint32_t addr)
 {
-	uint8_t* ptrAddress = (_onlyChrRam ? _chrRam : _chrRom) + (addr & 0x3FFF);
+	uint8_t* ptrAddress = _chrRom + (addr & 0x3FFF);
 
 	for(int i = 0; i < 64; i++) {
 		uint8_t* pageAddress = _chrPages[i];
@@ -1164,9 +1167,7 @@ vector<uint8_t> BaseMapper::GetPrgChrCopy()
 void BaseMapper::RestorePrgChrBackup(vector<uint8_t> &backupData)
 {
 	memcpy(_prgRom, backupData.data(), _prgSize);
-	if(!_onlyChrRam) {
-		memcpy(_chrRom, backupData.data() + _prgSize, _chrRomSize);
-	}
+	memcpy(_chrRom, backupData.data() + _prgSize, _chrRomSize);
 }
 
 void BaseMapper::RevertPrgChrChanges()

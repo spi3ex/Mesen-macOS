@@ -26,7 +26,6 @@ private:
 	uint8_t *_nametableRam = nullptr;
 	uint8_t _nametableCount = 2;
 
-	bool _onlyChrRam = false;
 	bool _hasBusConflicts = false;
 	
 	bool _allowRegisterRead = false;
@@ -78,7 +77,7 @@ protected:
 
 	bool IsNes20();
 
-	virtual uint16_t GetChrRamPageSize() { return 0x2000; }
+	virtual uint16_t GetChrRamPageSize() { return GetCHRPageSize(); }
 
 	//Save ram is battery backed and saved to disk
 	virtual uint32_t GetSaveRamSize() { return HasBattery() ? 0x2000 : 0; }
