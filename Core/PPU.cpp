@@ -1244,10 +1244,8 @@ void PPU::ProcessOamCorruption()
 
 void PPU::Exec()
 {
-	if(_cycle > 339) {
-		ProcessScanlineFirstCycle();
-	} else {
-		//Cycle > 0
+	if(_cycle < 340) {
+		//Process cycles 1 to 340
 		_cycle++;
 
 		if(_scanline < 240) {
@@ -1269,6 +1267,9 @@ void PPU::Exec()
 				_state.SpriteRamAddr = 0;
 			}
 		}
+	} else {
+		//Process cycle 0
+		ProcessScanlineFirstCycle();
 	}
 
 	if(_needStateUpdate) {
