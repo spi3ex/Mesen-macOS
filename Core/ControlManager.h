@@ -39,11 +39,12 @@ protected:
 	virtual void StreamState(bool saving) override;
 	virtual ControllerType GetControllerType(uint8_t port);
 	virtual void RemapControllerButtons();
-	virtual uint8_t GetOpenBusMask(uint8_t port);
 
 public:
 	ControlManager(std::shared_ptr<Console> console, std::shared_ptr<BaseControlDevice> systemActionManager, std::shared_ptr<BaseControlDevice> mapperControlDevice);
 	virtual ~ControlManager();
+
+	virtual uint8_t GetOpenBusMask(uint8_t port);
 
 	virtual void UpdateControlDevices();
 	void UpdateInputState();
