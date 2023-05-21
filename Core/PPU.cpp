@@ -983,19 +983,16 @@ void PPU::ProcessScanline()
 			}
 		}
 	} else if(_cycle >= 321 && _cycle <= 336) {
+		LoadTileInfo();
 		if(_cycle == 321) {
 			if(IsRenderingEnabled()) {
 				LoadExtraSprites();
 				_oamCopybuffer = _secondarySpriteRAM[0];
 			}
-			LoadTileInfo();
 		} else if(_prevRenderingEnabled && (_cycle == 328 || _cycle == 336)) {
-			LoadTileInfo();
 			_state.LowBitShift <<= 8;
 			_state.HighBitShift <<= 8;
 			IncHorizontalScrolling();
-		} else {
-			LoadTileInfo();
 		}
 	} else if(_cycle == 337 || _cycle == 339) {
 		if(IsRenderingEnabled()) {
@@ -1247,52 +1244,8 @@ void PPU::ProcessOamCorruption()
 
 void PPU::Exec()
 {
-	if(_cycle > 339) {
-		_cycle = 0;
-		if(++_scanline > _vblankEnd) {
-			_lastUpdatedPixel = -1;
-			_scanline = -1;
-
-			//Force prerender scanline sprite fetches to load the dummy $FF tiles (fixes shaking in Ninja Gaiden 3 stage 1 after beating boss)
-			_spriteCount = 0;
-
-			if(_renderingEnabled) {
-				ProcessOamCorruption();
-			}
-
-			UpdateMinimumDrawCycles();
-		}
-
-		UpdateApuStatus();
-		
-		if(_scanline == _settings->GetInputPollScanline()) {
-			_console->GetControlManager()->UpdateInputState();
-		}
-
-		//Cycle = 0
-		if(_scanline < 240) {
-			if(_scanline == -1) {
-				_statusFlags.SpriteOverflow = false;
-				_statusFlags.Sprite0Hit = false;
-
-				//Switch to alternate output buffer (VideoDecoder may still be decoding the last frame buffer)
-				_currentOutputBuffer = (_currentOutputBuffer == _outputBuffers[0]) ? _outputBuffers[1] : _outputBuffers[0];
-			} else if(_prevRenderingEnabled) {
-				if(_scanline > 0 || (!(_frameCount & 0x01) || _nesModel != NesModel::NTSC || _settings->GetPpuModel() != PpuModel::Ppu2C02)) {
-					//Set bus address to the tile address calculated from the unused NT fetches at the end of the previous scanline
-					//This doesn't happen on scanline 0 if the last dot of the previous frame was skipped
-					SetBusAddress((_nextTile.TileAddr << 4) | (_state.VideoRamAddr >> 12) | _flags.BackgroundPatternAddr);
-				}
-			}
-		} else if(_scanline == 240) {
-			//At the start of vblank, the bus address is set back to VideoRamAddr.
-			//According to Visual NES, this occurs on scanline 240, cycle 1, but is done here on cycle for performance reasons
-			SetBusAddress(_state.VideoRamAddr);
-			SendFrame();
-			_frameCount++;
-		}
-	} else {
-		//Cycle > 0
+	if(_cycle < 340) {
+		//Process cycles 1 to 340
 		_cycle++;
 
 		if(_scanline < 240) {
@@ -1314,10 +1267,60 @@ void PPU::Exec()
 				_state.SpriteRamAddr = 0;
 			}
 		}
+	} else {
+		//Process cycle 0
+		ProcessScanlineFirstCycle();
 	}
 
 	if(_needStateUpdate) {
 		UpdateState();
+	}
+}
+
+void PPU::ProcessScanlineFirstCycle()
+{
+	_cycle = 0;
+	if(++_scanline > _vblankEnd) {
+		_lastUpdatedPixel = -1;
+		_scanline = -1;
+
+		//Force prerender scanline sprite fetches to load the dummy $FF tiles (fixes shaking in Ninja Gaiden 3 stage 1 after beating boss)
+		_spriteCount = 0;
+
+		if(_renderingEnabled) {
+			ProcessOamCorruption();
+		}
+
+		UpdateMinimumDrawCycles();
+	}
+
+	UpdateApuStatus();
+		
+	if(_scanline == _settings->GetInputPollScanline()) {
+		_console->GetControlManager()->UpdateInputState();
+	}
+
+	//Cycle = 0
+	if(_scanline < 240) {
+		if(_scanline == -1) {
+			_statusFlags.SpriteOverflow = false;
+			_statusFlags.Sprite0Hit = false;
+
+			//Switch to alternate output buffer (VideoDecoder may still be decoding the last frame buffer)
+			_currentOutputBuffer = (_currentOutputBuffer == _outputBuffers[0]) ? _outputBuffers[1] : _outputBuffers[0];
+		} else if(_prevRenderingEnabled) {
+			if(_scanline > 0 || (!(_frameCount & 0x01) || _nesModel != NesModel::NTSC || _settings->GetPpuModel() != PpuModel::Ppu2C02)) {
+				//Set bus address to the tile address calculated from the unused NT fetches at the end of the previous scanline
+				//This doesn't happen on scanline 0 if the last dot of the previous frame was skipped
+				SetBusAddress((_nextTile.TileAddr << 4) | (_state.VideoRamAddr >> 12) | _flags.BackgroundPatternAddr);
+			}
+		}
+	} else if(_scanline == 240) {
+		//At the start of vblank, the bus address is set back to VideoRamAddr.
+		//According to Visual NES, this occurs on scanline 240, cycle 1, but is done here on cycle for performance reasons
+		SetBusAddress(_state.VideoRamAddr);
+		SendFrame();
+		_frameCount++;
 	}
 }
 
