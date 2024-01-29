@@ -24,6 +24,9 @@ protected:
 	virtual uint32_t GetSaveRamSize() override { return 0x100; }
 	virtual uint32_t GetSaveRamPageSize() override { return 0x100; }
 
+	bool ForceSaveRamSize() override { return HasBattery(); }
+	bool ForceWorkRamSize() override { return !HasBattery(); }
+
 	void InitMapper() override
 	{
 		_ramPermission = 0;
@@ -31,6 +34,17 @@ protected:
 		SelectPRGPage(3, -1);
 
 		UpdateRamAccess();
+	}
+
+	void WriteRAM(uint16_t addr, uint8_t value) override
+	{
+		if((addr & 0xFF00) == 0x7F00) {
+			//Mirror writes to the top/bottom - the mapper only has 128 bytes of ram, mirrored once.
+			//The current BaseMapper code doesn't support mapping blocks smaller than 256 bytes,
+			//so doing this at least ensures it behaves like a mirrored 128-byte block of ram
+			BaseMapper::WriteRAM(addr ^ 0x80, value);
+		}
+		BaseMapper::WriteRAM(addr, value);
 	}
 
 	void WriteRegister(uint16_t addr, uint8_t value) override
