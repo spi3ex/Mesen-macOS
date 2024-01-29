@@ -428,7 +428,8 @@ protected:
 				_nametableMapping, _extendedRamMode, _exAttributeLastNametableFetch, _exAttrLastFetchCounter, _exAttrSelectedChrBank, 
 				_prgMode, prgBanks, _chrMode, _chrUpperBits, chrBanks, _lastChrReg, 
 				unusedSpriteFetch, unusedLargeSprites, _irqCounterTarget, _irqEnabled, unusedPreviousScanline, _scanlineCounter, _irqPending, _ppuInFrame, audio,
-				_splitInSplitRegion, _splitVerticalScroll, _splitTile, _splitTileNumber, _needInFrame);
+				_splitInSplitRegion, _splitVerticalScroll, _splitTile, _splitTileNumber, _needInFrame,
+				_prevChrA, _ppuIdleCounter, _lastPpuReadAddr, _ntReadCounter);
 
 		if(!saving) {
 			UpdatePrgBanks();
@@ -517,7 +518,7 @@ protected:
 					}
 				} else if(_splitInSplitRegion) {
 					//CHR tile fetches for split region
-					return _chrRom[(_verticalSplitBank % (GetCHRPageCount() / 4)) * 0x1000 + (((addr & ~0x07) | (verticalSplitScroll & 0x07)) & 0xFFF)];
+					return ReadFromChr((_verticalSplitBank << 12) + (((addr & ~0x07) | (verticalSplitScroll & 0x07)) & 0xFFF));
 				}
 			}
 
@@ -542,7 +543,7 @@ protected:
 							uint8_t value = InternalReadRam(0x5C00 + _exAttributeLastNametableFetch);
 
 							//"The pattern fetches ignore the standard CHR banking bits, and instead use the top two bits of $5130 and the bottom 6 bits from Expansion RAM to choose a 4KB bank to select the tile from."
-							_exAttrSelectedChrBank = ((value & 0x3F) | (_chrUpperBits << 6)) % (_chrRomSize / 0x1000);
+							_exAttrSelectedChrBank = (value & 0x3F) | (_chrUpperBits << 6);
 
 							//Return a byte containing the same palette 4 times - this allows the PPU to select the right palette no matter the shift value
 							uint8_t palette = (value & 0xC0) >> 6;
@@ -552,7 +553,7 @@ protected:
 						case 1:
 						case 0:
 							//PPU tile data fetch (high byte & low byte)
-							return _chrRom[_exAttrSelectedChrBank * 0x1000 + (addr & 0xFFF)];
+							return ReadFromChr((_exAttrSelectedChrBank << 12) + (addr & 0xFFF));
 					}
 				}
 			}
@@ -638,6 +639,16 @@ protected:
 		return _console->GetMemoryManager()->GetOpenBus();
 	}
 
+	__forceinline uint8_t ReadFromChr(uint32_t pos)
+	{
+		uint32_t size = (_chrRomSize || !_chrRam) ? _chrRomSize : _chrRamSize;
+		if(size == 0) {
+			return 0;
+		}
+
+		return ((_chrRomSize || !_chrRam) ? _chrRom : _chrRam)[pos & (size - 1)];
+	}
+
 public:
 	bool IsExtendedAttributes()
 	{
@@ -657,9 +668,9 @@ public:
 		uint8_t value = InternalReadRam(0x5C00 + ntAddr);
 
 		//"The pattern fetches ignore the standard CHR banking bits, and instead use the top two bits of $5130 and the bottom 6 bits from Expansion RAM to choose a 4KB bank to select the tile from."
-		uint16_t chrBank = ((value & 0x3F) | (_chrUpperBits << 6)) % (_chrRomSize / 0x1000);
+		uint16_t chrBank = (value & 0x3F) | (_chrUpperBits << 6);
 
-		return chrBank * 0x1000 + (chrAddr & 0xFFF);
+		return (chrBank << 12) + (chrAddr & 0xFFF);
 	}
 
 	uint8_t GetExAttributeTileData(uint16_t ntAddr, uint16_t chrAddr)
