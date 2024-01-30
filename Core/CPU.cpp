@@ -374,7 +374,7 @@ void CPU::ProcessPendingDma(uint16_t readAddress)
 				assert(_needHalt || _needDummyRead);
 				processCycle();
 				if(!skipDummyReads) {
-					ProcessDmaRead(readAddress, prevReadAddress, enableInternalRegReads, isNesBehavior);
+					_memoryManager->Read(readAddress, MemoryOperationType::DummyRead);
 				}
 				EndCpuCycle(true);
 			}
@@ -392,7 +392,7 @@ void CPU::ProcessPendingDma(uint16_t readAddress)
 				//Align to read cycle before starting sprite DMA (or align to perform DMC read)
 				processCycle();
 				if(!skipDummyReads) {
-					ProcessDmaRead(readAddress, prevReadAddress, enableInternalRegReads, isNesBehavior);
+					_memoryManager->Read(readAddress, MemoryOperationType::DummyRead);
 				}
 				EndCpuCycle(true);
 			}

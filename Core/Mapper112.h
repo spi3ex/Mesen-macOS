@@ -32,6 +32,7 @@ protected:
 	
 	void StreamState(bool saving) override
 	{
+		BaseMapper::StreamState(saving);
 		ArrayInfo<uint8_t> registers { _registers, 8 };
 		Stream(registers, _currentReg, _outerChrBank);
 	}

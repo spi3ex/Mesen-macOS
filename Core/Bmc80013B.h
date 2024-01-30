@@ -25,6 +25,7 @@ protected:
 
 	void StreamState(bool saving) override
 	{
+		BaseMapper::StreamState(saving);
 		Stream(_regs[0], _regs[1], _mode);
 	}
 

@@ -1129,11 +1129,15 @@ uint8_t PPU::ReadSpriteRam(uint8_t addr)
 		uint64_t elapsedCycles = _console->GetCpu()->GetCycleCount() - _oamDecayCycles[addr >> 3];
 		if(elapsedCycles <= PPU::OamDecayCycleCount) {
 			_oamDecayCycles[addr >> 3] = _console->GetCpu()->GetCycleCount();
-			return _spriteRAM[addr];
 		} else {
-			//If this 8-byte row hasn't been read/written to in over 3000 cpu cycles (~1.7ms), return 0x10 to simulate decay
-			return 0x10;
+			//If this 8-byte row hasn't been read/written to in over 3000 cpu cycles (~1.7ms),
+			//decay the row (set it to addr, clear the bits that don't exist on some bytes)
+			for(int i = 0; i < 8; i++) {
+				int sprAddr = (addr & 0xF8) | i;
+				_spriteRAM[sprAddr] = (sprAddr & 0x03) == 0x02 ? (sprAddr & 0xE3) : sprAddr;
+			}
 		}
+		return _spriteRAM[addr];
 	}
 }
 

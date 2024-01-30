@@ -149,6 +149,8 @@ protected:
 
 	virtual void StreamState(bool saving) override
 	{
+		BaseMapper::StreamState(saving);
+
 		SnapshotInfo a12Watcher { &_a12Watcher };
 		ArrayInfo<uint8_t> regs { _mmc3Registers, 12 };
 
